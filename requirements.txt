@@ -1,0 +1,10 @@
+torch 
+transformers
+datasets
+nltk
+tqdm 
+wandb
+scikit-learn
+sentence-transformers
+sentencepiece
+peft
