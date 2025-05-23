@@ -8,4 +8,4 @@ path_test_score = "data_raw/public_leaderboard_solution.csv"
 train_df = pd.read_csv(path_train, sep="\t")
 train_df.rename(columns={"Score1": "score"}, inplace=True)
 train_df.drop(columns=["Score2"], inplace=True)
-train_df.to_csv("data/train.csv", sep="\t", index=False)
+train_df.to_csv("data/train.csv",index=False)

@@ -61,8 +61,8 @@ def encoding_for_conditional_generation(example, tokenizer):
     return example
 class Asap_Dataset:
     def __init__(self,enc_fn=encoding):
-        self.train = Dataset.from_csv("data/train.csv")
-        self.test = Dataset.from_csv("data/test.csv")
+        self.train = Dataset.from_pandas(pd.read_csv("data/train.csv"))
+        self.test = Dataset.from_pandas(pd.read_csv("data/test.csv"))
         self.train, self.val = self.train.train_test_split(test_size=0.1,seed=42).values()
         self.enc_fn = enc_fn
     def get_encoding(self, tokenizer):
