@@ -121,15 +121,26 @@ class ASAP_Encoder(nn.Module):
         Freeze the specified number of layers in the encoder.
         """
 
-        regex = re.compile(r"(\d+)\.layer")
+        
         for name, param in self.encoder.named_parameters():
-            match = regex.search(name)
-            if match:
-                layer_num = int(match.group(1))
-                if layer_num < n_frozen_layers:
-                    param.requires_grad = False
-                else:
-                    param.requires_grad = True
+            if self.is_t5:
+                regex = re.compile(r"(\d+)\.layer")
+                match = regex.search(name)
+                if match:
+                    layer_num = int(match.group(1))
+                    if layer_num < n_frozen_layers:
+                        param.requires_grad = False
+                    else:
+                        param.requires_grad = True
+            else:
+                regex = re.compile(r"layer\.(\d+)")
+                match = regex.search(name)
+                if match:
+                    layer_num = int(match.group(1))
+                    if layer_num < n_frozen_layers:
+                        param.requires_grad = False
+                    else:
+                        param.requires_grad = True
     def freeze_embeddings(self):
         """
         Freeze the embedding layer.

@@ -101,6 +101,8 @@ class Asap_Dataset:
                 example["label_id"] = 1
             else:
                 example["label_id"] = 0
+            rubric_target = RUBRICS[int(example["EssaySet"]) - 1]["rubric"][str(target_score)]
+            example["rubric"] = rubric_target
             return example
             
         self.train = self.train.map(

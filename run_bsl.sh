@@ -21,7 +21,7 @@ python src/train_bsl.py --save-dir "${EXP_ROOT}" \
     --lr 2e-5 \
     --lr2 5e-4 \
     --max-epoch 5 \
-    --log-wandb \
+    --freeze-layers 10 \
 
             
                 
