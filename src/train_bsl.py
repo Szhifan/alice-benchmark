@@ -58,7 +58,7 @@ def add_training_args(parser):
     parser.add_argument('--checkpoint', default=None, type=str, help='path to a checkpoint to load from')
     # other arguments
     parser.add_argument('--dropout', type=float,default=0.1 ,metavar='D', help='dropout probability')
-    parser.add_argument('--freeze-layers',default=10,type=int, metavar='F', help='number of encoder layers in bert whose parameters to be frozen')
+    parser.add_argument('--freeze-layers',default=0,type=int, metavar='F', help='number of encoder layers in bert whose parameters to be frozen')
     parser.add_argument('--freeze-embeddings', action='store_true', help='freeze the embeddings')
     parser.add_argument('--freeze-encoder', action='store_true', help='freeze the encoder')
     parser.add_argument('--test-only', action='store_true', help='test model only')
@@ -300,6 +300,7 @@ def evaluate(
  
     model.eval()
     eval_loss = []
+    acc_history = deque(maxlen=10)
     predictions = defaultdict(list)
     for step, (batch, meta) in enumerate(data_iterator):
         batch = batch_to_device(batch, DEFAULT_DEVICE)
@@ -311,6 +312,14 @@ def evaluate(
         # collect data to put in the prediction dict
         predictions["pred_id"].extend(pred_id)
         predictions["label_id"].extend(batch["label_id"].detach().cpu().numpy())
+        acc = accuracy_score(batch["label_id"].detach().cpu().numpy(), pred_id)
+        acc_history.append(acc)
+        data_iterator.set_description(
+            "Evaluating: loss {:.4f} acc {:.4f} ≈".format(
+                mean_dequeue(eval_loss),
+                mean_dequeue(acc_history),
+            )
+        )
         for key, value in meta.items():
             predictions[key].extend(value)
     pred_df = pd.DataFrame(predictions)

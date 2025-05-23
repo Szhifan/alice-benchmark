@@ -18,7 +18,7 @@ train_df = train_df.drop(columns=["Score2"])
 test_df = pd.read_csv(path_test, sep="\t")
 test_score_df = pd.read_csv(path_test_score)
 test_df = pd.concat([test_df, test_score_df], axis=1)
-test_df = test_df.drop(columns=["Id", "essay_set", "Usage"])
+test_df = test_df.drop(columns=["id", "essay_set", "Usage"])
 test_df = test_df.rename(columns={"essay_score": "score"}) 
 RUBRICS = []
 rubrics_dir = "rubrics/"
