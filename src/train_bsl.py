@@ -394,7 +394,13 @@ def main(args):
         is_test=True,
     )
     
-    test_metrics = metrics_calc(test_predictions["label_id"], test_predictions["pred_id"])
+    test_metrics = eval_report(
+        test_predictions,
+        {0: "true", 1: "false"},
+        "EssaySet",) 
+    with open(os.path.join(args.save_dir, "test_metrics.json"), "w") as f:
+        json.dump(test_metrics, f, indent=4)
+
     metrics_wandb = {f"test": test_metrics}
 
     wandb.log(metrics_wandb)

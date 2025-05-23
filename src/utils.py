@@ -118,7 +118,7 @@ def eval_report(pred_df, label2id, group_by=None):
         for group in groups:
             group_df = pred_df[pred_df[group_by] == group]
             group_preds = group_df["pred_id"].values
-            group_labels = group_df["label"].values
+            group_labels = group_df["label_id"].values
             group_metrics = metrics_calc_label(group_preds, group_labels, label2id)
 
             results[f"{group}_f1"] = group_metrics["overall_f1"]
