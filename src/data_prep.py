@@ -7,28 +7,7 @@ import os
 import torch
 from transformers import AutoTokenizer
 disable_progress_bars()
-raw_fields = ["Id","EssaySet","score","EssayText"]
-path_train = "data_raw/train.tsv"
-path_test = "data_raw/public_leaderboard.tsv"
-path_test_score = "data_raw/public_leaderboard_solution.csv"
-train_df = pd.read_csv(path_train, sep="\t")
-train_df = train_df.rename(columns={"Score1": "score"})
-train_df = train_df.drop(columns=["Score2"])
 
-test_df = pd.read_csv(path_test, sep="\t")
-test_score_df = pd.read_csv(path_test_score)
-test_score_ids = set(test_score_df["id"].unique())
-test_df = test_df[test_df["Id"].isin(test_score_ids)]
-test_df["Id"] = test_df["Id"].astype(int)
-test_df = pd.concat([test_df, test_score_df], axis=1)
-test_df = test_df.drop(columns=["id", "essay_set", "Usage"])
-test_df = test_df.rename(columns={"essay_score": "score"})
-
-# Save test and train DataFrames to CSV
-output_dir = "data/"
-os.makedirs(output_dir, exist_ok=True)
-train_df.to_csv(os.path.join(output_dir, "train.csv"), index=False)
-test_df.to_csv(os.path.join(output_dir, "test.csv"), index=False)
 RUBRICS = []
 rubrics_dir = "rubrics/"
 for i in range(1,11):
@@ -82,8 +61,8 @@ def encoding_for_conditional_generation(example, tokenizer):
     return example
 class Asap_Dataset:
     def __init__(self,enc_fn=encoding):
-        self.train = Dataset.from_pandas(train_df)
-        self.test = Dataset.from_pandas(test_df)
+        self.train = Dataset.from_csv("data/train.csv")
+        self.test = Dataset.from_csv
         self.train, self.val = self.train.train_test_split(test_size=0.1,seed=42).values()
         self.enc_fn = enc_fn
     def get_encoding(self, tokenizer):
@@ -212,3 +191,6 @@ class Asap_Rubric_Conditional_Gen(Asap_Rubric):
 
         return batch, batch_decoder, meta
 
+if __name__ == "__main__":
+    # Example usage
+    dataset = Asap_Dataset()
