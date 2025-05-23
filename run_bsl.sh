@@ -11,7 +11,7 @@ EXP_NAME="bert-binary"
 
 ## Local variables for current experiment
 EXP_ROOT="${RESULTS_ROOT}/${EXP_NAME}"
-
+export WANDB_PROJECT="asap-binary
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
 python src/train_bsl.py --save-dir "${EXP_ROOT}" \

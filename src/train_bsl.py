@@ -245,7 +245,7 @@ def train_epoch(
                 scheduler.step()
             epoch_iterator.set_description(
                 "Epoch {}|Training: loss {:.4f} acc {:.4f} ≈".format(
-                    epoch,
+                    epoch + 1,
                     mean_dequeue(loss_history),
                     mean_dequeue(acc_history),
           
@@ -272,8 +272,8 @@ def train_epoch(
             best_metric = eval_f1
        
             export_cp(model, optimizer, scheduler, args, model_name="model.pt")
-            logger.info("Best model saved at epoch %d", epoch)
-        logger.info("Epoch %d: Validation loss: %.4f, F1: %.4f, Accuracy: %.4f", epoch, val_loss, eval_f1, eval_acc)
+            logger.info("Best model saved at epoch %d", epoch + 1)
+        logger.info("Epoch %d: Validation loss: %.4f, F1: %.4f, Accuracy: %.4f", epoch + 1, val_loss, eval_f1, eval_acc)
         wandb.log({
             "eval": {
                 "loss": val_loss,
