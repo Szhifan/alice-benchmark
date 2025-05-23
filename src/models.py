@@ -28,6 +28,44 @@ def get_tokenizer(model_name: str) -> AutoTokenizer:
 
     return AutoTokenizer.from_pretrained(model_name)
 
+def freeze_bert_layers(model, n_frozen_layers: int):
+    """
+    Freeze the specified number of layers in the BERT model.
+    """
+    for name, param in model.named_parameters():
+        regex = re.compile(r"layer\.(\d+)")
+        match = regex.search(name)
+        if match:
+            layer_num = int(match.group(1))
+            if layer_num < n_frozen_layers:
+                param.requires_grad = False
+            else:
+                param.requires_grad = True
+def freeze_bert_embeddings(model):
+    """
+    Freeze the embedding layer of the BERT model.
+    """
+    for param in model.embeddings.parameters():
+        param.requires_grad = False
+def freeze_t5_layers(model, n_frozen_layers: int):
+    """
+    Freeze the specified number of layers in the T5 model.
+    """
+    for name, param in model.named_parameters():
+        regex = re.compile(r"block\.(\d+)")
+        match = regex.search(name)
+        if match:
+            layer_num = int(match.group(1))
+            if layer_num < n_frozen_layers:
+                param.requires_grad = False
+            else:
+                param.requires_grad = True
+def freeze_t5_embeddings(model):
+    """
+    Freeze the embedding layer of the T5 model.
+    """
+    for param in model.shared.parameters():
+        param.requires_grad = False
 class ClassificationHead(nn.Module):
     """Head for sentence-level classification tasks."""
 
@@ -58,9 +96,15 @@ class ASAP_Encoder(nn.Module):
         self.classifier = ClassificationHead(hidden_size, num_labels)
         self.num_labels = num_labels
         if freeze_layers > 0:
-            self.freeze_layers(freeze_layers) 
+            if self.is_t5:
+                freeze_t5_layers(self.encoder, freeze_layers)
+            else:
+                freeze_bert_layers(self.encoder, freeze_layers)
         if freeze_embeddings:
-            self.freeze_embeddings()
+            if self.is_t5:
+                freeze_t5_embeddings(self.encoder)
+            else:
+                freeze_bert_embeddings(self.encoder)
 
     def forward(
         self, 
@@ -116,43 +160,7 @@ class ASAP_Encoder(nn.Module):
             loss = loss_fct(logits.view(-1, self.num_labels), label_id.view(-1))
 
         return ModelOutput(logits=logits, loss=loss)
-    def freeze_layers(self, n_frozen_layers: int):
-        """
-        Freeze the specified number of layers in the encoder.
-        """
-
-        
-        for name, param in self.encoder.named_parameters():
-            if self.is_t5:
-                regex = re.compile(r"(\d+)\.layer")
-                match = regex.search(name)
-                if match:
-                    layer_num = int(match.group(1))
-                    if layer_num < n_frozen_layers:
-                        param.requires_grad = False
-                    else:
-                        param.requires_grad = True
-            else:
-                regex = re.compile(r"layer\.(\d+)")
-                match = regex.search(name)
-                if match:
-                    layer_num = int(match.group(1))
-                    if layer_num < n_frozen_layers:
-                        param.requires_grad = False
-                    else:
-                        param.requires_grad = True
-    def freeze_embeddings(self):
-        """
-        Freeze the embedding layer.
-        """
-       
-        if self.is_t5:
-            for param in self.encoder.embed_tokens.parameters():
-                param.requires_grad = False
-        else:
-            for param in self.encoder.embeddings.parameters():
-                param.requires_grad = False
-
+   
            
 class ASAP_SentenceEmbeddings(nn.Module):
     def __init__(self,model_name: str, num_labels: int, freeze_layers: int = 0, freeze_embeddings: bool = False, use_multiplication = False):
@@ -212,9 +220,9 @@ class ASAP_T5_COND_GEN(nn.Module):
         self.t5_model = T5ForConditionalGeneration.from_pretrained(model_name, config=t5_config)
         self.generate = self.t5_model.generate
         if freeze_layers > 0:
-            self.freeze_layers(freeze_layers)
+            freeze_t5_layers(self.t5_model, freeze_layers)
         if freeze_embeddings:
-            self.freeze_embeddings()
+            freeze_t5_embeddings(self.t5_model)
         
 
     def forward(
@@ -241,31 +249,12 @@ class ASAP_T5_COND_GEN(nn.Module):
             loss=outputs.loss
         )
 
-    def freeze_layers(self, n_frozen_layers: int):
-        """
-        Freeze the specified number of encoder layers
-        """
-        
-        regex = re.compile(r"block\.(\d+)")
-        for name, param in self.t5_model.named_parameters():
-            match = regex.search(name)
-            if match:
-                layer_num = int(match.group(1))
-                if layer_num < n_frozen_layers:
-                    param.requires_grad = False
-
-    def freeze_embeddings(self):
-        """
-        Freeze embedding layers
-        """
-        for param in self.t5_model.shared.parameters():
-            param.requires_grad = False
   
     
 if __name__ == "__main__":
     # Import T5 tokenizer
     from transformers import T5Tokenizer
     # Define model name and tokenizer
-    model = ASAP_T5_COND_GEN("t5-small",freeze_embeddings=True,freeze_layers=2)
+    model = ASAP_Encoder("bert-base-uncased", 6, freeze_layers=10, freeze_embeddings=True)
     for name, param in model.named_parameters():
         print(name, param.requires_grad)

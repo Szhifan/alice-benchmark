@@ -128,9 +128,7 @@ class Asap_Dataset:
             "attention_mask": attention_mask,
             "token_type_ids": token_type_ids,
             "label_id": torch.tensor([x["label_id"] for x in input_batch]),
-
         } 
-
         meta = {
             "Id": [x["Id"] for x in input_batch],
             "EssaySet": [x["EssaySet"] for x in input_batch],
