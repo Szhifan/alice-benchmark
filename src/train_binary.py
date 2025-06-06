@@ -348,7 +348,7 @@ def main(args):
         wandb.init(mode="disabled")
     logger.info("Training arguments: %s", args)
     # Load the dataset
-    asap = Asap_Dataset()
+    asap = Asap_Dataset(enc_fn=Asap_Dataset.encoding_with_rubric_pair)
     asap.merge_scores(score=args.merge_scores)
     asap.get_encoding(tokenizer=get_tokenizer(args.model_name))
     steps_per_epoch = int(np.ceil(len(asap.train) / args.batch_size)) 

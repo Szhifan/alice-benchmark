@@ -1,13 +1,12 @@
 from datasets import load_dataset 
 from typing import Literal
-from datasets import load_dataset, enable_caching, Dataset, disable_progress_bars
+from datasets import load_dataset, enable_caching, Dataset,disable_caching
 import json
 import pandas as pd
 import os 
 import torch
 from transformers import AutoTokenizer
-disable_progress_bars()
-
+disable_caching()
 RUBRICS = []
 rubrics_dir = "rubrics/"
 for i in range(1,11):
@@ -61,8 +60,8 @@ def encoding_for_conditional_generation(example, tokenizer):
     return example
 class Asap_Dataset:
     def __init__(self,enc_fn=encoding):
-        self.train = Dataset.from_pandas(pd.read_csv("data/train.csv"))
-        self.test = Dataset.from_pandas(pd.read_csv("data/test.csv"))
+        self.train = Dataset.from_csv("data/train.csv")
+        self.test = Dataset.from_csv("data/test.csv")
         self.train, self.val = self.train.train_test_split(test_size=0.1,seed=42).values()
         self.enc_fn = enc_fn
     def get_encoding(self, tokenizer):
@@ -92,7 +91,7 @@ class Asap_Dataset:
             rubric_target = RUBRICS[int(example["EssaySet"]) - 1]["rubric"][str(target_score)]
             example["rubric"] = rubric_target
             return example
-            
+
         self.train = self.train.map(
             lambda x: _merge_scores(x),     
         )
@@ -193,4 +192,8 @@ class Asap_Rubric_Conditional_Gen(Asap_Rubric):
 
 if __name__ == "__main__":
     # Example usage
-    dataset = Asap_Dataset()
+    dataset = Asap_Dataset(enc_fn=encoding_with_rubric_pair)
+    dataset.merge_scores(score="low")   
+    dataset.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
+    print(dataset.train[0])
+  
