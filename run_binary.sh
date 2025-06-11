@@ -15,7 +15,7 @@ export WANDB_PROJECT="asap-binary"
 export WANDB_NAME="${EXP_NAME}"
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
-python src/train_bsl.py --save-dir "${EXP_ROOT}" \
+python src/train_binary.py --save-dir "${EXP_ROOT}" \
     --model-name "bert-base-uncased" \
     --no-save \
     --batch-size 16 \

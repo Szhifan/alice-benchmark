@@ -20,9 +20,9 @@ from utils import (
     mean_dequeue,
     metrics_calc,
     eval_report,
-    save_report,
+    get_label_weights
     )
-from data_prep import Asap_Dataset
+from data_prep_alice import Alice_Dataset
 from torch.utils.data import DataLoader
 import pandas as pd 
 
@@ -37,17 +37,15 @@ def add_training_args(parser):
     """ 
     # add experiment arguments 
     parser.add_argument('--model-name', default='bert-base-uncased', type=str, help='model type to use')
-    parser.add_argument('--label-mode', default='3-ways', type=str, help='label mode to use')
-    parser.add_argument('--seed', default=42, type=int, help='random seed for initialization')
-    parser.add_argument('--merge-scores', default='low', type=str, help='merge scores to use')
-    # Add optimization arguments
+    parser.add_argument('--seed', default=114514, type=int, help='random seed for initialization')
+    parser.add_argument('--merge-scores', default='low', type=str, choices=['low', 'mid', 'high'], help='merge scores to binary classification')
     parser.add_argument('--batch-size', default=32, type=int, help='maximum number of sentences in a batch')
     parser.add_argument('--max-epoch', default=3, type=int, help='force stop training at specified epoch')
     parser.add_argument('--clip-norm', default=1, type=float, help='clip threshold of gradients')
     parser.add_argument('--lr', default=5e-5, type=float, help='learning rate')
     parser.add_argument('--lr2', default=3e-5, type=float, help='learning rate for the second optimizer')
-    parser.add_argument('--patience', default=3, type=int,
-                        help='number of epochs without improvement on validation set before early stopping')
+    parser.add_argument('--patience', default=3, type=int,help='number of epochs without improvement on validation set before early stopping')
+    parser.add_argument('--weighted-loss', action='store_true', help='use weighted loss')
     parser.add_argument('--grad-accumulation-steps', default=1, type=int, help='number of updates steps to accumulate before performing a backward/update pass')
     parser.add_argument('--weight-decay', default=0.01, type=float, help='weight decay for Adam')
     parser.add_argument('--adam-epsilon', default=1e-8, type=float, help='epsilon for Adam optimizer')
@@ -55,7 +53,7 @@ def add_training_args(parser):
     # Add checkpoint arguments
     parser.add_argument('--save-dir', default='results/checkpoints', help='path to save checkpoints')
     parser.add_argument('--no-save', action='store_true', help='don\'t save models or checkpoints')
-    parser.add_argument('--checkpoint', default=None, type=str, help='path to a checkpoint to load from')
+    parser.add_argument('--cpt-path', default=None, type=str, help='path to a checkpoint to load from')
     # other arguments
     parser.add_argument('--dropout', type=float,default=0.1 ,metavar='D', help='dropout probability')
     parser.add_argument('--freeze-layers',default=0,type=int, metavar='F', help='number of encoder layers in bert whose parameters to be frozen')
@@ -100,8 +98,8 @@ def build_optimizer(model, args,total_steps):
         num_training_steps=total_steps,
     )
     # if checkpoint path is provided, load optimizer and scheduler states
-    if args.checkpoint is not None:
-        checkpoint_path = os.path.join(args.checkpoint, "checkpoint")
+    if args.cpt_path is not None:
+        checkpoint_path = os.path.join(args.cpt_path, "checkpoint")
         if os.path.exists(checkpoint_path):
             optimizer_path = os.path.join(checkpoint_path, "optimizer.pt")
             scheduler_path = os.path.join(checkpoint_path, "scheduler.pt")
@@ -144,44 +142,34 @@ def export_cp(model, optimizer, scheduler, args, model_name="model.pt"):
     torch.save(scheduler.state_dict(), os.path.join(output_dir, "scheduler.pt"))
     logger.info("Saving optimizer and scheduler states to %s", output_dir)
 
-def load_model(args):
+def load_model(args,label_weights=None):
     model = Asag_CrossEncoder(
         model_name=args.model_name,
         num_labels=2,
         freeze_layers=args.freeze_layers,
         freeze_embeddings=args.freeze_embeddings,
+        label_weights=label_weights
         
     )
     # if checkpoint is provided, load the model state
-    if args.checkpoint is not None:
-        checkpoint_path = os.path.join(args.checkpoint, "checkpoint", "model.pt")
-        if os.path.exists(checkpoint_path):
-            model.load_state_dict(torch.load(checkpoint_path))
-            logger.info("Loaded model from checkpoint: %s", checkpoint_path)
-    checkpoint_path = os.path.join(args.save_dir, "checkpoint", "model.pt")
-    if os.path.exists(checkpoint_path):
-        model.load_state_dict(torch.load(checkpoint_path))
-        logger.info("Loaded model from checkpoint: %s", checkpoint_path)
-    else:
-        logger.info("No checkpoint found. Initializing new model.")
+    if args.cpt_path:
+        checkpoint_path = os.path.join(args.cpt_path, "checkpoint", "model.pt")
+        model.load_state_dict(torch.load(checkpoint_path, map_location=DEFAULT_DEVICE))
+
     model = model.to(DEFAULT_DEVICE)
     return model
-def import_cp(args, total_steps):
+def import_cp(args, total_steps, label_weights=None):
     # check if cp exists 
-    checkpoint_path = os.path.join(args.save_dir, "checkpoint", "model.pt")
-    if os.path.exists(checkpoint_path):
-        logger.info("found checkpoint, loading model and optimizer")
+    if args.cpt_path:
+        logger.info("Loading checkpoint from %s", args.cpt_path)
+        training_config_path = os.path.join(args.cpt_path, "checkpoint", "training_config.json")
     
-    training_config_path = os.path.join(args.save_dir, "checkpoint", "training_config.json")
-    if os.path.exists(training_config_path):
         with open(training_config_path, "r") as f:
             training_config = json.load(f)
         if training_config["model_name"] != args.model_name:
             logger.warning("Model type mismatch. Expected %s, but found %s", args.model_name, training_config["model_name"])
-        if training_config["label_mode"] != args.label_mode:
-            logger.warning("Label mode mismatch. Expected %s, but found %s", args.label_mode, training_config["label_mode"])
         
-    model = load_model(args)
+    model = load_model(args,label_weights=label_weights)
     optimizer, scheduler = build_optimizer(model, args,total_steps) 
     return {
         "model": model,
@@ -209,7 +197,7 @@ def train_epoch(
             num_workers=0,
             pin_memory=True,
             batch_size=args.batch_size, 
-            collate_fn=Asap_Dataset.collate_fn,
+            collate_fn=Alice_Dataset.collate_fn,
             shuffle=True) 
         epoch_iterator = tqdm(
             train_dataloader, 
@@ -292,7 +280,7 @@ def evaluate(
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,
-        collate_fn=Asap_Dataset.collate_fn,
+        collate_fn=Alice_Dataset.collate_fn,
         shuffle=False) 
     
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0 if is_test else 2, leave=True)
@@ -346,16 +334,16 @@ def main(args):
         wandb.init(mode="disabled")
     logger.info("Training arguments: %s", args)
     # Load the dataset
-    asap = Asap_Dataset()
+    asap = Alice_Dataset()
     asap.merge_scores(args.merge_scores)
     asap.get_encoding(tokenizer=get_tokenizer(args.model_name))
     steps_per_epoch = int(np.ceil(len(asap.train) / args.batch_size)) 
     total_steps = args.max_epoch * steps_per_epoch
-
+    label_weights = get_label_weights(asap.train) if args.weighted_loss else None
 
  
     # Load the checkpoint 
-    cp = import_cp(args, total_steps)
+    cp = import_cp(args, total_steps, label_weights=label_weights)
     model = cp["model"]
     optimizer = cp["optimizer"]
     scheduler = cp["scheduler"]

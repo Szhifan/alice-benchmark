@@ -86,13 +86,14 @@ class Asag_CrossEncoder(nn.Module):
     """
     Encoder based ASAG model
     """
-    def __init__(self, model_name: str, num_labels: int, freeze_layers: int = 0, freeze_embeddings: bool = False):
+    def __init__(self, model_name: str, num_labels: int, freeze_layers: int = 0, freeze_embeddings: bool = False, label_weights: Optional[torch.Tensor] = None):
     
         super().__init__()
         self.is_t5 = "t5" in model_name
         self.model_name = model_name 
         self.encoder = AutoModel.from_pretrained(model_name) if not self.is_t5 else T5EncoderModel.from_pretrained(model_name)
         hidden_size = self.encoder.config.hidden_size
+        self.label_weights = label_weights
         self.classifier = ClassificationHead(hidden_size, num_labels)
         self.num_labels = num_labels
         if freeze_layers > 0:
@@ -127,7 +128,7 @@ class Asag_CrossEncoder(nn.Module):
 
         loss = None
         if label_id is not None:
-            loss_fct = CrossEntropyLoss()
+            loss_fct = CrossEntropyLoss(weight=self.label_weights) 
             loss = loss_fct(logits.view(-1, self.num_labels), label_id.view(-1))
 
         return ModelOutput(logits=logits, loss=loss)
