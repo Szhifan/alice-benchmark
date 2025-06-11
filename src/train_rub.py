@@ -1,17 +1,19 @@
 from sklearn.metrics import accuracy_score
 import torch
+from torch.utils.data import DataLoader
+from torch.nn.functional import softmax
+from torch.optim import AdamW
+from transformers import get_linear_schedule_with_warmup
+import torch
+from torch.amp import GradScaler, autocast
 import os 
 import json
 import argparse
 import wandb 
-import torch
-from torch.amp import GradScaler, autocast
 import logging
 import numpy as np
 from collections import deque, defaultdict
-from models import Asag_CrossEncoder, get_tokenizer
-from transformers import get_linear_schedule_with_warmup
-from torch.optim import AdamW
+import pandas as pd
 from tqdm import tqdm, trange
 from utils import (
     set_seed,
@@ -20,11 +22,11 @@ from utils import (
     mean_dequeue,
     metrics_calc,
     eval_report,
-    save_report,
+    transform_for_inference,
+    save_report
     )
-from data_prep import Asap_Dataset
-from torch.utils.data import DataLoader
-import pandas as pd 
+from data_prep import Asap_Rubric,encoding_with_rubric_pair
+from models import Asag_CrossEncoder, get_tokenizer
 
 
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
@@ -37,9 +39,7 @@ def add_training_args(parser):
     """ 
     # add experiment arguments 
     parser.add_argument('--model-name', default='bert-base-uncased', type=str, help='model type to use')
-    parser.add_argument('--label-mode', default='3-ways', type=str, help='label mode to use')
-    parser.add_argument('--seed', default=42, type=int, help='random seed for initialization')
-    parser.add_argument('--merge-scores', default='low', type=str, help='merge scores to use')
+    parser.add_argument('--seed', default=114514, type=int, help='random seed for initialization')
     # Add optimization arguments
     parser.add_argument('--batch-size', default=32, type=int, help='maximum number of sentences in a batch')
     parser.add_argument('--max-epoch', default=3, type=int, help='force stop training at specified epoch')
@@ -209,7 +209,7 @@ def train_epoch(
             num_workers=0,
             pin_memory=True,
             batch_size=args.batch_size, 
-            collate_fn=Asap_Dataset.collate_fn,
+            collate_fn=Asap_Rubric.collate_fn,
             shuffle=True) 
         epoch_iterator = tqdm(
             train_dataloader, 
@@ -232,9 +232,9 @@ def train_epoch(
             logits = model_output.logits.detach().cpu().numpy()
 
             pred_id = np.argmax(logits, axis=1)
-            acc = accuracy_score(label_id, pred_id)
+            eval_acc = accuracy_score(label_id, pred_id)
 
-            acc_history.append(acc)
+            acc_history.append(eval_acc)
             loss_history.append(tr_loss)
             if (step + 1) % args.grad_accumulation_steps == 0:  # perform optimizer step after accumulation
                 if args.clip_norm > 0:
@@ -265,19 +265,16 @@ def train_epoch(
             batch_size=args.batch_size,
             is_test=False,
         )
-        eval_metrics = metrics_calc(val_predictions["label_id"], val_predictions["pred_id"])
-        eval_f1 = eval_metrics["f1"]
-        eval_acc = eval_metrics["accuracy"]
-        if eval_f1 > best_metric:
-            best_metric = eval_f1
+        eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
+        if eval_acc > best_metric:
+            best_metric = eval_acc
        
             export_cp(model, optimizer, scheduler, args, model_name="model.pt")
             logger.info("Best model saved at epoch %d", epoch + 1)
-        logger.info("Epoch %d: Validation loss: %.4f, F1: %.4f, Accuracy: %.4f", epoch + 1, val_loss, eval_f1, eval_acc)
+        logger.info("Epoch %d: Validation loss: %.4f, F1: %.4f, Accuracy: %.4f", epoch + 1, val_loss, eval_acc)
         wandb.log({
             "eval": {
                 "loss": val_loss,
-                "f1": eval_f1,
                 "accuracy": eval_acc
             }
         })
@@ -292,7 +289,7 @@ def evaluate(
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,
-        collate_fn=Asap_Dataset.collate_fn,
+        collate_fn=Asap_Rubric.collate_fn,
         shuffle=False) 
     
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0 if is_test else 2, leave=True)
@@ -306,12 +303,14 @@ def evaluate(
         batch = batch_to_device(batch, DEFAULT_DEVICE)
         model_output = model(**batch)
         loss = model_output.loss
-        logits = model_output.logits.detach().cpu().numpy()
+        logits = model_output.logits.detach().cpu()
+        prob = softmax(logits, dim=-1).numpy()
         eval_loss.append(loss.item())
         pred_id = np.argmax(logits, axis=1)
         # collect data to put in the prediction dict
-        predictions["pred_id"].extend(pred_id)
-        predictions["label_id"].extend(batch["label_id"].detach().cpu().numpy())
+        predictions["pred_id"].extend(pred_id.tolist())
+        predictions["label_id"].extend(batch["label_id"].detach().cpu().numpy().tolist())
+        predictions["logits"].extend(prob.tolist())
         acc = accuracy_score(batch["label_id"].detach().cpu().numpy(), pred_id)
         acc_history.append(acc)
         data_iterator.set_description(
@@ -322,6 +321,7 @@ def evaluate(
         )
         for key, value in meta.items():
             predictions[key].extend(value)
+        break 
     pred_df = pd.DataFrame(predictions)
     eval_loss = np.mean(eval_loss)
     return pred_df, eval_loss 
@@ -339,15 +339,16 @@ def main(args):
     wandb.login()
     if args.log_wandb:
         wandb.init(
+            project="sb-baseline",
             config=vars(args),
+            name=f"{args.model_name}_{args.label_mode}",
             dir=args.save_dir,
         )
     else:
         wandb.init(mode="disabled")
     logger.info("Training arguments: %s", args)
     # Load the dataset
-    asap = Asap_Dataset()
-    asap.merge_scores(args.merge_scores)
+    asap = Asap_Rubric(enc_fn=encoding_with_rubric_pair)
     asap.get_encoding(tokenizer=get_tokenizer(args.model_name))
     steps_per_epoch = int(np.ceil(len(asap.train) / args.batch_size)) 
     total_steps = args.max_epoch * steps_per_epoch
@@ -391,18 +392,14 @@ def main(args):
         batch_size=args.batch_size,
         is_test=True,
     )
-    
-    test_metrics = eval_report(
+    test_predictions = transform_for_inference(test_predictions)
+    test_predictions.to_csv(os.path.join(args.save_dir, "test_predictions.csv"), index=False)
+    test_report = eval_report(
         test_predictions,
-        {0: "true", 1: "false"},
-        "EssaySet",) 
-    with open(os.path.join(args.save_dir, "test_metrics.json"), "w") as f:
-        json.dump(test_metrics, f, indent=4)
-
-    metrics_wandb = {f"test": test_metrics}
-
-    wandb.log(metrics_wandb)
-
+        group_by="EssaySet",
+    )
+    save_report(test_report, os.path.join(args.save_dir, "test_report.json"))
+    wandb.log(test_report)
     if args.no_save:
         logger.info("No-save flag is set. Deleting checkpoint.")
         checkpoint_dir = os.path.join(args.save_dir, "checkpoint")

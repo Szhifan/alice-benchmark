@@ -2,4 +2,4 @@ results/*
 wandb/*
 rubric/*.pdf
 data_raw/*
-
+move.sh

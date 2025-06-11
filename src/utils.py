@@ -5,8 +5,10 @@ import random
 import numpy as np
 import torch
 from torch.optim import AdamW
+import torch 
 from transformers import get_linear_schedule_with_warmup
 from sklearn.metrics import f1_score, accuracy_score,confusion_matrix
+from sklearn.metrics import cohen_kappa_score
 
 
 
@@ -62,41 +64,17 @@ def get_optimizer_step(optimizer):
    
 def metrics_calc(label_id, pred_id):
     """
-    Calculate the metrics for the predictions.
+    Calculate the metrics for the predictions, including Quadratic Weighted Kappa (QWK).
     """
-    f1 = f1_score(label_id, pred_id, average="macro")
-    acc = accuracy_score(label_id, pred_id)
+
+    qwk = cohen_kappa_score(label_id, pred_id, weights="quadratic")
     metrics = {
-        "f1": f1,
-        "accuracy": acc,
+        "qwk": qwk,
     }
     return metrics
-def metrics_calc_label(pred_id, label_id, label2id):
-    """
-    Calculate the F1 score for each label.
-    """
-    metrics = {}
-    for label, label_idx in label2id.items():
-        # Get binary arrays for the current label
-        binary_preds = (pred_id == label_idx).astype(int)
-        binary_labels = (label_id == label_idx).astype(int)
+
         
-        # Calculate confusion matrix for the current label
-        tn, fp, fn, tp = confusion_matrix(binary_labels, binary_preds, labels=[0, 1]).ravel()
-        
-        # Calculate precision and recall
-        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
-        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-        key = "{}_f1".format(label)
-        f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-        metrics[key] = f1
-    overall_f1 = f1_score(label_id, pred_id, average="macro")
-    overall_acc = accuracy_score(label_id, pred_id)
-    metrics["overall_f1"] = overall_f1
-    metrics["overall_acc"] = overall_acc
-    return metrics
-        
-def eval_report(pred_df, label2id, group_by=None):
+def eval_report(pred_df, group_by=None):
     """
     Report the evaluation result, print the overall F1 and accuracy to the logger.
     Additionally, create a dictionary that stores the results, sorted by the code of the datapoint,
@@ -105,28 +83,15 @@ def eval_report(pred_df, label2id, group_by=None):
     results = {}
 
     # Calculate overall metrics
-    overall_metrics = metrics_calc_label(pred_df["pred_id"].values, pred_df["label_id"].values, label2id)
-    results["overall_f1"] = overall_metrics["overall_f1"]
-    results["overall_acc"] = overall_metrics["overall_acc"]
+    metrics = metrics_calc(pred_df["pred_id"].values, pred_df["label_id"].values)
+    results["qwk"] = metrics["qwk"]
 
-    for label, _ in label2id.items():
-        results[f"overall_f1_{label}"] = overall_metrics[f"{label}_f1"]
-
-    # Calculate metrics for each group if group_by is provided
+    # Calculate QWK for each group if group_by is provided
     if group_by:
-        groups = pred_df[group_by].unique()
-        for group in groups:
-            group_df = pred_df[pred_df[group_by] == group]
-            group_preds = group_df["pred_id"].values
-            group_labels = group_df["label_id"].values
-            group_metrics = metrics_calc_label(group_preds, group_labels, label2id)
-
-            results[f"{group}_f1"] = group_metrics["overall_f1"]
-            results[f"{group}_acc"] = group_metrics["overall_acc"]
-
-            for label, _ in label2id.items():
-                results[f"{group}_f1_{label}"] = group_metrics[f"{label}_f1"]
-
+        grouped = pred_df.groupby(group_by)
+        for group, group_df in grouped:
+            group_metrics = metrics_calc(group_df["label_id"].values, group_df["pred_id"].values)
+            results[f"{group}_qwk"] = group_metrics["qwk"]
     return results
 
 def save_report(metrics, path):
@@ -135,7 +100,7 @@ def save_report(metrics, path):
     """
     with open(path, "w") as f:
         json.dump(metrics, f, indent=4) 
-def save_prediction(pred_df,id2label, path):
+def save_prediction(pred_df,id2label,path):
     """
     conver the predictions to the original labels and save them to a CSV file.
     """
@@ -144,3 +109,19 @@ def save_prediction(pred_df,id2label, path):
     with open(path, "w") as f:
         pred_df.to_csv(f, index=False) 
 
+
+def get_label_weights(dataset,label_field="label_id"):
+    """
+    Calculate label weights for the optimizer based on the label distribution in the dataset.
+    """
+    label_ids = np.array(dataset[label_field])
+    unique_labels, counts = torch.unique(torch.tensor(label_ids), return_counts=True)
+    total_count = len(label_ids)
+    w = 1 / (counts / total_count)
+    return w 
+
+def transform_for_inference(pred_df):
+    pred_df["logit_label_1"] = pred_df['logits'].apply(lambda x: float(x[1]))
+    final_df = pred_df.loc[pred_df.groupby('Id')['logit_label_1'].idxmax()][['Id', 'EssaySet', 'EssayText', 'rubric_score', 'score']]
+    final_df = final_df.rename(columns={'rubric_score': 'pred_id', 'score': 'label_id'})
+    return final_df 
