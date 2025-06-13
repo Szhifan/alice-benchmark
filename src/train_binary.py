@@ -26,7 +26,8 @@ from data_prep_alice import Alice_Dataset
 from torch.utils.data import DataLoader
 import pandas as pd 
 
-
+TASK_DATASET = Alice_Dataset
+# Default device configuration
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 logger = logging.getLogger(__name__)
 print("Using device:", DEFAULT_DEVICE)
@@ -100,26 +101,14 @@ def build_optimizer(model, args,total_steps):
     # if checkpoint path is provided, load optimizer and scheduler states
     if args.cpt_path is not None:
         checkpoint_path = os.path.join(args.cpt_path, "checkpoint")
-        if os.path.exists(checkpoint_path):
-            optimizer_path = os.path.join(checkpoint_path, "optimizer.pt")
-            scheduler_path = os.path.join(checkpoint_path, "scheduler.pt")
-            if os.path.isfile(optimizer_path) and os.path.isfile(scheduler_path):
-                map_location = DEFAULT_DEVICE
-                optimizer.load_state_dict(torch.load(optimizer_path, map_location=map_location))
-                scheduler.load_state_dict(torch.load(scheduler_path, map_location=map_location))
-                logger.info("Loaded optimizer and scheduler from checkpoint.")
-
-    # Check if saved optimizer or scheduler states exist
-    if os.path.isfile(os.path.join(args.save_dir, "checkpoint/optimizer.pt")) and os.path.isfile(
-        os.path.join(args.save_dir, "checkpoint/scheduler.pt")
-    ):
+     
+        optimizer_path = os.path.join(checkpoint_path, "optimizer.pt")
+        scheduler_path = os.path.join(checkpoint_path, "scheduler.pt")
         map_location = DEFAULT_DEVICE
-        optimizer_path = os.path.join(args.save_dir, "checkpoint/optimizer.pt")
-        scheduler_path = os.path.join(args.save_dir, "checkpoint/scheduler.pt")
-        # Load in optimizer and scheduler states
         optimizer.load_state_dict(torch.load(optimizer_path, map_location=map_location))
         scheduler.load_state_dict(torch.load(scheduler_path, map_location=map_location))
-        logger.info("Loaded the saved scheduler and optimizer.")
+        logger.info("Loaded optimizer and scheduler from checkpoint.")
+
     return optimizer, scheduler 
 
 
@@ -197,7 +186,7 @@ def train_epoch(
             num_workers=0,
             pin_memory=True,
             batch_size=args.batch_size, 
-            collate_fn=Alice_Dataset.collate_fn,
+            collate_fn=TASK_DATASET.collate_fn,
             shuffle=True) 
         epoch_iterator = tqdm(
             train_dataloader, 
@@ -280,7 +269,7 @@ def evaluate(
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,
-        collate_fn=Alice_Dataset.collate_fn,
+        collate_fn=TASK_DATASET.collate_fn,
         shuffle=False) 
     
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0 if is_test else 2, leave=True)
@@ -334,12 +323,12 @@ def main(args):
         wandb.init(mode="disabled")
     logger.info("Training arguments: %s", args)
     # Load the dataset
-    asap = Alice_Dataset()
-    asap.merge_scores(args.merge_scores)
-    asap.get_encoding(tokenizer=get_tokenizer(args.model_name))
-    steps_per_epoch = int(np.ceil(len(asap.train) / args.batch_size)) 
+    ds = TASK_DATASET()
+    ds.merge_scores(args.merge_scores)
+    ds.get_encoding(tokenizer=get_tokenizer(args.model_name))
+    steps_per_epoch = int(np.ceil(len(ds.train) / args.batch_size)) 
     total_steps = args.max_epoch * steps_per_epoch
-    label_weights = get_label_weights(asap.train) if args.weighted_loss else None
+    label_weights = get_label_weights(ds.train) if args.weighted_loss else None
 
  
     # Load the checkpoint 
@@ -355,13 +344,13 @@ def main(args):
 
         # Training loop
         logger.info("***** Running training *****")
-        logger.info("Num examples = %d", len(asap.train))
+        logger.info("Num examples = %d", len(ds.train))
         logger.info("  Num Epochs = %d", args.max_epoch)
         logger.info("  Instantaneous batch size per GPU = %d", args.batch_size)
         train_stats = train_epoch(
             model,
-            asap.train,
-            asap.val,
+            ds.train,
+            ds.val,
             optimizer,
             scheduler,
             args)  
@@ -372,10 +361,10 @@ def main(args):
 
 
     logger.info(f"***** Running evaluation on test set *****")
-    logger.info("  Num examples = %d", len(asap.test))
+    logger.info("  Num examples = %d", len(ds.test))
     test_predictions, test_loss = evaluate(
         model,
-        asap.test,
+        ds.test,
         batch_size=args.batch_size,
         is_test=True,
     )
