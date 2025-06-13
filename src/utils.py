@@ -120,8 +120,14 @@ def get_label_weights(dataset,label_field="label_id"):
     w = 1 / (counts / total_count)
     return w 
 
-def transform_for_inference(pred_df):
+def transform_for_inference_asap(pred_df):
     pred_df["logit_label_1"] = pred_df['logits'].apply(lambda x: float(x[1]))
-    final_df = pred_df.loc[pred_df.groupby('Id')['logit_label_1'].idxmax()][['Id', 'EssaySet', 'EssayText', 'rubric_score', 'score']]
+    final_df = pred_df.loc[pred_df.groupby('id')['logit_label_1'].idxmax()][['id','rubric_level', 'level', 'EssaySet', 'EssayText']]
     final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'label_id'})
     return final_df 
+
+def transform_for_inference_alice(pred_df):
+    pred_df["logit_label_1"] = pred_df['logits'].apply(lambda x: float(x[1]))
+    final_df = pred_df.loc[pred_df.groupby('id')['logit_label_1'].idxmax()][['id', 'question_id', 'sid', 'rubric_level', 'level', "answer"]]
+    final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'label_id'})
+    return final_df

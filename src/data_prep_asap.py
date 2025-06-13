@@ -169,7 +169,7 @@ class Asap_Rubric(Asap_Dataset):
         }
 
         meta = {
-            "Id": [x["Id"] for x in input_batch],
+            "id": [x["Id"] for x in input_batch],
             "EssaySet": [x["EssaySet"] for x in input_batch],
             "EssayText": [x["EssayText"] for x in input_batch],
             "rubric_level": [x["rubric_level"] for x in input_batch],

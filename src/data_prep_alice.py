@@ -103,6 +103,9 @@ class Alice_Rubric_Dataset(Alice_Dataset):
             expanded_data = Dataset.from_list(expanded_data)
             return expanded_data
         self.train = _expand_dataset(self.train)
+        self.val = _expand_dataset(self.val)
+        self.test_ua = _expand_dataset(self.test_ua)
+        self.test_uq = _expand_dataset(self.test_uq)
 
     @staticmethod
     def collate_fn(input_batch):
@@ -119,26 +122,19 @@ class Alice_Rubric_Dataset(Alice_Dataset):
             "label_id": torch.tensor([x["label_id"] for x in input_batch]),
         }
         meta = {
+            "id": [x["id"] for x in input_batch],
             "sid": [x["sid"] for x in input_batch],
             "question_id": [x["question_id"] for x in input_batch],
             "rubric_level": [x["rubric_level"] for x in input_batch],
             "level": [x["level"] for x in input_batch],
+            "answer": [x["answer"] for x in input_batch],
         }
         return batch, meta
 if __name__ == "__main__":
     enable_caching()
     alice_ds = Alice_Rubric_Dataset()
+    alice_ds.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
 
     # Plot the distribution of student answer length
-    import matplotlib.pyplot as plt
+    print(alice_ds.val[0])
 
-    # Get the lengths of student answers in the training dataset
-    answer_lengths = [len(example["answer"]) for example in alice_ds.train]
-
-    # Plot the histogram
-    plt.figure(figsize=(10, 6))
-    plt.hist(answer_lengths, bins=100, range=(0, max(answer_lengths)), edgecolor='black')
-    plt.title("Distribution of Student Answer Lengths")
-    plt.xlabel("Answer Length")
-    plt.ylabel("Frequency")
-    plt.savefig("answer_length_distribution.png")

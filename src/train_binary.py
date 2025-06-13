@@ -18,13 +18,12 @@ from utils import (
     configure_logging,
     batch_to_device,
     mean_dequeue,
-    metrics_calc,
-    eval_report,
     get_label_weights
     )
 from data_prep_alice import Alice_Dataset
 from torch.utils.data import DataLoader
 import pandas as pd 
+from sklearn.metrics import f1_score, accuracy_score
 
 TASK_DATASET = Alice_Dataset
 # Default device configuration
@@ -111,7 +110,41 @@ def build_optimizer(model, args,total_steps):
 
     return optimizer, scheduler 
 
+def metrics_calc(label_id, pred_id):
+    """
+    Calculate the metrics for the predictions, including Quadratic Weighted Kappa (QWK), F1 score, and accuracy.
+    """
+    f1 = f1_score(label_id, pred_id, average='weighted')
+    acc = accuracy_score(label_id, pred_id)
+    
+    metrics = {
+        "f1": f1, 
+        "accuracy": acc
+    }
+    return metrics
 
+        
+def eval_report(pred_df, group_by=None):
+    """
+    Report the evaluation result, print the overall metrics to the logger.
+    Additionally, create a dictionary that stores the results, sorted by the code of the datapoint,
+    along with the overall metrics.
+    """
+    results = {}
+
+    # Calculate overall metrics
+    metrics = metrics_calc(pred_df["label_id"].values, pred_df["pred_id"].values)
+    results["f1"] = metrics["f1"]
+    results["accuracy"] = metrics["accuracy"]
+
+    # Calculate metrics for each group if group_by is provided
+    if group_by:
+        grouped = pred_df.groupby(group_by)
+        for group, group_df in grouped:
+            group_metrics = metrics_calc(group_df["label_id"].values, group_df["pred_id"].values)
+            results[f"{group}_f1"] = group_metrics["f1"]
+            results[f"{group}_accuracy"] = group_metrics["accuracy"]
+    return results
     
 def export_cp(model, optimizer, scheduler, args, model_name="model.pt"):
  
@@ -356,29 +389,25 @@ def main(args):
             args)  
         logger.info("***** Training finished *****")
     # Evaluate on test dataset
-    
+    for test in ["test_ua", "test_uq"]:
+        
+        test_ds = getattr(ds, test)
+        logger.info(f"***** Running evaluation on {test} *****")
+        logger.info("  Num examples = %d", len(test_ds))
+        test_predictions, test_loss = evaluate(
+            model,
+            test_ds,
+            batch_size=args.batch_size,
+            is_test=True,
+        )
+        
+        test_metrics = eval_report(test_predictions)
+        with open(os.path.join(args.save_dir, f"{test}_metrics.json"), "w") as f:
+            json.dump(test_metrics, f, indent=4)
 
+        metrics_wandb = {test: test_metrics}
 
-
-    logger.info(f"***** Running evaluation on test set *****")
-    logger.info("  Num examples = %d", len(ds.test))
-    test_predictions, test_loss = evaluate(
-        model,
-        ds.test,
-        batch_size=args.batch_size,
-        is_test=True,
-    )
-    
-    test_metrics = eval_report(
-        test_predictions,
-        {0: "true", 1: "false"},
-        "EssaySet",) 
-    with open(os.path.join(args.save_dir, "test_metrics.json"), "w") as f:
-        json.dump(test_metrics, f, indent=4)
-
-    metrics_wandb = {f"test": test_metrics}
-
-    wandb.log(metrics_wandb)
+        wandb.log(metrics_wandb)
 
     if args.no_save:
         logger.info("No-save flag is set. Deleting checkpoint.")

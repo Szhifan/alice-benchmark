@@ -20,18 +20,19 @@ from utils import (
     configure_logging,
     batch_to_device,
     mean_dequeue,
-    metrics_calc,
-    eval_report,
-    transform_for_inference,
+    transform_for_inference_alice,
+    transform_for_inference_asap,
     save_report,
     get_label_weights
     )
-from data_prep_asap import Asap_Rubric,encoding_with_rubric_pair
+from data_prep_asap import Asap_Rubric
+from data_prep_alice import Alice_Rubric_Dataset
 from models import Asag_CrossEncoder, get_tokenizer
+from sklearn.metrics import cohen_kappa_score, f1_score, accuracy_score
 
-TASK_DATASET = Asap_Rubric
+TASK_DATASET = Alice_Rubric_Dataset
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 print("Using device:", DEFAULT_DEVICE)
 
 def add_training_args(parser):
@@ -109,12 +110,52 @@ def build_optimizer(model, args,total_steps):
         map_location = DEFAULT_DEVICE
         optimizer.load_state_dict(torch.load(optimizer_path, map_location=map_location))
         scheduler.load_state_dict(torch.load(scheduler_path, map_location=map_location))
-        logger.info("Loaded optimizer and scheduler from checkpoint.")
+        print("Loaded optimizer and scheduler from checkpoint.")
 
 
     return optimizer, scheduler 
 
+   
+def metrics_calc(label_id, pred_id):
+    """
+    Calculate the metrics for the predictions, including Quadratic Weighted Kappa (QWK), F1 score, and accuracy.
+    """
+    
+    qwk = cohen_kappa_score(label_id, pred_id, weights="quadratic")
+    f1 = f1_score(label_id, pred_id, average='weighted')
+    acc = accuracy_score(label_id, pred_id)
+    
+    metrics = {
+        "qwk": qwk,
+        "f1": f1, 
+        "accuracy": acc
+    }
+    return metrics
 
+        
+def eval_report(pred_df, group_by=None):
+    """
+    Report the evaluation result, print the overall metrics to the logger.
+    Additionally, create a dictionary that stores the results, sorted by the code of the datapoint,
+    along with the overall metrics.
+    """
+    results = {}
+
+    # Calculate overall metrics
+    metrics = metrics_calc(pred_df["label_id"].values, pred_df["pred_id"].values)
+    results["qwk"] = metrics["qwk"]
+    results["f1"] = metrics["f1"]
+    results["accuracy"] = metrics["accuracy"]
+
+    # Calculate metrics for each group if group_by is provided
+    if group_by:
+        grouped = pred_df.groupby(group_by)
+        for group, group_df in grouped:
+            group_metrics = metrics_calc(group_df["label_id"].values, group_df["pred_id"].values)
+            results[f"{group}_qwk"] = group_metrics["qwk"]
+            results[f"{group}_f1"] = group_metrics["f1"]
+            results[f"{group}_accuracy"] = group_metrics["accuracy"]
+    return results
     
 def export_cp(model, optimizer, scheduler, args, model_name="model.pt"):
  
@@ -129,10 +170,10 @@ def export_cp(model, optimizer, scheduler, args, model_name="model.pt"):
     training_config = args.__dict__.copy()
     with open(os.path.join(output_dir, "training_config.json"), "w") as f:
         json.dump(training_config, f, indent=4) 
-    logger.info("Saving model checkpoint to %s", output_dir)
+    print("Saving model checkpoint to %s", output_dir)
     torch.save(optimizer.state_dict(), os.path.join(output_dir, "optimizer.pt"))
     torch.save(scheduler.state_dict(), os.path.join(output_dir, "scheduler.pt"))
-    logger.info("Saving optimizer and scheduler states to %s", output_dir)
+    print("Saving optimizer and scheduler states to %s", output_dir)
 
 def load_model(args,label_weights=None):
     model = Asag_CrossEncoder(
@@ -153,13 +194,13 @@ def load_model(args,label_weights=None):
 def import_cp(args, total_steps, label_weights=None):
     # check if cp exists 
     if args.cpt_path:
-        logger.info("Loading checkpoint from %s", args.cpt_path)
+        print("Loading checkpoint from %s", args.cpt_path)
         training_config_path = os.path.join(args.cpt_path, "checkpoint", "training_config.json")
     
         with open(training_config_path, "r") as f:
             training_config = json.load(f)
         if training_config["model_name"] != args.model_name:
-            logger.warning("Model type mismatch. Expected %s, but found %s", args.model_name, training_config["model_name"])
+            print("Model type mismatch. Expected %s, but found %s", args.model_name, training_config["model_name"])
         
     model = load_model(args,label_weights=label_weights)
     optimizer, scheduler = build_optimizer(model, args,total_steps) 
@@ -250,8 +291,8 @@ def train_epoch(
             best_metric = eval_acc
        
             export_cp(model, optimizer, scheduler, args, model_name="model.pt")
-            logger.info("Best model saved at epoch %d", epoch + 1)
-        logger.info("Epoch %d: Validation loss: %.4f, F1: %.4f, Accuracy: %.4f", epoch + 1, val_loss, eval_acc)
+            print("Best model saved at epoch %d", epoch + 1)
+        print("Epoch %d: Validation loss: %.4f, Accuracy: %.4f", epoch + 1, val_loss, eval_acc)
         wandb.log({
             "eval": {
                 "loss": val_loss,
@@ -260,12 +301,7 @@ def train_epoch(
         })
         
 @torch.no_grad() 
-def evaluate(
-        model, 
-        dataset,
-        batch_size,
-        is_test=False,
-): 
+def evaluate(model, dataset, batch_size, is_test=False): 
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,
@@ -301,6 +337,7 @@ def evaluate(
         )
         for key, value in meta.items():
             predictions[key].extend(value)
+        break 
     pred_df = pd.DataFrame(predictions)
     eval_loss = np.mean(eval_loss)
     return pred_df, eval_loss 
@@ -323,9 +360,9 @@ def main(args):
         )
     else:
         wandb.init(mode="disabled")
-    logger.info("Training arguments: %s", args)
+    print("Training arguments: %s", args)
     # Load the dataset
-    ds = TASK_DATASET(enc_fn=encoding_with_rubric_pair)
+    ds = TASK_DATASET()
     ds.get_encoding(tokenizer=get_tokenizer(args.model_name))
     steps_per_epoch = int(np.ceil(len(ds.train) / args.batch_size)) 
     total_steps = args.max_epoch * steps_per_epoch
@@ -343,10 +380,10 @@ def main(args):
         # Build optimizer and scheduler
 
         # Training loop
-        logger.info("***** Running training *****")
-        logger.info("Num examples = %d", len(ds.train))
-        logger.info("  Num Epochs = %d", args.max_epoch)
-        logger.info("  Instantaneous batch size per GPU = %d", args.batch_size)
+        print("***** Running training *****")
+        print("Num examples = %d", len(ds.train))
+        print("  Num Epochs = %d", args.max_epoch)
+        print("  Instantaneous batch size per GPU = %d", args.batch_size)
         train_stats = train_epoch(
             model,
             ds.train,
@@ -354,26 +391,43 @@ def main(args):
             optimizer,
             scheduler,
             args)  
-        logger.info("***** Training finished *****")
+        print("***** Training finished *****")
     # Evaluate on test dataset
-    logger.info(f"***** Running evaluation on test set *****")
-    logger.info("  Num examples = %d", len(ds.test))
-    test_predictions, test_loss = evaluate(
-        model,
-        ds.test,
-        batch_size=args.batch_size,
-        is_test=True,
-    )
-    test_predictions = transform_for_inference(test_predictions)
-    test_predictions.to_csv(os.path.join(args.save_dir, "test_predictions.csv"), index=False)
-    test_report = eval_report(
-        test_predictions,
-        group_by="EssaySet",
-    )
-    save_report(test_report, os.path.join(args.save_dir, "test_report.json"))
-    wandb.log(test_report)
+    # print(f"***** Running evaluation on test set *****")
+    # print("  Num examples = %d", len(ds.test))
+    # test_predictions, test_loss = evaluate(
+    #     model,
+    #     ds.test,
+    #     batch_size=args.batch_size,
+    #     is_test=True,
+    # )
+    # test_predictions = transform_for_inference_asap(test_predictions)
+    # test_predictions.to_csv(os.path.join(args.save_dir, "test_predictions.csv"), index=False)
+    # test_report = eval_report(
+    #     test_predictions,
+    #     group_by="EssaySet",
+    # )
+    
+    for test in ["test_ua", "test_uq"]:
+        
+        test_ds = getattr(ds, test)
+        print(f"***** Running evaluation on {test} *****")
+        print("  Num examples = %d", len(test_ds))
+        test_predictions, test_loss = evaluate(
+            model,
+            test_ds,
+            batch_size=args.batch_size,
+            is_test=True,
+        )
+        test_predictions = transform_for_inference_alice(test_predictions)
+        test_predictions.to_csv(os.path.join(args.save_dir, f"{test}_predictions.csv"), index=False)
+        test_metrics = eval_report(test_predictions)
+        with open(os.path.join(args.save_dir, f"{test}_metrics.json"), "w") as f:
+            json.dump(test_metrics, f, indent=4)
+        metrics_wandb = {test: test_metrics}
+        wandb.log(metrics_wandb)
     if args.no_save:
-        logger.info("No-save flag is set. Deleting checkpoint.")
+        print("No-save flag is set. Deleting checkpoint.")
         checkpoint_dir = os.path.join(args.save_dir, "checkpoint")
         if os.path.exists(checkpoint_dir):
             for file in os.listdir(checkpoint_dir):
@@ -382,7 +436,7 @@ def main(args):
                     if file_path.endswith(".pt") and os.path.isfile(file_path):
                         os.remove(file_path)
                 except Exception as e:
-                    logger.error("Error deleting file %s: %s", file_path, e)
+                    print("Error deleting file %s: %s", file_path, e)
      
 if __name__ == "__main__":
     args = get_args()
