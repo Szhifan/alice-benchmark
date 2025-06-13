@@ -128,6 +128,7 @@ class Asag_CrossEncoder(nn.Module):
 
         loss = None
         if label_id is not None:
+            self.label_weights = self.label_weights.to(input_ids.device) if self.label_weights is not None else None
             loss_fct = CrossEntropyLoss(weight=self.label_weights) 
             loss = loss_fct(logits.view(-1, self.num_labels), label_id.view(-1))
 

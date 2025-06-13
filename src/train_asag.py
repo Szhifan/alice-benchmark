@@ -337,7 +337,7 @@ def evaluate(model, dataset, batch_size, is_test=False):
         )
         for key, value in meta.items():
             predictions[key].extend(value)
-        break 
+   
     pred_df = pd.DataFrame(predictions)
     eval_loss = np.mean(eval_loss)
     return pred_df, eval_loss 
