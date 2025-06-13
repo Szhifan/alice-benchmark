@@ -11,25 +11,21 @@ path_ua = "alice_data/ALICE_UA_new.csv"
 path_uq = "alice_data/ALICE_UQ_new.csv"
 def encoding(example, tokenizer):
     # basic encoding 
-    output = tokenizer(
-        example["answer"]
-    )
+    output = tokenizer(example["answer"], max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
     return example
+
 def encoding_with_solution_pair(example, tokenizer):
     # for sequence pair classification
-    output = tokenizer(
-        example["sample_solution"],
-        example["answer"],) 
+    output = tokenizer(example["sample_solution"], example["answer"], max_length=512, truncation=True) 
     for field in output:
         example[field] = output[field]
     return example
+
 def encoding_with_rubric_pair(example, tokenizer):
     # for sequence pair classification with rubric
-    output = tokenizer(
-        example["answer"],
-        example["rubric"],) 
+    output = tokenizer(example["answer"], example["rubric"], max_length=512, truncation=True) 
     for field in output:
         example[field] = output[field]
     return example
@@ -132,3 +128,17 @@ class Alice_Rubric_Dataset(Alice_Dataset):
 if __name__ == "__main__":
     enable_caching()
     alice_ds = Alice_Rubric_Dataset()
+
+    # Plot the distribution of student answer length
+    import matplotlib.pyplot as plt
+
+    # Get the lengths of student answers in the training dataset
+    answer_lengths = [len(example["answer"]) for example in alice_ds.train]
+
+    # Plot the histogram
+    plt.figure(figsize=(10, 6))
+    plt.hist(answer_lengths, bins=100, range=(0, max(answer_lengths)), edgecolor='black')
+    plt.title("Distribution of Student Answer Lengths")
+    plt.xlabel("Answer Length")
+    plt.ylabel("Frequency")
+    plt.savefig("answer_length_distribution.png")
