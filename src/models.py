@@ -1,10 +1,10 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoTokenizer, T5Config
-
 import torch
-from transformers import AutoModel,T5EncoderModel,T5ForConditionalGeneration
-from torch.nn import CrossEntropyLoss
+from transformers import AutoModel,T5EncoderModel
+from torch.nn import CrossEntropyLoss, Bilinear
+from torch.nn.functional import sigmoid
 from dataclasses import dataclass
 from typing import Optional, Tuple
 import re 
@@ -82,11 +82,19 @@ class ClassificationHead(nn.Module):
         hidden_states = self.dropout(hidden_states)
         hidden_states = self.out_proj(hidden_states)
         return hidden_states
-class Asag_CrossEncoder(nn.Module):
+class AsagCrossEncoder(nn.Module):
     """
     Encoder based ASAG model
     """
-    def __init__(self, model_name: str, num_labels: int, freeze_layers: int = 0, freeze_embeddings: bool = False, label_weights: Optional[torch.Tensor] = None):
+    def __init__(
+        self, 
+        model_name: str, 
+        num_labels: int, 
+        freeze_layers: int = 0, 
+        freeze_embeddings: bool = False, 
+        label_weights: Optional[torch.Tensor] = None, 
+        use_ce_loss: bool = True
+    ):
     
         super().__init__()
         self.is_t5 = "t5" in model_name
@@ -95,18 +103,30 @@ class Asag_CrossEncoder(nn.Module):
         hidden_size = self.encoder.config.hidden_size
         self.label_weights = label_weights
         self.classifier = ClassificationHead(hidden_size, num_labels)
-        self.num_labels = num_labels
-        if freeze_layers > 0:
-            if self.is_t5:
-                freeze_t5_layers(self.encoder, freeze_layers)
-            else:
-                freeze_bert_layers(self.encoder, freeze_layers)
+        self.num_labels = num_labels if use_ce_loss else 1
+        self.use_ce_loss = use_ce_loss
+        if self.is_t5:
+            freeze_t5_layers(self.encoder, freeze_layers)
+        else:
+            freeze_bert_layers(self.encoder, freeze_layers)
         if freeze_embeddings:
             if self.is_t5:
                 freeze_t5_embeddings(self.encoder)
             else:
                 freeze_bert_embeddings(self.encoder)
-
+    def get_loss_ce(self, logits: torch.Tensor, label_id: torch.Tensor) -> torch.Tensor:
+        """
+        Compute the cross-entropy loss.
+        """
+        self.label_weights = self.label_weights.to(logits.device) if self.label_weights is not None else None
+        loss_fct = CrossEntropyLoss(weight=self.label_weights)
+        return loss_fct(logits.view(-1, self.num_labels), label_id.view(-1))
+    def get_loss_mse(self, logits: torch.Tensor, label_id: torch.Tensor) -> torch.Tensor:
+        """
+        Compute the mean squared error loss.
+        """
+        loss_fct = nn.MSELoss()
+        return loss_fct(logits.view(-1, self.num_labels), label_id.view(-1, self.num_labels))
     def forward(
         self, 
         input_ids: torch.Tensor, 
@@ -115,22 +135,20 @@ class Asag_CrossEncoder(nn.Module):
         label_id: Optional[torch.Tensor] = None
     ) -> ModelOutput:
         if self.is_t5:
-            return self.forward_t5(input_ids, attention_mask, label_id)
- 
-        encoder_outputs = self.encoder(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            token_type_ids=token_type_ids
-        )
-        sequence_output = encoder_outputs.last_hidden_state
-        logits = self.classifier(sequence_output[:, 0, :])  # Use [CLS] token representation
+            logits = self.forward_t5(input_ids, attention_mask, label_id)
+        else:
+            encoder_outputs = self.encoder(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                token_type_ids=token_type_ids
+            )
+            sequence_output = encoder_outputs.last_hidden_state
+            logits = self.classifier(sequence_output[:, 0, :])  # Use [CLS] token representation
 
 
         loss = None
         if label_id is not None:
-            self.label_weights = self.label_weights.to(input_ids.device) if self.label_weights is not None else None
-            loss_fct = CrossEntropyLoss(weight=self.label_weights) 
-            loss = loss_fct(logits.view(-1, self.num_labels), label_id.view(-1))
+            loss = self.get_loss_ce(logits, label_id) if self.use_ce_loss else self.get_loss_mse(logits, label_id)
 
         return ModelOutput(logits=logits, loss=loss)
     def forward_t5(
@@ -155,21 +173,81 @@ class Asag_CrossEncoder(nn.Module):
         sequence_output = sequence_output[eos_mask, :].view(batch_size, -1, hidden_size)[:, -1, :]
 
         logits = self.classifier(sequence_output)
-
+        return logits
+class PointerRubricModel(nn.Module):
+    """
+    Pointer Rubric Model for ASAG.
+    This model uses a T5 encoder to process the input and a pointer mechanism to select the rubric.
+    """
+    def __init__(self, model_name: str):
+        super().__init__()
+        self.encoder = AutoModel.from_pretrained(model_name) if "t5" not in model_name else T5EncoderModel.from_pretrained(model_name)
+        self.pointer_head = nn.Bilinear(self.encoder.config.hidden_size, self.encoder.config.hidden_size, 1)
+        
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor,
+        rubric_span: torch.Tensor,
+        answer_spans: torch.Tensor,
+        rubric_mask: torch.Tensor,
+        label_id: Optional[torch.Tensor] = None
+    ) -> ModelOutput:
+        """
+        Forward method for the Pointer Rubric Model.
+        """
+        encoder_outputs = self.encoder(
+            input_ids=input_ids,
+            attention_mask=attention_mask
+        )
+        seq_embeddings = encoder_outputs.last_hidden_state
+        B, R = rubric_span.size(0), rubric_span.size(1)
+        H = seq_embeddings.size(-1)
+        rubric_embeddings = torch.zeros((B, R, H), dtype=seq_embeddings.dtype, device=seq_embeddings.device)
+        for i in range(R):
+            starts, ends = rubric_span[:, i, 0], rubric_span[:, i, 1]
+            emb = torch.stack([
+                seq_embeddings[b, starts[b]:ends[b]].mean(dim=0) 
+                if rubric_mask[b, i] else torch.zeros(H, dtype=seq_embeddings.dtype, device=seq_embeddings.device)
+                for b in range(B)
+            ])
+            rubric_embeddings[:, i, :] = emb
+        ans_starts, ans_ends = answer_spans[:, 0], answer_spans[:, 1]
+        answer_embeddings = torch.stack([
+            seq_embeddings[b, ans_starts[b]:ans_ends[b]].mean(dim=0) 
+            for b in range(B)
+        ])
+        answer_embeddings = answer_embeddings.unsqueeze(1).expand(-1, R, -1)  # Expand to match rubric embeddings
+        scores = self.pointer_head(rubric_embeddings, answer_embeddings).squeeze(-1)  # Shape: (B, R)
+        scores = scores.masked_fill(~rubric_mask, float('-inf'))  # Apply mask to scores
+        logits = F.softmax(scores, dim=-1)  # Convert scores to probabilities
         loss = None
-        if  label_id is not None:
+        if label_id is not None:
             loss_fct = CrossEntropyLoss()
-            loss = loss_fct(logits.view(-1, self.num_labels), label_id.view(-1))
-
+            loss = loss_fct(logits.view(-1, logits.size(-1)), label_id.view(-1))
         return ModelOutput(logits=logits, loss=loss)
-   
-
-  
-    
 if __name__ == "__main__":
     # Import T5 tokenizer
-    from transformers import T5Tokenizer
-    # Define model name and tokenizer
-    model = Asag_CrossEncoder("bert-base-uncased", 6, freeze_layers=10, freeze_embeddings=True)
-    for name, param in model.named_parameters():
-        print(name, param.requires_grad)
+    from data_prep_alice import AliceRubricPointer, encoding_with_rubric_span
+    from torch.utils.data import DataLoader
+    dts = AliceRubricPointer()
+    tokenizer = get_tokenizer("bert-base-uncased")
+    test_ds = dts.test_ua
+    test_ds = test_ds.map(lambda x: encoding_with_rubric_span(x, tokenizer))
+    
+    loader = DataLoader(
+        test_ds, 
+        batch_size=2, 
+        collate_fn=dts.collate_fn
+    )
+    for batch, meta in loader:
+        model = PointerRubricModel("bert-base-uncased")
+        output = model(
+            input_ids=batch["input_ids"],
+            attention_mask=batch["attention_mask"],
+            rubric_span=batch["rubric_span"],
+            answer_spans=batch["answer_span"],
+            rubric_mask=batch["rubric_mask"]
+        )
+        print(output.logits)
+        break

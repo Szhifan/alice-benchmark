@@ -6,6 +6,7 @@ import pandas as pd
 import os 
 import torch
 from transformers import AutoTokenizer
+enable_caching()
 path_train = "alice_data/ALICE_train_new.csv"
 path_ua = "alice_data/ALICE_UA_new.csv"
 path_uq = "alice_data/ALICE_UQ_new.csv"
@@ -29,7 +30,42 @@ def encoding_with_rubric_pair(example, tokenizer):
     for field in output:
         example[field] = output[field]
     return example
-class Alice_Dataset:
+def encoding_with_rubric_solution_pair(example, tokenizer):
+    text2encode = f"{example['answer']} {tokenizer.sep_token} {example['rubric']} {tokenizer.sep_token} {example['sample_solution']}"
+    output = tokenizer(text2encode, max_length=512, truncation=True)
+    for field in output:
+        example[field] = output[field]
+    return example
+def encoding_with_rubric_span(example, tokenizer):
+    """
+    Encode answer + question + all the rubrics, seperated by the tokenizer's sep_token.
+    """
+    answer = example["answer"]
+    question = example["question"]
+    rubrics = example["rubric"]
+    cls_token = tokenizer.cls_token
+    sep_token = tokenizer.sep_token
+    tokens = [cls_token]
+    rubric_indeces = []
+    for rubric in rubrics:
+        start = len(tokens)
+        rub_tokens = tokenizer.tokenize(rubric) + [sep_token]
+        tokens.extend(rub_tokens)
+        end = len(tokens)
+        rubric_indeces.append((start, end))
+    answers_start = len(tokens)
+    qa_tokens = tokenizer.tokenize("Question: " + question + " Answer: " + answer)
+    tokens.extend(qa_tokens)
+    answer_end = len(tokens)
+    enc = tokenizer(tokens, is_split_into_words=True)
+    for field in enc:
+        example[field] = enc[field]
+    example["rubric_indeces"] = rubric_indeces
+    
+    example["answer_span"] = (answers_start, answer_end)
+    return example
+
+class AliceDataset:
     def __init__(self, enc_fn=encoding):
         self.enc_fn = enc_fn
         self.train = Dataset.from_csv(path_train)
@@ -37,10 +73,10 @@ class Alice_Dataset:
         self.test_uq = Dataset.from_csv(path_uq)
         self.train, self.val = self.train.train_test_split(test_size=0.1, seed=8964).values()
     def get_encoding(self, tokenizer):
-        self.train = self.train.map(lambda x: self.enc_fn(x, tokenizer), batched=True)
-        self.val = self.val.map(lambda x: self.enc_fn(x, tokenizer), batched=True)
-        self.test_ua = self.test_ua.map(lambda x: self.enc_fn(x, tokenizer), batched=True)
-        self.test_uq = self.test_uq.map(lambda x: self.enc_fn(x, tokenizer), batched=True)
+        self.train = self.train.map(lambda x: self.enc_fn(x, tokenizer))
+        self.val = self.val.map(lambda x: self.enc_fn(x, tokenizer))
+        self.test_ua = self.test_ua.map(lambda x: self.enc_fn(x, tokenizer))
+        self.test_uq = self.test_uq.map(lambda x: self.enc_fn(x, tokenizer))
     def merge_scores(self,score="low"):
         """
         convert the selected level to 1 and the rest to 0. This is for binary clasification 
@@ -78,12 +114,12 @@ class Alice_Dataset:
             "label_id": torch.tensor([x["label_id"] for x in input_batch]),
         } 
         meta = {
-            "sid": [x["sid"] for x in input_batch],
-            "question_id": [x["question_id"] for x in input_batch],
+            "id": [x["sid"] for x in input_batch],
+            "answer": [x["answer"] for x in input_batch],
         }
         return batch, meta 
 
-class Alice_Rubric_Dataset(Alice_Dataset):
+class AliceRubricDataset(AliceDataset):
     def __init__(self, enc_fn=encoding_with_rubric_pair):
         super().__init__(enc_fn=enc_fn)
         self.expand_with_rubric()
@@ -93,8 +129,6 @@ class Alice_Rubric_Dataset(Alice_Dataset):
             for example in dataset:
                 rubric = json.loads(example["rubric"])
                 for level, rb in rubric.items():
-                    if not isinstance(rb, str):
-                        print(rubric)
                     new_example = example.copy()
                     new_example["rubric"] = rb
                     new_example["rubric_level"] = int(level)  
@@ -123,18 +157,60 @@ class Alice_Rubric_Dataset(Alice_Dataset):
         }
         meta = {
             "id": [x["id"] for x in input_batch],
-            "sid": [x["sid"] for x in input_batch],
-            "question_id": [x["question_id"] for x in input_batch],
             "rubric_level": [x["rubric_level"] for x in input_batch],
             "level": [x["level"] for x in input_batch],
             "answer": [x["answer"] for x in input_batch],
         }
         return batch, meta
+
+class AliceRubricPointer(AliceDataset):
+    def __init__(self, enc_fn=encoding_with_rubric_span):
+        super().__init__(enc_fn=enc_fn)
+        self.tranform_rubric()
+    def tranform_rubric(self):
+        def _transform(example):
+            rubric = json.loads(example["rubric"])
+            example["rubric"] = [rub for rub in rubric.values()]
+             
+            return example
+        self.train = self.train.map(lambda x: _transform(x))
+        self.val = self.val.map(lambda x: _transform(x))
+        self.test_ua = self.test_ua.map(lambda x: _transform(x))
+        self.test_uq = self.test_uq.map(lambda x: _transform(x))
+    @staticmethod
+    def collate_fn(input_batch):
+        batch = {
+        "input_ids": torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True),
+        "attention_mask": torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True),
+        "label_id": torch.tensor([x["level"] for x in input_batch]),
+        }
+        max_rubrics = max(len(x["rubric"]) for x in input_batch)
+        span_tensor = torch.zeros((len(input_batch), max_rubrics, 2), dtype=torch.long)
+        mask_tensor = torch.zeros((len(input_batch), max_rubrics), dtype=torch.bool)
+        for i, example in enumerate(input_batch):
+            for j, (start, end) in enumerate(example["rubric_indeces"]):
+                span_tensor[i, j, 0] = start
+                span_tensor[i, j, 1] = end
+                mask_tensor[i, j] = True
+        batch["rubric_span"] = span_tensor
+        batch["rubric_mask"] = mask_tensor
+        batch["answer_span"] = torch.tensor([example["answer_span"] for example in input_batch], dtype=torch.long)
+        meta = {"id": [x["sid"] for x in input_batch],
+                "answer": [x["answer"] for x in input_batch],
+          }
+        return batch, meta
+
 if __name__ == "__main__":
-    enable_caching()
-    alice_ds = Alice_Rubric_Dataset()
-    alice_ds.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
-
-    # Plot the distribution of student answer length
-    print(alice_ds.val[0])
-
+    dts = AliceRubricPointer()
+    # dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
+    dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-multilingual-uncased"))
+  
+    train_loader = torch.utils.data.DataLoader(
+        dts.train, 
+        batch_size=2, 
+        collate_fn=dts.collate_fn, 
+        shuffle=True
+    )
+    for batch, meta in train_loader:
+        print(batch)
+        break

@@ -23,7 +23,6 @@ python src/train_asag.py --save-dir "${EXP_ROOT}" \
     --lr2 5e-4 \
     --max-epoch 5 \
     --freeze-layers 12 \
-    --weighted-loss \
     --test-only
 
             

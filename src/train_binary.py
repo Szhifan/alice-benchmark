@@ -9,7 +9,7 @@ from torch.amp import GradScaler, autocast
 import logging
 import numpy as np
 from collections import deque, defaultdict
-from models import Asag_CrossEncoder, get_tokenizer
+from models import AsagCrossEncoder, get_tokenizer
 from transformers import get_linear_schedule_with_warmup
 from torch.optim import AdamW
 from tqdm import tqdm, trange
@@ -20,12 +20,12 @@ from utils import (
     mean_dequeue,
     get_label_weights
     )
-from data_prep_alice import Alice_Dataset
+from data_prep_alice import AliceDataset
 from torch.utils.data import DataLoader
 import pandas as pd 
 from sklearn.metrics import f1_score, accuracy_score
 
-TASK_DATASET = Alice_Dataset
+TASK_DATASET = AliceDataset
 # Default device configuration
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 logger = logging.getLogger(__name__)
@@ -165,7 +165,7 @@ def export_cp(model, optimizer, scheduler, args, model_name="model.pt"):
     logger.info("Saving optimizer and scheduler states to %s", output_dir)
 
 def load_model(args,label_weights=None):
-    model = Asag_CrossEncoder(
+    model = AsagCrossEncoder(
         model_name=args.model_name,
         num_labels=2,
         freeze_layers=args.freeze_layers,

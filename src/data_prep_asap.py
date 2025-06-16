@@ -113,9 +113,9 @@ class Asap_Dataset:
             "label_id": torch.tensor([x["label_id"] for x in input_batch]),
         } 
         meta = {
-            "Id": [x["Id"] for x in input_batch],
+            "id": [x["Id"] for x in input_batch],
             "EssaySet": [x["EssaySet"] for x in input_batch],
-            "EssayText": [x["EssayText"] for x in input_batch]
+            "answer": [x["EssayText"] for x in input_batch]
         }
         return batch, meta 
 
@@ -171,7 +171,7 @@ class Asap_Rubric(Asap_Dataset):
         meta = {
             "id": [x["Id"] for x in input_batch],
             "EssaySet": [x["EssaySet"] for x in input_batch],
-            "EssayText": [x["EssayText"] for x in input_batch],
+            "answer": [x["EssayText"] for x in input_batch],
             "rubric_level": [x["rubric_level"] for x in input_batch],
             "level": [x["score"] for x in input_batch],
         }
@@ -211,9 +211,9 @@ class Asap_Rubric_Conditional_Gen(Asap_Rubric):
         }
 
         meta = {
-            "Id": [x["Id"] for x in input_batch],
+            "id": [x["Id"] for x in input_batch],
             "EssaySet": [x["EssaySet"] for x in input_batch],
-            "EssayText": [x["EssayText"] for x in input_batch],
+            "answer": [x["EssayText"] for x in input_batch],
         }
 
         return batch, batch_decoder, meta

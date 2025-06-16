@@ -20,17 +20,16 @@ from utils import (
     configure_logging,
     batch_to_device,
     mean_dequeue,
-    transform_for_inference_alice,
-    transform_for_inference_asap,
     save_report,
-    get_label_weights
+    get_label_weights,
+    transform_for_inference
     )
 from data_prep_asap import Asap_Rubric
-from data_prep_alice import Alice_Rubric_Dataset
-from models import Asag_CrossEncoder, get_tokenizer
+from data_prep_alice import AliceRubricDataset, AliceDataset
+from models import AsagCrossEncoder, get_tokenizer
 from sklearn.metrics import cohen_kappa_score, f1_score, accuracy_score
 
-TASK_DATASET = Alice_Rubric_Dataset
+TASK_DATASET = AliceRubricDataset
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 # logger = logging.getLogger(__name__)
 print("Using device:", DEFAULT_DEVICE)
@@ -54,10 +53,11 @@ def add_training_args(parser):
     parser.add_argument('--weight-decay', default=0.01, type=float, help='weight decay for Adam')
     parser.add_argument('--adam-epsilon', default=1e-8, type=float, help='epsilon for Adam optimizer')
     parser.add_argument('--warmup-proportion', default=0.05, type=float, help='proportion of warmup steps')
+    parser.add_argument('--eval-steps', default=500, type=int, help='number of steps between evaluations')
     # Add checkpoint arguments
     parser.add_argument('--save-dir', default='results/checkpoints', help='path to save checkpoints')
     parser.add_argument('--no-save', action='store_true', help='don\'t save models or checkpoints')
-    parser.add_argument('--cpt-path', default=None, type=str, help='path to a checkpoint to load from')
+    parser.add_argument('--model-path', default=None, type=str, help='path to the model checkpoint to load')
     # other arguments
     parser.add_argument('--dropout', type=float,default=0.1 ,metavar='D', help='dropout probability')
     parser.add_argument('--freeze-layers',default=0,type=int, metavar='F', help='number of encoder layers in bert whose parameters to be frozen')
@@ -101,10 +101,9 @@ def build_optimizer(model, args,total_steps):
         num_warmup_steps=args.warmup_proportion * total_steps,
         num_training_steps=total_steps,
     )
-    # if checkpoint path is provided, load optimizer and scheduler states
-    if args.cpt_path is not None:
-        checkpoint_path = os.path.join(args.cpt_path, "checkpoint")
-     
+    # if optimizers are found in save dir, load them
+    if os.path.exists(os.path.join(args.save_dir, "checkpoint/optimizer.pt")) and os.path.exists(os.path.join(args.save_dir, "checkpoint/scheduler.pt")):
+        checkpoint_path = os.path.join(args.save_dir, "checkpoint")
         optimizer_path = os.path.join(checkpoint_path, "optimizer.pt")
         scheduler_path = os.path.join(checkpoint_path, "scheduler.pt")
         map_location = DEFAULT_DEVICE
@@ -176,16 +175,17 @@ def export_cp(model, optimizer, scheduler, args, model_name="model.pt"):
     print("Saving optimizer and scheduler states to %s", output_dir)
 
 def load_model(args,label_weights=None):
-    model = Asag_CrossEncoder(
+    model = AsagCrossEncoder(
         model_name=args.model_name,
         num_labels=2,
         freeze_layers=args.freeze_layers,
         freeze_embeddings=args.freeze_embeddings,
-        label_weights=label_weights
+        label_weights=label_weights,
+        use_ce_loss=True,  # use cross-entropy loss
         
     )
     # if checkpoint is provided, load the model state
-    if args.cpt_path:
+    if args.model_path:
         checkpoint_path = os.path.join(args.cpt_path, "checkpoint", "model.pt")
         model.load_state_dict(torch.load(checkpoint_path, map_location=DEFAULT_DEVICE))
 
@@ -193,9 +193,9 @@ def load_model(args,label_weights=None):
     return model
 def import_cp(args, total_steps, label_weights=None):
     # check if cp exists 
-    if args.cpt_path:
-        print("Loading checkpoint from %s", args.cpt_path)
-        training_config_path = os.path.join(args.cpt_path, "checkpoint", "training_config.json")
+    if os.path.exists(os.path.join(args.save_dir, "checkpoint/model.pt")):
+        print("Loading checkpoint from %s", args.save_dir)
+        training_config_path = os.path.join(args.save_dir, "checkpoint", "training_config.json")
     
         with open(training_config_path, "r") as f:
             training_config = json.load(f)
@@ -225,20 +225,8 @@ def train_epoch(
     train_iterator = trange(num_epochs, position=0, leave=True, desc="Epoch") 
     scaler = GradScaler(enabled=args.fp16 and DEFAULT_DEVICE == "cuda")
     for epoch in train_iterator:
-        train_dataloader = DataLoader(
-            train_dataset, 
-            num_workers=0,
-            pin_memory=True,
-            batch_size=args.batch_size, 
-            collate_fn=TASK_DATASET.collate_fn,
-            shuffle=True) 
-        epoch_iterator = tqdm(
-            train_dataloader, 
-            desc="Iteration", 
-            position=1, 
-            leave=True, 
-
-        )
+        train_dataloader = DataLoader(train_dataset, num_workers=0, pin_memory=True, batch_size=args.batch_size, collate_fn=TASK_DATASET.collate_fn, shuffle=True) 
+        epoch_iterator = tqdm(train_dataloader, desc="Iteration", position=1, leave=True)
 
  
         for step, (batch, _) in enumerate(epoch_iterator):
@@ -269,44 +257,40 @@ def train_epoch(
                     epoch + 1,
                     mean_dequeue(loss_history),
                     mean_dequeue(acc_history),
-          
             ))
             accuracy = np.mean(list(acc_history))
-
             wandb.log({
                 "train": {
                     "loss:": tr_loss,
                     "accuracy": accuracy
                 }
             })
-        # Evaluate on validation dataset
-        val_predictions, val_loss = evaluate(
-            model,
-            val_dataset,
-            batch_size=args.batch_size,
-            is_test=False,
-        )
-        eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
-        if eval_acc > best_metric:
-            best_metric = eval_acc
-       
-            export_cp(model, optimizer, scheduler, args, model_name="model.pt")
-            print("Best model saved at epoch %d", epoch + 1)
-        print("Epoch %d: Validation loss: %.4f, Accuracy: %.4f", epoch + 1, val_loss, eval_acc)
-        wandb.log({
-            "eval": {
-                "loss": val_loss,
-                "accuracy": eval_acc
-            }
-        })
+        if step % args.eval_steps == 0 or step == len(train_dataloader) - 1:
+            print("Evaluating at epoch %d step %d", epoch, step)
+            # Evaluate on validation dataset
+            val_predictions, val_loss = evaluate(
+                model,
+                val_dataset,
+                batch_size=args.batch_size,
+                is_test=False,
+            )
+            eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
+            if eval_acc > best_metric:
+                best_metric = eval_acc
+        
+                export_cp(model, optimizer, scheduler, args, model_name="model.pt")
+                print("Best model saved at epoch %d", epoch + 1)
+            print(f"Validation loss: {val_loss:.4f}, Validation accuracy: {eval_acc:.4f}")
+            wandb.log({
+                "eval": {
+                    "loss": val_loss,
+                    "accuracy": eval_acc
+                }
+            })
         
 @torch.no_grad() 
 def evaluate(model, dataset, batch_size, is_test=False): 
-    dataloader = DataLoader(
-        dataset,
-        batch_size=batch_size,
-        collate_fn=TASK_DATASET.collate_fn,
-        shuffle=False) 
+    dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=TASK_DATASET.collate_fn, shuffle=False)
     
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0 if is_test else 2, leave=True)
 
@@ -337,7 +321,7 @@ def evaluate(model, dataset, batch_size, is_test=False):
         )
         for key, value in meta.items():
             predictions[key].extend(value)
-   
+        break 
     pred_df = pd.DataFrame(predictions)
     eval_loss = np.mean(eval_loss)
     return pred_df, eval_loss 
@@ -367,8 +351,6 @@ def main(args):
     steps_per_epoch = int(np.ceil(len(ds.train) / args.batch_size)) 
     total_steps = args.max_epoch * steps_per_epoch
     label_weights = get_label_weights(ds.train) if args.weighted_loss else None
-
- 
     # Load the checkpoint 
     cp = import_cp(args, total_steps, label_weights=label_weights)
     model = cp["model"]
@@ -401,7 +383,7 @@ def main(args):
     #     batch_size=args.batch_size,
     #     is_test=True,
     # )
-    # test_predictions = transform_for_inference_asap(test_predictions)
+    # test_predictions = transform_for_inference(test_predictions)
     # test_predictions.to_csv(os.path.join(args.save_dir, "test_predictions.csv"), index=False)
     # test_report = eval_report(
     #     test_predictions,
@@ -419,7 +401,7 @@ def main(args):
             batch_size=args.batch_size,
             is_test=True,
         )
-        test_predictions = transform_for_inference_alice(test_predictions)
+        test_predictions = transform_for_inference(test_predictions)
         test_predictions.to_csv(os.path.join(args.save_dir, f"{test}_predictions.csv"), index=False)
         test_metrics = eval_report(test_predictions)
         with open(os.path.join(args.save_dir, f"{test}_metrics.json"), "w") as f:
