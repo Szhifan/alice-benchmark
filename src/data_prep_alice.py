@@ -1,12 +1,9 @@
-from datasets import load_dataset 
 from typing import Literal
 from datasets import load_dataset, enable_caching, Dataset,disable_caching
 import json
-import pandas as pd
-import os 
 import torch
 from transformers import AutoTokenizer
-enable_caching()
+disable_caching()
 path_train = "alice_data/ALICE_train_new.csv"
 path_ua = "alice_data/ALICE_UA_new.csv"
 path_uq = "alice_data/ALICE_UQ_new.csv"
@@ -57,7 +54,7 @@ def encoding_with_rubric_span(example, tokenizer):
     qa_tokens = tokenizer.tokenize("Question: " + question + " Answer: " + answer)
     tokens.extend(qa_tokens)
     answer_end = len(tokens)
-    enc = tokenizer(tokens, is_split_into_words=True)
+    enc = tokenizer(tokens, is_split_into_words=True, max_length=512, truncation=True)
     for field in enc:
         example[field] = enc[field]
     example["rubric_indeces"] = rubric_indeces

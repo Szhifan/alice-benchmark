@@ -1,8 +1,5 @@
-from datasets import load_dataset 
-from typing import Literal
 from datasets import load_dataset, enable_caching, Dataset,disable_caching
 import json
-import pandas as pd
 import os 
 import torch
 from transformers import AutoTokenizer
@@ -60,7 +57,34 @@ def encoding_for_conditional_generation(example, tokenizer):
     for field in output_dec:
         example[field + "_dec"] = output_dec[field]
     return example
-class Asap_Dataset:
+
+def encoding_with_rubric_span(example, tokenizer):
+    """
+    Encode answer + question + all the rubrics, seperated by the tokenizer's sep_token.
+    """
+    answer = example["EssayText"]
+    rubrics = example["rubric"]
+    cls_token = tokenizer.cls_token
+    sep_token = tokenizer.sep_token
+    tokens = [cls_token]
+    rubric_indeces = []
+    for rubric in rubrics:
+        start = len(tokens)
+        rub_tokens = tokenizer.tokenize(rubric) + [sep_token]
+        tokens.extend(rub_tokens)
+        end = len(tokens)
+        rubric_indeces.append((start, end))
+    answers_start = len(tokens)
+    qa_tokens = tokenizer.tokenize(" Answer: " + answer)
+    tokens.extend(qa_tokens)
+    answer_end = len(tokens)
+    enc = tokenizer(tokens, is_split_into_words=True, max_length=512, truncation=True)
+    for field in enc:
+        example[field] = enc[field]
+    example["rubric_indeces"] = rubric_indeces
+    example["answer_span"] = (answers_start, answer_end)
+    return example
+class AsapDataset:
     def __init__(self,enc_fn=encoding):
         self.train = Dataset.from_csv(train_path)
         self.test = Dataset.from_csv(test_path)
@@ -119,7 +143,7 @@ class Asap_Dataset:
         }
         return batch, meta 
 
-class Asap_Rubric(Asap_Dataset):
+class AsapRubric(AsapDataset):
     def __init__(self, enc_fn=encoding_with_rubric_pair):
         super().__init__(enc_fn=enc_fn)
         self.expand_with_rubrics()
@@ -178,7 +202,7 @@ class Asap_Rubric(Asap_Dataset):
 
         return batch, meta
 
-class Asap_Rubric_Conditional_Gen(Asap_Rubric):
+class AsapRubricConditionalGen(AsapRubric):
     def __init__(self,enc_fn=encoding_for_conditional_generation):
         super().__init__(enc_fn=enc_fn)
         
@@ -218,13 +242,56 @@ class Asap_Rubric_Conditional_Gen(Asap_Rubric):
 
         return batch, batch_decoder, meta
 
-class Asap_similarity(Asap_Dataset):
-    """
-    create 
-    """
-
+class AsapRubricPointer(AsapDataset):
+    def __init__(self, enc_fn=encoding_with_rubric_span):
+        super().__init__(enc_fn=enc_fn)
+        self.add_rubric()
+    def add_rubric(self):
+        def _add_rubric(example):
+            essay_set = int(example["EssaySet"]) - 1
+            example["rubric"] = [rub for rub in RUBRICS[essay_set]["rubrics"].values()]
+            return example
+        self.train = self.train.map(lambda x: _add_rubric(x))
+        self.val = self.val.map(lambda x: _add_rubric(x))
+        self.test = self.test.map(lambda x: _add_rubric(x))
+    @staticmethod
+    def collate_fn(input_batch):
+        batch = {
+            "input_ids": torch.nn.utils.rnn.pad_sequence(
+                [torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True
+            ),
+            "attention_mask": torch.nn.utils.rnn.pad_sequence(
+                [torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True,
+            ),
+            "answer_span": torch.tensor([x["answer_span"] for x in input_batch], dtype=torch.long),
+            }
+        max_rubrics = max(len(x["rubric"]) for x in input_batch)
+        rubric_span_tensor = torch.zeros(len(input_batch), max_rubrics, 2, dtype=torch.long)
+        rubric_mask_tensor = torch.zeros(len(input_batch), max_rubrics, dtype=torch.bool)
+        for i, example in enumerate(input_batch):
+            for j, (start, end) in enumerate(example["rubric_indeces"]):
+                rubric_span_tensor[i, j, 0] = start
+                rubric_span_tensor[i, j, 1] = end
+                rubric_mask_tensor[i, j] = True
+        batch["rubric_span"] = rubric_span_tensor
+        batch["rubric_mask"] = rubric_mask_tensor
+        batch["label_id"] = torch.tensor([x["score"] for x in input_batch])
+        meta = {
+            "answer": [x["EssayText"] for x in input_batch],
+        }
+        return batch, meta
 if __name__ == "__main__":
     # Example usage
-    from utils import get_label_weights
-    dataset = Asap_Rubric()
-    print(dataset.train[:6])
+    from torch.utils.data import DataLoader
+    dts = AsapRubricPointer()
+    dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
+    tr_loader = DataLoader(
+        dts.train, batch_size=2, shuffle=True, collate_fn=dts.collate_fn
+    )
+    for batch, meta in tr_loader:
+        print(batch)
+        print(meta)
+        break
+
+
+    

@@ -95,7 +95,6 @@ class AsagCrossEncoder(nn.Module):
         label_weights: Optional[torch.Tensor] = None, 
         use_ce_loss: bool = True
     ):
-    
         super().__init__()
         self.is_t5 = "t5" in model_name
         self.model_name = model_name 
@@ -189,7 +188,7 @@ class PointerRubricModel(nn.Module):
         input_ids: torch.Tensor,
         attention_mask: torch.Tensor,
         rubric_span: torch.Tensor,
-        answer_spans: torch.Tensor,
+        answer_span: torch.Tensor,
         rubric_mask: torch.Tensor,
         label_id: Optional[torch.Tensor] = None
     ) -> ModelOutput:
@@ -212,7 +211,7 @@ class PointerRubricModel(nn.Module):
                 for b in range(B)
             ])
             rubric_embeddings[:, i, :] = emb
-        ans_starts, ans_ends = answer_spans[:, 0], answer_spans[:, 1]
+        ans_starts, ans_ends = answer_span[:, 0], answer_span[:, 1]
         answer_embeddings = torch.stack([
             seq_embeddings[b, ans_starts[b]:ans_ends[b]].mean(dim=0) 
             for b in range(B)
@@ -228,11 +227,12 @@ class PointerRubricModel(nn.Module):
         return ModelOutput(logits=logits, loss=loss)
 if __name__ == "__main__":
     # Import T5 tokenizer
-    from data_prep_alice import AliceRubricPointer, encoding_with_rubric_span
+
+    from data_prep_asap import AsapRubricPointer, encoding_with_rubric_span
     from torch.utils.data import DataLoader
-    dts = AliceRubricPointer()
+    dts = AsapRubricPointer()
     tokenizer = get_tokenizer("bert-base-uncased")
-    test_ds = dts.test_ua
+    test_ds = dts.test
     test_ds = test_ds.map(lambda x: encoding_with_rubric_span(x, tokenizer))
     
     loader = DataLoader(
@@ -242,12 +242,6 @@ if __name__ == "__main__":
     )
     for batch, meta in loader:
         model = PointerRubricModel("bert-base-uncased")
-        output = model(
-            input_ids=batch["input_ids"],
-            attention_mask=batch["attention_mask"],
-            rubric_span=batch["rubric_span"],
-            answer_spans=batch["answer_span"],
-            rubric_mask=batch["rubric_mask"]
-        )
+        output = model(**batch)
         print(output.logits)
         break
