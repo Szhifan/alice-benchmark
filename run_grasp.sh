@@ -6,7 +6,7 @@ RESULTS_ROOT="${ROOT}/results"
 mkdir -p ${RESULTS_ROOT}
 
 ### NAME YOUR EXPERIMENT HERE ##
-EXP_NAME="cross-encoder"
+EXP_NAME="grasp-bert"
 ################################
 
 ## Local variables for current experiment
@@ -15,7 +15,7 @@ export WANDB_PROJECT="alice-asag"
 export WANDB_NAME="${EXP_NAME}"
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
-python src/train_asag.py --save-dir "${EXP_ROOT}" \
+python src/train_grasp.py --save-dir "${EXP_ROOT}" \
     --model-name "bert-base-uncased" \
     --no-save \
     --batch-size 16 \
