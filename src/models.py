@@ -237,8 +237,9 @@ if __name__ == "__main__":
     
     loader = DataLoader(
         test_ds, 
-        batch_size=2, 
-        collate_fn=dts.collate_fn
+        batch_size=16, 
+        collate_fn=dts.collate_fn,
+        shuffle=True,
     )
     for batch, meta in loader:
         model = PointerRubricModel("bert-base-uncased")

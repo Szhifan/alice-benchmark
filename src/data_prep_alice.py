@@ -3,7 +3,7 @@ from datasets import load_dataset, enable_caching, Dataset,disable_caching
 import json
 import torch
 from transformers import AutoTokenizer
-disable_caching()
+enable_caching()
 path_train = "alice_data/ALICE_train_new.csv"
 path_ua = "alice_data/ALICE_UA_new.csv"
 path_uq = "alice_data/ALICE_UQ_new.csv"
@@ -202,12 +202,4 @@ if __name__ == "__main__":
     # dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
     dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-multilingual-uncased"))
   
-    train_loader = torch.utils.data.DataLoader(
-        dts.train, 
-        batch_size=2, 
-        collate_fn=dts.collate_fn, 
-        shuffle=True
-    )
-    for batch, meta in train_loader:
-        print(batch)
-        break
+    print(len(dts.train), len(dts.val), len(dts.test_ua), len(dts.test_uq))

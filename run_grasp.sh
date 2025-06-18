@@ -18,12 +18,12 @@ mkdir -p ${EXP_ROOT}
 python src/train_grasp.py --save-dir "${EXP_ROOT}" \
     --model-name "deepset/gbert-large" \
     --no-save \
-    --batch-size 16 \
-    --lr 2e-5 \
-    --lr2 5e-4 \
+    --batch-size 6 \
+    --lr 5e-6 \
+    --lr2 5e-6 \
     --max-epoch 5 \
-    --freeze-layers 6  \
-    --freeze-embeddings
+    --freeze-layers 0 \
+    --grad-accumulation-steps 4 \
             
                 
                

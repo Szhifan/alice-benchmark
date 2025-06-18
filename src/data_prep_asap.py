@@ -286,12 +286,7 @@ if __name__ == "__main__":
     dts = AsapRubricPointer()
     dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
     tr_loader = DataLoader(
-        dts.train, batch_size=2, shuffle=True, collate_fn=dts.collate_fn
+        dts.train, batch_size=16, shuffle=True, collate_fn=dts.collate_fn
     )
-    for batch, meta in tr_loader:
-        print(batch)
-        print(meta)
-        break
-
-
+    print(len(tr_loader))
     

@@ -54,7 +54,6 @@ def add_training_args(parser):
     parser.add_argument('--weight-decay', default=0.01, type=float, help='weight decay for Adam')
     parser.add_argument('--adam-epsilon', default=1e-8, type=float, help='epsilon for Adam optimizer')
     parser.add_argument('--warmup-proportion', default=0.05, type=float, help='proportion of warmup steps')
-    parser.add_argument('--eval-steps', default=500, type=int, help='number of steps between evaluations')
     # Add checkpoint arguments
     parser.add_argument('--save-dir', default='results/checkpoints', help='path to save checkpoints')
     parser.add_argument('--no-save', action='store_true', help='don\'t save models or checkpoints')
@@ -260,28 +259,28 @@ def train_epoch(
                     "accuracy": accuracy
                 }
             })
-            if global_step % args.eval_steps == 0 or (step + 1) == len(train_dataloader):
-                print(f"Evaluating at epoch {epoch} step {global_step}")
-                # Evaluate on validation dataset
-                val_predictions, val_loss = evaluate(
-                    model,
-                    val_dataset,
-                    batch_size=args.batch_size,
-                    is_test=False,
-                )
-                eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
-                if eval_acc > best_metric:
-                    best_metric = eval_acc
-            
-                    export_cp(model, optimizer, scheduler, args, model_name="model.pt")
-                    print("Best model saved at epoch %d", epoch + 1)
-                print(f"Validation loss: {val_loss:.4f}, Validation accuracy: {eval_acc:.4f}")
-                wandb.log({
-                    "eval": {
-                        "loss": val_loss,
-                        "accuracy": eval_acc
-                    }
-                })
+           
+            print(f"Evaluating at epoch {epoch}")
+            # Evaluate on validation dataset
+            val_predictions, val_loss = evaluate(
+                model,
+                val_dataset,
+                batch_size=args.batch_size,
+                is_test=False,
+            )
+            eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
+            if eval_acc > best_metric:
+                best_metric = eval_acc
+        
+                export_cp(model, optimizer, scheduler, args, model_name="model.pt")
+                print("Best model saved at epoch %d", epoch + 1)
+            print(f"Validation loss: {val_loss:.4f}, Validation accuracy: {eval_acc:.4f}")
+            wandb.log({
+                "eval": {
+                    "loss": val_loss,
+                    "accuracy": eval_acc
+                }
+            })
         
 @torch.no_grad() 
 def evaluate(model, dataset, batch_size, is_test=False): 
@@ -313,8 +312,7 @@ def evaluate(model, dataset, batch_size, is_test=False):
             )
         )
         for key, value in meta.items():
-            predictions[key].extend(value)
-        break 
+            predictions[key].extend(value) 
     pred_df = pd.DataFrame(predictions)
     eval_loss = np.mean(eval_loss)
     return pred_df, eval_loss 
