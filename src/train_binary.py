@@ -213,24 +213,14 @@ def train_epoch(
  
     train_iterator = trange(num_epochs, position=0, leave=True, desc="Epoch") 
     scaler = GradScaler(enabled=args.fp16 and DEFAULT_DEVICE == "cuda")
+    global_step = 0
     for epoch in train_iterator:
-        train_dataloader = DataLoader(
-            train_dataset, 
-            num_workers=0,
-            pin_memory=True,
-            batch_size=args.batch_size, 
-            collate_fn=TASK_DATASET.collate_fn,
-            shuffle=True) 
-        epoch_iterator = tqdm(
-            train_dataloader, 
-            desc="Iteration", 
-            position=1, 
-            leave=True, 
-
-        )
+        train_dataloader = DataLoader(train_dataset, num_workers=0, pin_memory=True, batch_size=args.batch_size, collate_fn=TASK_DATASET.collate_fn, shuffle=True)
+        epoch_iterator = tqdm(train_dataloader, desc="Iteration", position=1, leave=True)
 
  
         for step, (batch, _) in enumerate(epoch_iterator):
+            global_step += 1
             model.train()
             batch = batch_to_device(batch, DEFAULT_DEVICE)
             with autocast(device_type=DEFAULT_DEVICE, enabled=args.fp16):  # mixed precision training

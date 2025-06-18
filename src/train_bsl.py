@@ -24,7 +24,7 @@ from utils import (
     get_label_weights,
     transform_for_inference
     )
-from data_prep_asap import Asap_Rubric
+from data_prep_asap import AsapRubric
 from data_prep_alice import AliceRubricDataset, AliceDataset
 from models import AsagCrossEncoder, get_tokenizer
 from sklearn.metrics import cohen_kappa_score, f1_score, accuracy_score

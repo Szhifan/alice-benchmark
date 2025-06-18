@@ -24,7 +24,7 @@ from utils import (
     get_label_weights,
     transform_for_inference
     )
-from data_prep_asap import Asap_Rubric
+from data_prep_asap import AsapRubric
 from data_prep_alice import AliceRubricPointer
 
 from models import get_tokenizer, PointerRubricModel
@@ -217,12 +217,14 @@ def train_epoch(
  
     train_iterator = trange(num_epochs, position=0, leave=True, desc="Epoch") 
     scaler = GradScaler(enabled=args.fp16 and DEFAULT_DEVICE == "cuda")
+    global_step = 0
     for epoch in train_iterator:
         train_dataloader = DataLoader(train_dataset, num_workers=0, pin_memory=True, batch_size=args.batch_size, collate_fn=TASK_DATASET.collate_fn, shuffle=True) 
         epoch_iterator = tqdm(train_dataloader, desc="Iteration", position=1, leave=True)
 
  
         for step, (batch, _) in enumerate(epoch_iterator):
+            global_step += 1
             model.train()
             batch = batch_to_device(batch, DEFAULT_DEVICE)
             with autocast(device_type=DEFAULT_DEVICE, enabled=args.fp16):  # mixed precision training
@@ -258,8 +260,8 @@ def train_epoch(
                     "accuracy": accuracy
                 }
             })
-            if step % args.eval_steps == 0 or step == len(train_dataloader) - 1:
-                print(f"Evaluating at epoch {epoch} step {step}")
+            if global_step % args.eval_steps == 0 or (step + 1) == len(train_dataloader):
+                print(f"Evaluating at epoch {epoch} step {global_step}")
                 # Evaluate on validation dataset
                 val_predictions, val_loss = evaluate(
                     model,
