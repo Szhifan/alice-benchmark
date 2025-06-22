@@ -21,7 +21,7 @@ python src/train_bsl.py --save-dir "${EXP_ROOT}" \
     --batch-size 16 \
     --lr 2e-5 \
     --lr2 5e-4 \
-    --max-epoch 5 \
+    --max-epoch 1 \
     --freeze-layers 12 \
     --freeze-embeddings 
 

@@ -126,10 +126,9 @@ class AsagCrossEncoder(nn.Module):
         Compute the mean squared error loss.
         """
         loss_fct = nn.MSELoss()
-        if logits.device == label_id.device == "mps":
-            logits = logits.float()
-            label_id = label_id.float()
-        return loss_fct(logits.view(-1, self.num_labels), label_id.view(-1, self.num_labels))
+        prob =  sigmoid(logits)
+        label_id = label_id.float()
+        return loss_fct(prob.view(-1, self.num_labels), label_id.view(-1, self.num_labels))
     def forward(
         self, 
         input_ids: torch.Tensor, 
@@ -140,6 +139,7 @@ class AsagCrossEncoder(nn.Module):
         if self.is_t5:
             logits = self.forward_t5(input_ids, attention_mask, label_id)
         else:
+            
             encoder_outputs = self.encoder(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
@@ -147,7 +147,6 @@ class AsagCrossEncoder(nn.Module):
             )
             sequence_output = encoder_outputs.last_hidden_state
             logits = self.classifier(sequence_output[:, 0, :])  # Use [CLS] token representation
-
 
         loss = None
         if label_id is not None:
@@ -231,22 +230,41 @@ class PointerRubricModel(nn.Module):
         return ModelOutput(logits=logits, loss=loss)
 if __name__ == "__main__":
     # Import T5 tokenizer
-
-    from data_prep_asap import AsapRubricPointer, encoding_with_rubric_span
+    import torch 
+    from data_prep_asap import AsapRubric
+    from data_prep_alice import AliceRubricDataset
     from torch.utils.data import DataLoader
-    dts = AsapRubricPointer()
-    tokenizer = get_tokenizer("bert-base-uncased")
-    test_ds = dts.test
-    test_ds = test_ds.map(lambda x: encoding_with_rubric_span(x, tokenizer))
+    dts = AliceRubricDataset()
+    tokenizer = get_tokenizer("bert-base-multilingual-uncased")
     
+    dts.get_encoding(tokenizer)
+    test_ds = dts.test_ua
     loader = DataLoader(
         test_ds, 
         batch_size=16, 
         collate_fn=dts.collate_fn,
         shuffle=True,
     )
+    
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+    model = AsagCrossEncoder(
+        model_name="bert-base-multilingual-uncased", use_ce_loss=False
+    ).to(device)
     for batch, meta in loader:
-        model = PointerRubricModel("bert-base-uncased")
-        output = model(**batch)
-        print(output.logits)
+        input_ids = batch["input_ids"].to(device)
+        attention_mask = batch["attention_mask"].to(device)
+        token_type_ids = batch.get("token_type_ids", None)
+        if token_type_ids is not None:
+            token_type_ids = token_type_ids.to(device)
+        label_id = batch["label_id"].to(device)
+
+        outputs = model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+            label_id=label_id
+        )
+        logits = outputs.logits
+        loss = outputs.loss
+        print(f"Logits: {logits.shape}, Loss: {loss}")
         break
