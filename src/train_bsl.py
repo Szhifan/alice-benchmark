@@ -181,7 +181,7 @@ def load_model(args,label_weights=None):
         freeze_layers=args.freeze_layers,
         freeze_embeddings=args.freeze_embeddings,
         label_weights=label_weights,
-        use_ce_loss=True,  # use cross-entropy loss
+        use_ce_loss=False,  # use cross-entropy loss
         
     )
     # if checkpoint is provided, load the model state

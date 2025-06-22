@@ -89,7 +89,7 @@ class AsagCrossEncoder(nn.Module):
     def __init__(
         self, 
         model_name: str, 
-        num_labels: int, 
+        num_labels: int = 2, 
         freeze_layers: int = 0, 
         freeze_embeddings: bool = False, 
         label_weights: Optional[torch.Tensor] = None, 
@@ -101,8 +101,9 @@ class AsagCrossEncoder(nn.Module):
         self.encoder = AutoModel.from_pretrained(model_name) if not self.is_t5 else T5EncoderModel.from_pretrained(model_name)
         hidden_size = self.encoder.config.hidden_size
         self.label_weights = label_weights
-        self.classifier = ClassificationHead(hidden_size, num_labels)
         self.num_labels = num_labels if use_ce_loss else 1
+        self.classifier = ClassificationHead(hidden_size, self.num_labels)
+        
         self.use_ce_loss = use_ce_loss
         if self.is_t5:
             freeze_t5_layers(self.encoder, freeze_layers)
@@ -125,6 +126,9 @@ class AsagCrossEncoder(nn.Module):
         Compute the mean squared error loss.
         """
         loss_fct = nn.MSELoss()
+        if logits.device == label_id.device == "mps":
+            logits = logits.float()
+            label_id = label_id.float()
         return loss_fct(logits.view(-1, self.num_labels), label_id.view(-1, self.num_labels))
     def forward(
         self, 
