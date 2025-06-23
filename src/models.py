@@ -1,8 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import AutoTokenizer, T5Config
+from transformers import AutoTokenizer
 import torch
-from transformers import AutoModel,T5EncoderModel
+from transformers import AutoModel
 from torch.nn import CrossEntropyLoss, Bilinear
 from torch.nn.functional import sigmoid
 from dataclasses import dataclass
@@ -47,25 +47,6 @@ def freeze_bert_embeddings(model):
     """
     for param in model.embeddings.parameters():
         param.requires_grad = False
-def freeze_t5_layers(model, n_frozen_layers: int):
-    """
-    Freeze the specified number of layers in the T5 model.
-    """
-    for name, param in model.named_parameters():
-        regex = re.compile(r"block\.(\d+)")
-        match = regex.search(name)
-        if match:
-            layer_num = int(match.group(1))
-            if layer_num < n_frozen_layers:
-                param.requires_grad = False
-            else:
-                param.requires_grad = True
-def freeze_t5_embeddings(model):
-    """
-    Freeze the embedding layer of the T5 model.
-    """
-    for param in model.shared.parameters():
-        param.requires_grad = False
 class ClassificationHead(nn.Module):
     """Head for sentence-level classification tasks."""
 
@@ -96,31 +77,25 @@ class AsagCrossEncoder(nn.Module):
         use_ce_loss: bool = True
     ):
         super().__init__()
-        self.is_t5 = "t5" in model_name
         self.model_name = model_name 
-        self.encoder = AutoModel.from_pretrained(model_name) if not self.is_t5 else T5EncoderModel.from_pretrained(model_name)
+        self.encoder = AutoModel.from_pretrained(model_name) 
         hidden_size = self.encoder.config.hidden_size
         self.label_weights = label_weights
         self.num_labels = num_labels if use_ce_loss else 1
         self.classifier = ClassificationHead(hidden_size, self.num_labels)
         
         self.use_ce_loss = use_ce_loss
-        if self.is_t5:
-            freeze_t5_layers(self.encoder, freeze_layers)
-        else:
-            freeze_bert_layers(self.encoder, freeze_layers)
+
+        freeze_bert_layers(self.encoder, freeze_layers)
         if freeze_embeddings:
-            if self.is_t5:
-                freeze_t5_embeddings(self.encoder)
-            else:
-                freeze_bert_embeddings(self.encoder)
+            freeze_bert_embeddings(self.encoder)
     def get_loss_ce(self, logits: torch.Tensor, label_id: torch.Tensor) -> torch.Tensor:
         """
         Compute the cross-entropy loss.
         """
         self.label_weights = self.label_weights.to(logits.device) if self.label_weights is not None else None
         loss_fct = CrossEntropyLoss(weight=self.label_weights)
-        return loss_fct(logits.view(-1, self.num_labels), label_id.view(-1))
+        return loss_fct(logits.view(-1, self.num_labels), label_id.view(-1)), logits
     def get_loss_mse(self, logits: torch.Tensor, label_id: torch.Tensor) -> torch.Tensor:
         """
         Compute the mean squared error loss.
@@ -128,7 +103,7 @@ class AsagCrossEncoder(nn.Module):
         loss_fct = nn.MSELoss()
         prob =  sigmoid(logits)
         label_id = label_id.float()
-        return loss_fct(prob.view(-1, self.num_labels), label_id.view(-1, self.num_labels))
+        return loss_fct(prob.view(-1, self.num_labels), label_id.view(-1, self.num_labels)), prob
     def forward(
         self, 
         input_ids: torch.Tensor, 
@@ -136,46 +111,22 @@ class AsagCrossEncoder(nn.Module):
         token_type_ids: Optional[torch.Tensor] = None, 
         label_id: Optional[torch.Tensor] = None
     ) -> ModelOutput:
-        if self.is_t5:
-            logits = self.forward_t5(input_ids, attention_mask, label_id)
-        else:
-            
-            encoder_outputs = self.encoder(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                token_type_ids=token_type_ids
-            )
-            sequence_output = encoder_outputs.last_hidden_state
-            logits = self.classifier(sequence_output[:, 0, :])  # Use [CLS] token representation
+  
+        
+        encoder_outputs = self.encoder(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids
+        )
+        sequence_output = encoder_outputs.last_hidden_state
+        logits = self.classifier(sequence_output[:, 0, :])  # Use [CLS] token representation
 
         loss = None
         if label_id is not None:
-            loss = self.get_loss_ce(logits, label_id) if self.use_ce_loss else self.get_loss_mse(logits, label_id)
+            loss, logits = self.get_loss_ce(logits, label_id) if self.use_ce_loss else self.get_loss_mse(logits, label_id)
 
         return ModelOutput(logits=logits, loss=loss)
-    def forward_t5(
-        self,
-        input_ids: torch.Tensor,
-        attention_mask: torch.Tensor,
-        label_id: Optional[torch.Tensor] = None
-    ) -> ModelOutput:
-        """
-        Forward method for T5 model. Extracts the last EOS token as the sequence representation.
-        """
-        encoder_outputs = self.encoder(
-            input_ids=input_ids,
-            attention_mask=attention_mask
-        )
-        sequence_output = encoder_outputs.last_hidden_state
 
-        # Extract the position of </s> token (id = tokenizer.eos_token_id)
-        eos_token_id = self.encoder.config.eos_token_id
-        eos_mask = input_ids.eq(eos_token_id)
-        batch_size, hidden_size = sequence_output.size(0), sequence_output.size(-1)
-        sequence_output = sequence_output[eos_mask, :].view(batch_size, -1, hidden_size)[:, -1, :]
-
-        logits = self.classifier(sequence_output)
-        return logits
 class PointerRubricModel(nn.Module):
     """
     Pointer Rubric Model for ASAG.
@@ -183,7 +134,7 @@ class PointerRubricModel(nn.Module):
     """
     def __init__(self, model_name: str):
         super().__init__()
-        self.encoder = AutoModel.from_pretrained(model_name) if "t5" not in model_name else T5EncoderModel.from_pretrained(model_name)
+        self.encoder = AutoModel.from_pretrained(model_name)
         self.pointer_head = nn.Bilinear(self.encoder.config.hidden_size, self.encoder.config.hidden_size, 1)
         
     def forward(
@@ -241,7 +192,7 @@ if __name__ == "__main__":
     test_ds = dts.test_ua
     loader = DataLoader(
         test_ds, 
-        batch_size=16, 
+        batch_size=4, 
         collate_fn=dts.collate_fn,
         shuffle=True,
     )
@@ -266,5 +217,5 @@ if __name__ == "__main__":
         )
         logits = outputs.logits
         loss = outputs.loss
-        print(f"Logits: {logits.shape}, Loss: {loss}")
+        print(f"Logits: {logits}, Loss: {loss}")
         break

@@ -17,9 +17,9 @@ mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
 python src/train_bsl.py --save-dir "${EXP_ROOT}" \
     --model-name "bert-base-multilingual-uncased" \
-    --no-save \
     --batch-size 16 \
     --lr 2e-5 \
+    --test-only \
     --lr2 5e-4 \
     --max-epoch 1 \
     --freeze-layers 12 \
