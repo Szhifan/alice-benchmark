@@ -53,7 +53,6 @@ def add_training_args(parser):
     parser.add_argument('--weight-decay', default=0.01, type=float, help='weight decay for Adam')
     parser.add_argument('--adam-epsilon', default=1e-8, type=float, help='epsilon for Adam optimizer')
     parser.add_argument('--warmup-proportion', default=0.05, type=float, help='proportion of warmup steps')
-    parser.add_argument('--eval-steps', default=500, type=int, help='number of steps between evaluations')
     # Add checkpoint arguments
     parser.add_argument('--save-dir', default='results/checkpoints', help='path to save checkpoints')
     parser.add_argument('--no-save', action='store_true', help='don\'t save models or checkpoints')
@@ -181,7 +180,7 @@ def load_model(args,label_weights=None):
         freeze_layers=args.freeze_layers,
         freeze_embeddings=args.freeze_embeddings,
         label_weights=label_weights,
-        use_ce_loss=True,  # use cross-entropy loss
+        use_ce_loss=False,  # use cross-entropy loss
         
     )
     # if checkpoint is provided, load the model state
@@ -265,28 +264,27 @@ def train_epoch(
                     "accuracy": accuracy
                 }
             })
-            if step % args.eval_steps == 0 or step == len(train_dataloader) - 1:
-                print(f"Evaluating at epoch {epoch} step {step}")
+
                 # Evaluate on validation dataset
-                val_predictions, val_loss = evaluate(
-                    model,
-                    val_dataset,
-                    batch_size=args.batch_size,
-                    is_test=False,
-                )
-                eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
-                if eval_acc > best_metric:
-                    best_metric = eval_acc
-            
-                    export_cp(model, optimizer, scheduler, args, model_name="model.pt")
-                    print("Best model saved at epoch %d", epoch + 1)
-                print(f"Validation loss: {val_loss:.4f}, Validation accuracy: {eval_acc:.4f}")
-                wandb.log({
-                    "eval": {
-                        "loss": val_loss,
-                        "accuracy": eval_acc
-                    }
-                })
+        val_predictions, val_loss = evaluate(
+            model,
+            val_dataset,
+            batch_size=args.batch_size,
+            is_test=False,
+        )
+        eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
+        if eval_acc > best_metric:
+            best_metric = eval_acc
+    
+            export_cp(model, optimizer, scheduler, args, model_name="model.pt")
+            print("Best model saved at epoch %d", epoch + 1)
+        print(f"Validation loss: {val_loss:.4f}, Validation accuracy: {eval_acc:.4f}")
+        wandb.log({
+            "eval": {
+                "loss": val_loss,
+                "accuracy": eval_acc
+            }
+        })
         
 @torch.no_grad() 
 def evaluate(model, dataset, batch_size, is_test=False): 
@@ -304,13 +302,12 @@ def evaluate(model, dataset, batch_size, is_test=False):
         model_output = model(**batch)
         loss = model_output.loss
         logits = model_output.logits.detach().cpu()
-        prob = softmax(logits, dim=-1).numpy()
         eval_loss.append(loss.item())
         pred_id = np.argmax(logits, axis=1)
         # collect data to put in the prediction dict
         predictions["pred_id"].extend(pred_id.tolist())
         predictions["label_id"].extend(batch["label_id"].detach().cpu().numpy().tolist())
-        predictions["logits"].extend(prob.tolist())
+        predictions["logits"].extend(logits.tolist())
         acc = accuracy_score(batch["label_id"].detach().cpu().numpy(), pred_id)
         acc_history.append(acc)
         data_iterator.set_description(
@@ -400,11 +397,9 @@ def main(args):
             batch_size=args.batch_size,
             is_test=True,
         )
+        test_predictions.to_csv(os.path.join(args.save_dir, f"{test}_raw_predictions.csv"), index=False)
         test_predictions = transform_for_inference(test_predictions)
-        test_predictions.to_csv(os.path.join(args.save_dir, f"{test}_predictions.csv"), index=False)
         test_metrics = eval_report(test_predictions)
-        with open(os.path.join(args.save_dir, f"{test}_metrics.json"), "w") as f:
-            json.dump(test_metrics, f, indent=4)
         metrics_wandb = {test: test_metrics}
         wandb.log(metrics_wandb)
     if args.no_save:
