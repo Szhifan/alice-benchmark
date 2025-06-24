@@ -74,18 +74,15 @@ class AsagCrossEncoder(nn.Module):
         freeze_layers: int = 0, 
         freeze_embeddings: bool = False, 
         label_weights: Optional[torch.Tensor] = None, 
-        use_ce_loss: bool = True
     ):
         super().__init__()
         self.model_name = model_name 
         self.encoder = AutoModel.from_pretrained(model_name) 
         hidden_size = self.encoder.config.hidden_size
         self.label_weights = label_weights
-        self.num_labels = num_labels if use_ce_loss else 1
+        self.num_labels = num_labels 
         self.classifier = ClassificationHead(hidden_size, self.num_labels)
         
-        self.use_ce_loss = use_ce_loss
-
         freeze_bert_layers(self.encoder, freeze_layers)
         if freeze_embeddings:
             freeze_bert_embeddings(self.encoder)
@@ -123,7 +120,9 @@ class AsagCrossEncoder(nn.Module):
 
         loss = None
         if label_id is not None:
-            loss, logits = self.get_loss_ce(logits, label_id) if self.use_ce_loss else self.get_loss_mse(logits, label_id)
+            # Cross-entropy: the model detemine if the rubric is relevant or not
+            # MSE: the model predicts the relevance score (0-1) for each rubric
+            loss, logits = self.get_loss_ce(logits, label_id) if self.num_labels > 1 else self.get_loss_mse(logits, label_id) 
 
         return ModelOutput(logits=logits, loss=loss)
 
