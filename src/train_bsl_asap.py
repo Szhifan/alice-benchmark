@@ -25,11 +25,10 @@ from utils import (
     transform_for_inference
     )
 from data_prep_asap import AsapRubric
-from data_prep_alice import AliceRubricDataset, AliceDataset
 from models import AsagCrossEncoder, get_tokenizer
 from sklearn.metrics import cohen_kappa_score, f1_score, accuracy_score
 
-TASK_DATASET = AliceRubricDataset
+TASK_DATASET = AsapRubric
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 # logger = logging.getLogger(__name__)
 print("Using device:", DEFAULT_DEVICE)
@@ -371,37 +370,24 @@ def main(args):
             args)  
         print("***** Training finished *****")
     # Evaluate on test dataset
-    # print(f"***** Running evaluation on test set *****")
-    # print("  Num examples = %d", len(ds.test))
-    # test_predictions, test_loss = evaluate(
-    #     model,
-    #     ds.test,
-    #     batch_size=args.batch_size,
-    #     is_test=True,
-    # )
-    # test_predictions = transform_for_inference(test_predictions)
-    # test_predictions.to_csv(os.path.join(args.save_dir, "test_predictions.csv"), index=False)
-    # test_report = eval_report(
-    #     test_predictions,
-    #     group_by="EssaySet",
-    # )
-    
-    for test in ["test_ua", "test_uq"]:
-        
-        test_ds = getattr(ds, test)
-        print(f"***** Running evaluation on {test} *****")
-        print("  Num examples = %d", len(test_ds))
-        test_predictions, test_loss = evaluate(
-            model,
-            test_ds,
-            batch_size=args.batch_size,
-            is_test=True,
-        )
-        test_predictions.to_csv(os.path.join(args.save_dir, f"{test}_raw_predictions.csv"), index=False)
-        test_predictions = transform_for_inference(test_predictions)
-        test_metrics = eval_report(test_predictions)
-        metrics_wandb = {test: test_metrics}
-        wandb.log(metrics_wandb)
+    print(f"***** Running evaluation on test set *****")
+    print("  Num examples = %d", len(ds.test))
+    test_predictions, test_loss = evaluate(
+        model,
+        ds.test,
+        batch_size=args.batch_size,
+        is_test=True,
+    )
+    test_predictions = transform_for_inference(test_predictions, other_filds=["EssaySet"])
+    test_predictions.to_csv(os.path.join(args.save_dir, "test_predictions.csv"), index=False)
+    test_report = eval_report(
+        test_predictions,
+        group_by="EssaySet",
+    )
+    save_report(test_report, os.path.join(args.save_dir, "test_report.json"))
+    metrics_wandb = {"test": test_report}
+    wandb.log(metrics_wandb)
+  
     if args.no_save:
         print("No-save flag is set. Deleting checkpoint.")
         checkpoint_dir = os.path.join(args.save_dir, "checkpoint")
