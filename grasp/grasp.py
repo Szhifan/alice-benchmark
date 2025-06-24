@@ -153,7 +153,7 @@ tokenized_dataset = dataset.map(tokenize_with_spans)
 # Define training arguments
 training_args = TrainingArguments(
     output_dir="./pointer-rubric",
-    per_device_train_batch_size=1,  # Lower from 4 to 2
+    per_device_train_batch_size=4,  # Lower from 4 to 2
     gradient_accumulation_steps=4,  # Add this for similar effective batch size
     learning_rate=5e-6,
     max_grad_norm=1.0,

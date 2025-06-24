@@ -259,28 +259,28 @@ def train_epoch(
                     "accuracy": accuracy
                 }
             })
-           
-            print(f"Evaluating at epoch {epoch}")
-            # Evaluate on validation dataset
-            val_predictions, val_loss = evaluate(
-                model,
-                val_dataset,
-                batch_size=args.batch_size,
-                is_test=False,
-            )
-            eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
-            if eval_acc > best_metric:
-                best_metric = eval_acc
         
-                export_cp(model, optimizer, scheduler, args, model_name="model.pt")
-                print("Best model saved at epoch %d", epoch + 1)
-            print(f"Validation loss: {val_loss:.4f}, Validation accuracy: {eval_acc:.4f}")
-            wandb.log({
-                "eval": {
-                    "loss": val_loss,
-                    "accuracy": eval_acc
-                }
-            })
+        print(f"Evaluating at epoch {epoch}")
+        # Evaluate on validation dataset
+        val_predictions, val_loss = evaluate(
+            model,
+            val_dataset,
+            batch_size=args.batch_size,
+            is_test=False,
+        )
+        eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
+        if eval_acc > best_metric:
+            best_metric = eval_acc
+    
+            export_cp(model, optimizer, scheduler, args, model_name="model.pt")
+            print("Best model saved at epoch %d", epoch + 1)
+        print(f"Validation loss: {val_loss:.4f}, Validation accuracy: {eval_acc:.4f}")
+        wandb.log({
+            "eval": {
+                "loss": val_loss,
+                "accuracy": eval_acc
+            }
+        })
         
 @torch.no_grad() 
 def evaluate(model, dataset, batch_size, is_test=False): 
