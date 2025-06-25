@@ -13,7 +13,7 @@ for i in range(1,11):
     with open(rubrics_path, "r") as f:
         rubrics = json.load(f)
         RUBRICS.append(rubrics)
-def encoding(example, tokenizer):
+def basic_encode(example, tokenizer):
     # basic encoding 
     output = tokenizer(
         example["EssayText"]
@@ -21,7 +21,7 @@ def encoding(example, tokenizer):
     for field in output:
         example[field] = output[field]
     return example
-def encoding_with_rubric_pair(example, tokenizer):
+def encode_rubric_pair(example, tokenizer):
     # for sequence pair classification
     output = tokenizer(
         example["EssayText"],
@@ -30,7 +30,7 @@ def encoding_with_rubric_pair(example, tokenizer):
         example[field] = output[field]
     return example
 
-def encoding_with_rubric_prompt(example, tokenizer):
+def encode_rubric_prompt(example, tokenizer):
     # for prompt-based classification, can be used for T5 or other LLMs. 
     prompt = f"Essay: {example['EssayText']}. Rubric: {example['rubric']}. The essay meets the rubric."
     output = tokenizer(
@@ -39,26 +39,8 @@ def encoding_with_rubric_prompt(example, tokenizer):
     for field in output:
         example[field] = output[field]
     return example
-def encoding_for_conditional_generation(example, tokenizer):
-    # for conditional generation task
-    prompt_enc = f"Essay: {example['EssayText']} \n Rubric: {example['rubric']}"
-    output_enc = tokenizer(
-        prompt_enc,
-    )
-    if example["rubric_level"] == example["score"]:
-        prompt_dec = "yes"
-    else:
-        prompt_dec = "no"
-    output_dec = tokenizer(
-        prompt_dec,
-    )
-    for field in output_enc:
-        example[field] = output_enc[field]
-    for field in output_dec:
-        example[field + "_dec"] = output_dec[field]
-    return example
 
-def encoding_with_rubric_span(example, tokenizer):
+def encode_rubric_span(example, tokenizer):
     """
     Encode answer + question + all the rubrics, seperated by the tokenizer's sep_token.
     """
@@ -85,7 +67,7 @@ def encoding_with_rubric_span(example, tokenizer):
     example["answer_span"] = (answers_start, answer_end)
     return example
 class AsapDataset:
-    def __init__(self,enc_fn=encoding):
+    def __init__(self,enc_fn=basic_encode):
         self.train = Dataset.from_csv(train_path)
         self.test = Dataset.from_csv(test_path)
         self.train, self.val = self.train.train_test_split(test_size=0.1,seed=42).values()
@@ -144,7 +126,7 @@ class AsapDataset:
         return batch, meta 
 
 class AsapRubric(AsapDataset):
-    def __init__(self, enc_fn=encoding_with_rubric_pair):
+    def __init__(self, enc_fn=encode_rubric_pair):
         super().__init__(enc_fn=enc_fn)
         self.expand_with_rubrics()
     
@@ -202,48 +184,9 @@ class AsapRubric(AsapDataset):
 
         return batch, meta
 
-class AsapRubricConditionalGen(AsapRubric):
-    def __init__(self,enc_fn=encoding_for_conditional_generation):
-        super().__init__(enc_fn=enc_fn)
-        
-    @staticmethod
-    
-    def collate_fn(input_batch):
-        input_ids = torch.nn.utils.rnn.pad_sequence(
-            [torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True
-        )
-        attention_mask = torch.nn.utils.rnn.pad_sequence(
-            [torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True
-        )
-
-
-        decoder_input_ids = torch.nn.utils.rnn.pad_sequence(
-            [torch.tensor(x["input_ids_dec"]) for x in input_batch], batch_first=True
-        )
-        decoder_attention_mask = torch.nn.utils.rnn.pad_sequence(
-            [torch.tensor(x["attention_mask_dec"]) for x in input_batch], batch_first=True
-        )
-
-        batch = {
-            "input_ids": input_ids,
-            "attention_mask": attention_mask,
-        }
-
-        batch_decoder = {
-            "input_ids": decoder_input_ids,
-            "attention_mask": decoder_attention_mask,
-        }
-
-        meta = {
-            "id": [x["Id"] for x in input_batch],
-            "EssaySet": [x["EssaySet"] for x in input_batch],
-            "answer": [x["EssayText"] for x in input_batch],
-        }
-
-        return batch, batch_decoder, meta
 
 class AsapRubricPointer(AsapDataset):
-    def __init__(self, enc_fn=encoding_with_rubric_span):
+    def __init__(self, enc_fn=encode_rubric_span):
         super().__init__(enc_fn=enc_fn)
         self.add_rubric()
     def add_rubric(self):

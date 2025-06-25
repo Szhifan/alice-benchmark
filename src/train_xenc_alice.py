@@ -371,8 +371,6 @@ def main(args):
             args)  
         print("***** Training finished *****")
     # Evaluate on test dataset
-    print(f"***** Running evaluation on test set *****")
-    print("  Num examples = %d", len(ds.test))
     for test in ["test_ua", "test_uq"]:
         
         test_ds = getattr(ds, test)
