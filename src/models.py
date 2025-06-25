@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from transformers import AutoTokenizer
 import torch
 from transformers import AutoModel
-from torch.nn import CrossEntropyLoss, Bilinear
+from torch.nn import CrossEntropyLoss, Bilinear, CosineEmbeddingLoss
 from torch.nn.functional import sigmoid, cosine_similarity
 from dataclasses import dataclass
 from typing import Optional, Tuple
@@ -313,19 +313,27 @@ class AsagSentenceTransformer(AsagCrossEncoder):
         # Normalize embeddings for cosine similarity
         embeddings_a = F.normalize(embeddings_a, p=2, dim=1)
         embeddings_b = F.normalize(embeddings_b, p=2, dim=1)
+        loss = None
         if self.num_labels == 1:
             # For regression task, compute cosine similarity
-            cosine_sim = cosine_similarity(embeddings_a, embeddings_b, dim=1)
-            logits = cosine_sim.unsqueeze(1)  # Shape: (B, 1)
+            logits = cosine_similarity(embeddings_a, embeddings_b, dim=1)
+            # Replace 0s in label_id with -1 for CosineEmbeddingLos
+            loss_fct = CosineEmbeddingLoss()
+            if label_id is not None:
+                label_id = torch.where(label_id == 0, torch.tensor(-1, device=label_id.device, dtype=label_id.dtype), label_id)
+                # Convert label_id to float for cosine similarity
+                label_id = label_id.float()
+                # Compute cosine similarity loss
+                loss = loss_fct(embeddings_a, embeddings_b, label_id)
         else:
-            # classification task
+            # For classification task, compute logits
             features = self.emb_features(embeddings_a, embeddings_b)
-            logits = self.classifier(features)  # Shape: (B, num_labels)
-        loss = None
-        if label_id is not None:
-            # Cross-entropy loss for classification
-            loss, logits = self.get_loss_ce(logits, label_id)
+            logits = self.classifier(features)
+            if label_id is not None:
+                loss, logits = self.get_loss_ce(logits, label_id)
         return ModelOutput(logits=logits, loss=loss)
+
+   
         
 if __name__ == "__main__":
     import torch 
