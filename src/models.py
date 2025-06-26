@@ -306,12 +306,16 @@ class AsagSentenceTransformer(AsagCrossEncoder):
         embeddings_a = F.normalize(embeddings_a, p=2, dim=1)
         embeddings_b = F.normalize(embeddings_b, p=2, dim=1)
         loss = None
+
         logits = cosine_similarity(embeddings_a, embeddings_b, dim=-1)  #
         if label_id is not None:
             loss_fct = CosineEmbeddingLoss()
             label_id = torch.where(label_id > 0, torch.ones_like(label_id), torch.zeros_like(label_id) - 1)
             loss = loss_fct(embeddings_a, embeddings_b, label_id.float())
+
         return ModelOutput(logits=logits, loss=loss)
+
+   
         
 if __name__ == "__main__":
     import torch 
