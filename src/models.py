@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from transformers import AutoTokenizer
 import torch
 from transformers import AutoModel
-from torch.nn import CrossEntropyLoss, Bilinear
+from torch.nn import CrossEntropyLoss, Bilinear, CosineEmbeddingLoss
 from torch.nn.functional import sigmoid, cosine_similarity
 from dataclasses import dataclass
 from typing import Optional, Tuple
@@ -262,7 +262,7 @@ class AsagSentenceTransformer(AsagCrossEncoder):
     def __init__(
         self, 
         model_name: str, 
-        num_labels: int = 2, 
+        num_labels: int = 1, 
         freeze_layers: int = 0, 
         freeze_embeddings: bool = False, 
         label_weights: Optional[torch.Tensor] = None, 
@@ -274,8 +274,6 @@ class AsagSentenceTransformer(AsagCrossEncoder):
             freeze_embeddings=freeze_embeddings,
             label_weights=label_weights
         )
-        d_in_features = self.encoder.config.hidden_size * 3  # Concatenated features
-        self.classifier = nn.Linear(d_in_features, num_labels)  # For classification tasks
     
     def encode(self, input_ids, attention_mask, token_type_ids=None):
         outputs = self.encoder(
@@ -287,12 +285,6 @@ class AsagSentenceTransformer(AsagCrossEncoder):
         embeddings = mean_pooling(outputs, attention_mask)
     
         return embeddings
-    def emb_features(self, emb_a: torch.Tensor, emb_b: torch.Tensor) -> torch.Tensor:
-        features = torch.cat([emb_a, emb_b,emb_a - emb_b], dim=-1)
-        return features
-    def get_loss_ce(self, logits, label_id):
-        loss_fct = CrossEntropyLoss(weight=self.label_weights) if self.label_weights is not None else CrossEntropyLoss()
-        return loss_fct(logits.view(-1, self.num_labels), label_id.view(-1)), logits
         
     def forward(
         self, 
@@ -313,26 +305,19 @@ class AsagSentenceTransformer(AsagCrossEncoder):
         # Normalize embeddings for cosine similarity
         embeddings_a = F.normalize(embeddings_a, p=2, dim=1)
         embeddings_b = F.normalize(embeddings_b, p=2, dim=1)
-        if self.num_labels == 1:
-            # For regression task, compute cosine similarity
-            cosine_sim = cosine_similarity(embeddings_a, embeddings_b, dim=1)
-            logits = cosine_sim.unsqueeze(1)  # Shape: (B, 1)
-        else:
-            # classification task
-            features = self.emb_features(embeddings_a, embeddings_b)
-            logits = self.classifier(features)  # Shape: (B, num_labels)
         loss = None
+        logits = cosine_similarity(embeddings_a, embeddings_b, dim=-1)  #
         if label_id is not None:
-            # Cross-entropy loss for classification
-            loss, logits = self.get_loss_ce(logits, label_id)
+            loss_fct = CosineEmbeddingLoss()
+            label_id = torch.where(label_id > 0, torch.ones_like(label_id), torch.zeros_like(label_id) - 1)
+            loss = loss_fct(embeddings_a, embeddings_b, label_id.float())
         return ModelOutput(logits=logits, loss=loss)
         
 if __name__ == "__main__":
     import torch 
-    from data_prep_asap import AsapRubric
-    from data_prep_alice import AliceRubricDataset
+    from data_prep_alice import AliceRubricDataset, encode_rubric_separate
     from torch.utils.data import DataLoader
-    dts = AliceRubricDataset()
+    dts = AliceRubricDataset(enc_fn=encode_rubric_separate)
     tokenizer = get_tokenizer("bert-base-multilingual-uncased")
     
     dts.get_encoding(tokenizer)
@@ -340,29 +325,18 @@ if __name__ == "__main__":
     loader = DataLoader(
         test_ds, 
         batch_size=4, 
-        collate_fn=dts.collate_fn,
+        collate_fn=dts.collate_rubric_seperate,
         shuffle=True,
     )
-    
-    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
-    model = AsagCrossEncoder(
-        model_name="bert-base-multilingual-uncased", use_ce_loss=False
-    ).to(device)
+    model = AsagSentenceTransformer(model_name="bert-base-multilingual-uncased", num_labels=1)
     for batch, meta in loader:
-        input_ids = batch["input_ids"].to(device)
-        attention_mask = batch["attention_mask"].to(device)
-        token_type_ids = batch.get("token_type_ids", None)
-        if token_type_ids is not None:
-            token_type_ids = token_type_ids.to(device)
-        label_id = batch["label_id"].to(device)
-
-        outputs = model(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            token_type_ids=token_type_ids,
-            label_id=label_id
+        output = model(
+            input_ids_a=batch['input_ids_a'], 
+            attention_mask_a=batch['attention_mask_a'],
+            input_ids_b=batch['input_ids_b'], 
+            attention_mask_b=batch['attention_mask_b'],
+            label_id=batch['label_id']
         )
-        logits = outputs.logits
-        loss = outputs.loss
-        print(f"Logits: {logits}, Loss: {loss}")
+        print(output.logits)
+        print(output.loss)
         break

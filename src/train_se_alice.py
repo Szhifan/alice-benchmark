@@ -40,7 +40,6 @@ def add_training_args(parser):
     # add experiment arguments 
     parser.add_argument('--model-name', default='bert-base-uncased', type=str, help='model type to use')
     parser.add_argument('--seed', default=114514, type=int, help='random seed for initialization')
-    parser.add_argument('--n-labels', default=2, type=int, help='number of labels for classification')
     # Add optimization arguments
     parser.add_argument('--batch-size', default=32, type=int, help='maximum number of sentences in a batch')
     parser.add_argument('--max-epoch', default=3, type=int, help='force stop training at specified epoch')

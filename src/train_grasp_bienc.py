@@ -22,7 +22,6 @@ from utils import (
     mean_dequeue,
     save_report,
     get_label_weights,
-    transform_for_inference
     )
 from data_prep_alice import AliceRubricPointer, encode_rubric_span_separate
 from models import get_tokenizer, PointerRubricBiEncoder
@@ -386,16 +385,10 @@ def main(args):
         test_ds = getattr(ds, test)
         print(f"***** Running evaluation on {test} *****")
         print("  Num examples = %d", len(test_ds))
-        test_predictions, test_loss = evaluate(
-            model,
-            test_ds,
-            batch_size=args.batch_size,
-            is_test=True,
-        )
+        test_predictions, test_loss = evaluate(model, test_ds, batch_size=args.batch_size, is_test=True)
         test_predictions.to_csv(os.path.join(args.save_dir, f"{test}_predictions.csv"), index=False)
         test_metrics = eval_report(test_predictions)
-        with open(os.path.join(args.save_dir, f"{test}_metrics.json"), "w") as f:
-            json.dump(test_metrics, f, indent=4)
+        save_report(test_metrics, os.path.join(args.save_dir, f"{test}_report.json"))
         metrics_wandb = {test: test_metrics}
         wandb.log(metrics_wandb)
     if args.no_save:

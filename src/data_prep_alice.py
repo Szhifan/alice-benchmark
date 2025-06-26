@@ -286,10 +286,4 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
     dts = AliceRubricDataset(enc_fn=encode_rubric_separate)
     # dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
-    dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
-    train_loader = DataLoader(dts.train, batch_size=8, collate_fn=dts.collate_rubric_seperate)
-    for batch, meta in train_loader:
-        print(batch["input_ids"].shape, batch["attention_mask"].shape, batch["rubric_input_ids"].shape, batch["rubric_attention_mask"].shape)
-        print(meta["id"])
-        print(meta["answer"])
-        break
+    print(dts.train[0])
