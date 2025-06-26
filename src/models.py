@@ -307,7 +307,7 @@ class AsagSentenceTransformer(AsagCrossEncoder):
         embeddings_b = F.normalize(embeddings_b, p=2, dim=1)
         loss = None
 
-        logits = cosine_similarity(embeddings_a, embeddings_b, dim=-1)  #
+        logits = cosine_similarity(embeddings_a, embeddings_b, dim=-1).unsqueeze(1)
         if label_id is not None:
             loss_fct = CosineEmbeddingLoss()
             label_id = torch.where(label_id > 0, torch.ones_like(label_id), torch.zeros_like(label_id) - 1)

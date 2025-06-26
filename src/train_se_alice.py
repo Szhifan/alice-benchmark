@@ -175,7 +175,6 @@ def export_cp(model, optimizer, scheduler, args, model_name="model.pt"):
 def load_model(args,label_weights=None):
     model = AsagSentenceTransformer(
         model_name=args.model_name,
-        num_labels= args.n_labels,
         freeze_layers=args.freeze_layers,
         freeze_embeddings=args.freeze_embeddings,
         label_weights=label_weights,
