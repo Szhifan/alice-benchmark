@@ -189,7 +189,6 @@ class AliceRubricDataset(AliceDataset):
             "id": [x["id"] for x in input_batch],
             "rubric_level": [x["rubric_level"] for x in input_batch],
             "level": [x["level"] for x in input_batch],
-            "answer": [x["answer"] for x in input_batch],
         }
         return batch, meta
     @staticmethod
@@ -217,9 +216,11 @@ class AliceRubricDataset(AliceDataset):
             "token_type_ids_b": rubric_token_type_ids,
             "label_id": torch.tensor([x["label_id"] for x in input_batch]),
         }
+
         meta = {
-            "id": [x["sid"] for x in input_batch],
-            "answer": [x["answer"] for x in input_batch],
+            "id": [x["id"] for x in input_batch],
+            "rubric_level": [x["rubric_level"] for x in input_batch],
+            "level": [x["level"] for x in input_batch],
         }
         return batch, meta
 class AliceRubricPointer(AliceDataset):

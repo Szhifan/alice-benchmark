@@ -122,7 +122,7 @@ def get_label_weights(dataset,label_field="label_id"):
 
 def transform_for_inference(pred_df, other_filds=None):
     pred_df["logit_label"] = pred_df['logits'].apply(lambda x: float(x[1])) if len(pred_df['logits'].iloc[0]) > 1 else pred_df['logits']
-    final_fields = ["id", "rubric_level", "level", "answer", "logit_label"] + (other_filds if other_filds else [])
+    final_fields = ["id", "rubric_level", "level", "logit_label"] + (other_filds if other_filds else [])
     final_df = pred_df.loc[pred_df.groupby('id')['logit_label'].idxmax()][final_fields]
 
     final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'label_id'})
