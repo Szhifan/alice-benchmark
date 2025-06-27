@@ -287,4 +287,5 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
     dts = AliceRubricDataset(enc_fn=encode_rubric_separate)
     # dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
-    print(dts.train[0])
+    print(len(dts.train))
+    print(len(dts.val))

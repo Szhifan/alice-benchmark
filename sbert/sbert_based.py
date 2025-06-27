@@ -78,8 +78,8 @@ trainer = SentenceTransformerTrainer(
 )
 trainer.train()
 for dataset in ['UA', 'UQ']:
+    test_name = "test_" + dataset.lower()
     df = pd.read_csv(f'alice_data/ALICE_{dataset}_new.csv')
-
     qs = []
     a = []
     ref = [int(l) for l in df['level'].values]
@@ -106,8 +106,8 @@ for dataset in ['UA', 'UQ']:
     print(qwk)
     print(confusion_matrix(ref, pred, labels=[0, 1, 2]))
     wandb.log({
-        f'{dataset}_f1': f1,
-        f'{dataset}_qwk': qwk
+        f'{test_name}_f1': f1,
+        f'{test_name}_qwk': qwk
     })
     dddf = {
         'pred': pred,

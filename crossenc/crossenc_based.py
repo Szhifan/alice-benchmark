@@ -35,7 +35,6 @@ train_data_dict = {
     'label': [1 if score == train['level'].values[x] else 0 for x in train_idx for score in [0, 1, 2]]
 }
 train_dataset = Dataset.from_dict(train_data_dict)
-
 # Create validation dataset
 val_data_dict = {
     'query': [f"{train['answer'].values[x]}" for x in val_idx for score in [0, 1, 2]],
@@ -80,6 +79,7 @@ train = pd.read_csv('alice_data/ALICE_train_new.csv')
 model = CrossEncoder("./crossenc-variant-1")
 
 for dataset in ['UA', 'UQ']:
+    test_name = "test_" + dataset.lower()
     df = pd.read_csv(f'alice_data/ALICE_{dataset}_new.csv')
 
     ref = [int(l) for l in df['level'].values]
@@ -107,8 +107,8 @@ for dataset in ['UA', 'UQ']:
     
     # Log metrics to wandb
     wandb.log({
-        f"{dataset}_f1_score": f1,
-        f"{dataset}_qwk": qwk
+        f"{test_name}_f1": f1,
+        f"{test_name}_qwk": qwk
     })
     print(confusion_matrix(ref, pred, labels=[0, 1, 2]))
     
