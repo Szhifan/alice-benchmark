@@ -3,7 +3,7 @@ from datasets import load_dataset, enable_caching, Dataset,disable_caching
 import json
 import torch
 from transformers import AutoTokenizer
-enable_caching()
+disable_caching()
 path_train = "alice_data/ALICE_train_new.csv"
 path_ua = "alice_data/ALICE_UA_new.csv"
 path_uq = "alice_data/ALICE_UQ_new.csv"
@@ -62,10 +62,11 @@ def encode_rubric_span(example, tokenizer):
         end = len(tokens)
         rubric_indeces.append((start, end))
     answers_start = len(tokens)
-    qa_tokens = tokenizer.tokenize(answer)
+    # qa_tokens = tokenizer.tokenize("Question: " + question + " Answer: " + answer)
+    qa_tokens = tokenizer.tokenize(question + sep_token + answer)
     tokens.extend(qa_tokens)
     answer_end = len(tokens)
-    enc = tokenizer(tokens, is_split_into_words=True, max_length=512, truncation=True)
+    enc = tokenizer(tokens, is_split_into_words=True)
     for field in enc:
         example[field] = enc[field]
     example["rubric_indeces"] = rubric_indeces
@@ -285,7 +286,38 @@ class AliceRubricPointer(AliceDataset):
         return batch, meta
 if __name__ == "__main__":
     from torch.utils.data import DataLoader
+    import numpy as np
     dts = AliceRubricPointer(enc_fn=encode_rubric_span)
-    # dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
-    print(len(dts.train))
-    print(len(dts.val))
+    dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
+    input_ids_length = [len(x["input_ids"]) for x in dts.train]
+    input_ids_length.sort()
+    input_ids_length = input_ids_length[:-5]
+    import matplotlib.pyplot as plt
+
+
+    # Add statistics as text
+    mean_len = np.mean(input_ids_length)
+    median_len = np.median(input_ids_length)
+    max_len = max(input_ids_length)
+    min_len = min(input_ids_length)
+
+    stats_text = f"Mean: {mean_len:.2f}\nMedian: {median_len:.2f}\nMax: {max_len}\nMin: {min_len}"
+    
+    # Create the figure and plot the histogram
+    plt.figure(figsize=(10, 6))
+    plt.hist(input_ids_length, bins=50, alpha=0.75, color='blue', edgecolor='black', range=(0, max_len))
+    plt.grid(alpha=0.3)
+
+    # Add labels and title
+    plt.xlabel('Input ID Length')
+    plt.ylabel('Frequency')
+    plt.title('Distribution of Input ID Lengths')
+    plt.annotate(stats_text, xy=(0.75, 0.75), xycoords='axes fraction', 
+                 bbox=dict(boxstyle="round,pad=0.3", fc="white", alpha=0.8))
+
+    # Save the figure
+    plt.tight_layout()
+    plt.savefig("input_length_distribution.png", dpi=300)
+    plt.show()
+
+    print(f"Distribution plot saved as 'input_length_distribution.png'")
