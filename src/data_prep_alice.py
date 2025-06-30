@@ -62,7 +62,7 @@ def encode_rubric_span(example, tokenizer):
         end = len(tokens)
         rubric_indeces.append((start, end))
     answers_start = len(tokens)
-    qa_tokens = tokenizer.tokenize("Question: " + question + " Answer: " + answer)
+    qa_tokens = tokenizer.tokenize(answer)
     tokens.extend(qa_tokens)
     answer_end = len(tokens)
     enc = tokenizer(tokens, is_split_into_words=True, max_length=512, truncation=True)
@@ -285,7 +285,7 @@ class AliceRubricPointer(AliceDataset):
         return batch, meta
 if __name__ == "__main__":
     from torch.utils.data import DataLoader
-    dts = AliceRubricDataset(enc_fn=encode_rubric_separate)
+    dts = AliceRubricPointer(enc_fn=encode_rubric_span)
     # dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
     print(len(dts.train))
     print(len(dts.val))

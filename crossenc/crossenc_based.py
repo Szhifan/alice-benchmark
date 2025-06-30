@@ -15,7 +15,7 @@ train_config = {
     'epochs': 5,
     'dataset': 'ALICE'}
 wandb.init(
-    project='alice-rubric',
+    project='alice-rubrics',
     name='crossenc-bert-sg',
     config=train_config) 
 from sentence_transformers.cross_encoder import CrossEncoder, CrossEncoderTrainer, CrossEncoderTrainingArguments, losses
