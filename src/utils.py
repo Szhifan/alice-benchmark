@@ -64,12 +64,17 @@ def get_optimizer_step(optimizer):
    
 def metrics_calc(label_id, pred_id):
     """
-    Calculate the metrics for the predictions, including Quadratic Weighted Kappa (QWK).
+    Calculate the metrics for the predictions, including Quadratic Weighted Kappa (QWK), F1 score, and accuracy.
     """
-
+    
     qwk = cohen_kappa_score(label_id, pred_id, weights="quadratic")
+    f1 = f1_score(label_id, pred_id, average='weighted')
+    acc = accuracy_score(label_id, pred_id)
+    
     metrics = {
         "qwk": qwk,
+        "f1": f1, 
+        "accuracy": acc
     }
     return metrics
 

@@ -3,6 +3,12 @@ from datasets import load_dataset, enable_caching, Dataset,disable_caching
 import json
 import torch
 from transformers import AutoTokenizer
+"""
+Dataprep pipeline: 
+1. Load the Alice dataset from csv files.
+2. Encode the dataset using the provided encoding functions for different model settings.
+3. Provide collate functions for batching the dataset.
+"""
 disable_caching()
 path_train = "alice_data/ALICE_train_new.csv"
 path_ua = "alice_data/ALICE_UA_new.csv"
@@ -15,7 +21,7 @@ def basic_encode(example, tokenizer):
     return example
 
 def encode_solution_pair(example, tokenizer):
-    # for sequence pair classification
+    # encode answer and sample solution as a sequence pair
     output = tokenizer(example["sample_solution"], example["answer"], max_length=512, truncation=True) 
     for field in output:
         example[field] = output[field]
@@ -29,7 +35,7 @@ def encode_rubric_pair(example, tokenizer):
     return example
 def encode_rubric_separate(example, tokenizer):
     """
-    Encode rubric and answer separately into different keys.
+    Encode rubric and answer separately into different keys for double encoder models.
     """
     answer_output = tokenizer(example["answer"], max_length=512, truncation=True)
     rubric_output = tokenizer(example["rubric"], max_length=512, truncation=True)
@@ -39,6 +45,9 @@ def encode_rubric_separate(example, tokenizer):
         example[f"rubric_{field}"] = rubric_output[field]
     return example
 def encode_rubric_solution_pair(example, tokenizer):
+    """
+    Encode answer + rubric + sample_solution, seperated by the tokenizer's sep_token.
+    """
     text2encode = f"{example['answer']} {tokenizer.sep_token} {example['rubric']} {tokenizer.sep_token} {example['sample_solution']}"
     output = tokenizer(text2encode, max_length=512, truncation=True)
     for field in output:
@@ -46,7 +55,7 @@ def encode_rubric_solution_pair(example, tokenizer):
     return example
 def encode_rubric_span(example, tokenizer):
     """
-    Encode answer + question + all the rubrics, seperated by the tokenizer's sep_token.
+    Grasp encoding 
     """
     answer = example["answer"]
     question = example["question"]
@@ -63,7 +72,7 @@ def encode_rubric_span(example, tokenizer):
         rubric_indeces.append((start, end))
     answers_start = len(tokens)
     # qa_tokens = tokenizer.tokenize("Question: " + question + " Answer: " + answer)
-    qa_tokens = tokenizer.tokenize(question + sep_token + answer)
+    qa_tokens = tokenizer.tokenize(answer)
     tokens.extend(qa_tokens)
     answer_end = len(tokens)
     enc = tokenizer(tokens, is_split_into_words=True)
@@ -75,7 +84,7 @@ def encode_rubric_span(example, tokenizer):
     return example
 def encode_rubric_span_separate(example, tokenizer):
     """
-    Encode answer and rubric separately, but also provide the span of the answer in the rubric.
+    Grasp encoding with separate encoding for answer and rubric.
     """
     answer_output = tokenizer(example["answer"], example["question"], max_length=512, truncation=True)
     rubrics = example["rubric"]
@@ -97,6 +106,9 @@ def encode_rubric_span_separate(example, tokenizer):
     example["rubric_indeces"] = rubric_indeces
     return example
 class AliceDataset:
+    """
+    Base alice dataset.
+    """
     def __init__(self, enc_fn=basic_encode):
         self.enc_fn = enc_fn
         self.train = Dataset.from_csv(path_train)
@@ -152,6 +164,11 @@ class AliceDataset:
 
 class AliceRubricDataset(AliceDataset):
     def __init__(self, enc_fn=encode_rubric_pair):
+        """
+        Alice datast for sbert and cross-ecoder pair-wise ranking. 
+        Each entry is expended to include all rubric levels.
+        The label_id is 1 if the level matches the rubric level, otherwise 0.
+        """
         super().__init__(enc_fn=enc_fn)
         self.expand_with_rubric()
     def expand_with_rubric(self):
@@ -194,6 +211,9 @@ class AliceRubricDataset(AliceDataset):
         return batch, meta
     @staticmethod
     def collate_rubric_seperate(input_batch):
+        """
+        colllate function for settings where the rubric and answer are encoded separately.
+        """
         input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True)
         attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True)
         if "token_type_ids" in input_batch[0]:
@@ -262,6 +282,9 @@ class AliceRubricPointer(AliceDataset):
         return batch, meta
     @staticmethod
     def collate_rubric_separate(input_batch):   
+        """
+        colllate function for settings where the rubric and answer are encoded separately.
+        """
         batch = {
             "ans_input_ids": torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True),
             "ans_attention_mask": torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True),
@@ -288,7 +311,7 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
     import numpy as np
     dts = AliceRubricPointer(enc_fn=encode_rubric_span)
-    dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
+    dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-multilingual-uncased"))
     input_ids_length = [len(x["input_ids"]) for x in dts.train]
     input_ids_length.sort()
     input_ids_length = input_ids_length[:-5]

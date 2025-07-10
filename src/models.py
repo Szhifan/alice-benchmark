@@ -106,6 +106,10 @@ class AsagCrossEncoder(nn.Module):
         Compute the loss based on the number of labels.
         """
         if self.num_labels > 1:
+            """
+            Model outputs as binary classification logits. 0: rubric is not relevant, 1: rubric is relevant.
+            During inference, use the logits of label 1 to determine relevance.
+            """
             return self.get_loss_ce(logits, label_id)
         else:
             return self.get_loss_mse(logits, label_id)
@@ -136,8 +140,7 @@ class AsagCrossEncoder(nn.Module):
 
 class PointerRubricModel(nn.Module):
     """
-    Pointer Rubric Model for ASAG.
-    This model uses a T5 encoder to process the input and a pointer mechanism to select the rubric.
+    grasp
     """
     def __init__(self, model_name: str):
         super().__init__()
@@ -188,9 +191,7 @@ class PointerRubricModel(nn.Module):
         return ModelOutput(logits=logits, loss=loss)
 class PointerRubricBiEncoder(nn.Module):
     """
-    Pointer Rubric BiEncoder Model for ASAG.
-    This model uses separate encoders to process the student answer and rubrics,
-    and a pointer mechanism to select the relevant rubric.
+    Grasp, but rubrics and qa are encoded separately.
     """
     def __init__(self, model_name: str, share_encoders: bool = True):
         super().__init__()
