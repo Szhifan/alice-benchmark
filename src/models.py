@@ -293,15 +293,13 @@ class AsagSentenceTransformer(AsagCrossEncoder):
         attention_mask_a: torch.Tensor,
         input_ids_b: torch.Tensor,  # Rubric
         attention_mask_b: torch.Tensor,
-        token_type_ids_a: Optional[torch.Tensor] = None,
-        token_type_ids_b: Optional[torch.Tensor] = None,
         label_id: Optional[torch.Tensor] = None
     ) -> ModelOutput:
         
         # Encode student answer
-        embeddings_a = self.encode(input_ids_a, attention_mask_a, token_type_ids_a)
+        embeddings_a = self.encode(input_ids_a, attention_mask_a)
         # Encode rubric
-        embeddings_b = self.encode(input_ids_b, attention_mask_b, token_type_ids_b)
+        embeddings_b = self.encode(input_ids_b, attention_mask_b)
         
         # Normalize embeddings for cosine similarity
         embeddings_a = F.normalize(embeddings_a, p=2, dim=1)

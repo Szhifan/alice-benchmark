@@ -42,6 +42,7 @@ def add_training_args(parser):
     parser.add_argument('--model-name', default='bert-base-uncased', type=str, help='model type to use')
     parser.add_argument('--seed', default=114514, type=int, help='random seed for initialization')
     parser.add_argument('--n-labels', default=2, type=int, help='number of labels for classification')
+    parser.add_argument('--train-frac', default=1.0, type=float, help='fraction of training data to use')
     # Add optimization arguments
     parser.add_argument('--batch-size', default=32, type=int, help='maximum number of sentences in a batch')
     parser.add_argument('--max-epoch', default=3, type=int, help='force stop training at specified epoch')
@@ -342,7 +343,7 @@ def main(args):
         wandb.init(mode="disabled")
     print("Training arguments: %s", args)
     # Load the dataset
-    ds = TASK_DATASET()
+    ds = TASK_DATASET(train_frac=args.train_frac)
     ds.get_encoding(tokenizer=get_tokenizer(args.model_name))
     steps_per_epoch = int(np.ceil(len(ds.train) / args.batch_size)) 
     total_steps = args.max_epoch * steps_per_epoch

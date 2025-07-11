@@ -48,7 +48,7 @@ def encode_rubric_solution_pair(example, tokenizer):
     """
     Encode answer + rubric + sample_solution, seperated by the tokenizer's sep_token.
     """
-    text2encode = f"{example['answer']} {tokenizer.sep_token} {example['rubric']} {tokenizer.sep_token} {example['sample_solution']}"
+    text2encode = f"{tokenizer.sep_token}".join([example["answer"], example["sample_solution"], example["rubric"]])
     output = tokenizer(text2encode, max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
@@ -109,9 +109,10 @@ class AliceDataset:
     """
     Base alice dataset.
     """
-    def __init__(self, enc_fn=basic_encode):
+    def __init__(self, enc_fn=basic_encode,train_frac=1):
+        assert train_frac <= 1 and train_frac > 0, "train_frac must be in (0, 1]"
         self.enc_fn = enc_fn
-        self.train = Dataset.from_csv(path_train)
+        self.train = Dataset.from_csv(path_train).shuffle(seed=8964).select(range(int(len(self.train) * train_frac)))
         self.test_ua = Dataset.from_csv(path_ua)
         self.test_uq = Dataset.from_csv(path_uq)
         self.train, self.val = self.train.train_test_split(test_size=0.1, seed=8964).values()
@@ -163,13 +164,13 @@ class AliceDataset:
         return batch, meta 
 
 class AliceRubricDataset(AliceDataset):
-    def __init__(self, enc_fn=encode_rubric_pair):
+    def __init__(self, enc_fn=encode_rubric_pair, train_frac=1):
         """
         Alice datast for sbert and cross-ecoder pair-wise ranking. 
         Each entry is expended to include all rubric levels.
         The label_id is 1 if the level matches the rubric level, otherwise 0.
         """
-        super().__init__(enc_fn=enc_fn)
+        super().__init__(enc_fn=enc_fn, train_frac=train_frac)
         self.expand_with_rubric()
     def expand_with_rubric(self):
         def _expand_dataset(dataset):
@@ -231,10 +232,8 @@ class AliceRubricDataset(AliceDataset):
         batch = {
             "input_ids_a": input_ids,
             "attention_mask_a": attention_mask,
-            "token_type_ids_a": token_type_ids,
             "input_ids_b": rubric_input_ids,
             "attention_mask_b": rubric_attention_mask,
-            "token_type_ids_b": rubric_token_type_ids,
             "label_id": torch.tensor([x["label_id"] for x in input_batch]),
         }
 
@@ -245,8 +244,8 @@ class AliceRubricDataset(AliceDataset):
         }
         return batch, meta
 class AliceRubricPointer(AliceDataset):
-    def __init__(self, enc_fn=encode_rubric_span):
-        super().__init__(enc_fn=enc_fn)
+    def __init__(self, enc_fn=encode_rubric_span, train_frac=1):
+        super().__init__(enc_fn=enc_fn, train_frac=train_frac)
         self.tranform_rubric()
     def tranform_rubric(self):
         def _transform(example):
@@ -310,37 +309,4 @@ class AliceRubricPointer(AliceDataset):
 if __name__ == "__main__":
     from torch.utils.data import DataLoader
     import numpy as np
-    dts = AliceRubricPointer(enc_fn=encode_rubric_span)
-    dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-multilingual-uncased"))
-    input_ids_length = [len(x["input_ids"]) for x in dts.train]
-    input_ids_length.sort()
-    input_ids_length = input_ids_length[:-5]
-    import matplotlib.pyplot as plt
-
-
-    # Add statistics as text
-    mean_len = np.mean(input_ids_length)
-    median_len = np.median(input_ids_length)
-    max_len = max(input_ids_length)
-    min_len = min(input_ids_length)
-
-    stats_text = f"Mean: {mean_len:.2f}\nMedian: {median_len:.2f}\nMax: {max_len}\nMin: {min_len}"
-    
-    # Create the figure and plot the histogram
-    plt.figure(figsize=(10, 6))
-    plt.hist(input_ids_length, bins=50, alpha=0.75, color='blue', edgecolor='black', range=(0, max_len))
-    plt.grid(alpha=0.3)
-
-    # Add labels and title
-    plt.xlabel('Input ID Length')
-    plt.ylabel('Frequency')
-    plt.title('Distribution of Input ID Lengths')
-    plt.annotate(stats_text, xy=(0.75, 0.75), xycoords='axes fraction', 
-                 bbox=dict(boxstyle="round,pad=0.3", fc="white", alpha=0.8))
-
-    # Save the figure
-    plt.tight_layout()
-    plt.savefig("input_length_distribution.png", dpi=300)
-    plt.show()
-
-    print(f"Distribution plot saved as 'input_length_distribution.png'")
+    dts = AliceRubricDataset(enc_fn=encode_rubric_pair,)
