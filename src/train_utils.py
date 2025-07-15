@@ -21,27 +21,40 @@ from utils import (
     batch_to_device,
     mean_dequeue,
     save_report,
-    get_label_weights,
     transform_for_inference
     )
 from data_prep_asap import AsapRubric
-from data_prep_alice import AliceRubricPointer
-
-from models import get_tokenizer, PointerRubricModel
+from data_prep_alice import AliceRubricDataset, AliceDataset
+from models import (AsagXNet,
+                    AsagSNet,
+                    AsagXNetT5,
+                    PointerRubricModel,
+                    get_tokenizer)
 from sklearn.metrics import cohen_kappa_score, f1_score, accuracy_score
-
-TASK_DATASET = AliceRubricPointer
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 # logger = logging.getLogger(__name__)
 print("Using device:", DEFAULT_DEVICE)
+MODEL_REGISTRY = {
+    "asagxnet": AsagXNet,
+    "asagsnet": AsagSNet,
+    "asagxnet-t5": AsagXNetT5,
+    "pointer": PointerRubricModel,
+}
 
 def add_training_args(parser):
     """
     add training related args 
     """ 
     # add experiment arguments 
-    parser.add_argument('--model-name', default='bert-base-uncased', type=str, help='model type to use')
-    parser.add_argument('--seed', default=114514, type=int, help='random seed for initialization')
+    parser.add_argument('--base-model', default='bert-base-uncased', type=str)
+    parser.add_argument('--seed', default=114514, type=int)
+    parser.add_argument('--n-labels', default=2, type=int)
+    parser.add_argument('--train-frac', default=1.0, type=float)
+    parser.add_argument('--model-type', default='asagxnet', type=str, 
+                        choices=['asagxnet', 'asagsnet', 'asagxnet-t5'],
+                        help='type of model architecture to use')
+    parser.add_argument('--use-lora', action='store_true', help='use LoRA for training')
+    parser.add_argument('--merge-scores', action='store_true', help='merge scores only for binary classification')
     # Add optimization arguments
     parser.add_argument('--batch-size', default=32, type=int, help='maximum number of sentences in a batch')
     parser.add_argument('--max-epoch', default=3, type=int, help='force stop training at specified epoch')
@@ -70,7 +83,10 @@ def get_args():
     parser = argparse.ArgumentParser()
     add_training_args(parser)
     args = parser.parse_args()
+    if "t5" in args.base_model:
+        args.model_type = "asagxnet-t5"  
     return args
+
 
 def build_optimizer(model, args,total_steps):
     # Prepare optimizer and schedule (linear warmup and decay)
@@ -130,6 +146,8 @@ def metrics_calc(label_id, pred_id):
         "accuracy": acc
     }
     return metrics
+
+        
 def eval_report(pred_df, group_by=None):
     """
     Report the evaluation result, print the overall metrics to the logger.
@@ -172,18 +190,25 @@ def export_cp(model, optimizer, scheduler, args, model_name="model.pt"):
     torch.save(scheduler.state_dict(), os.path.join(output_dir, "scheduler.pt"))
     print("Saving optimizer and scheduler states to %s", output_dir)
 
-def load_model(args,label_weights=None):
-    model = PointerRubricModel(
-        model_name=args.model_name,    
+def load_model(args):
+    if args.model_type not in MODEL_REGISTRY:
+        raise ValueError(f"Model type {args.model_type} is not supported. Choose from {list(MODEL_REGISTRY.keys())}.")
+    # Load the model based on the specified type
+    model_class = MODEL_REGISTRY[args.model_type]
+    model = model_class(
+        base_model=args.base_model,
+        n_labels=args.n_labels,
+        freeze_layers=args.freeze_layers,
+        freeze_embeddings=args.freeze_embeddings,
+        use_lora=args.use_lora,
     )
-    # if checkpoint is provided, load the model state
     if args.model_path:
         checkpoint_path = os.path.join(args.cpt_path, "checkpoint", "model.pt")
         model.load_state_dict(torch.load(checkpoint_path, map_location=DEFAULT_DEVICE))
 
     model = model.to(DEFAULT_DEVICE)
     return model
-def import_cp(args, total_steps, label_weights=None):
+def import_cp(args, total_steps):
     # check if cp exists 
     if os.path.exists(os.path.join(args.save_dir, "checkpoint/model.pt")):
         print("Loading checkpoint from %s", args.save_dir)
@@ -191,10 +216,10 @@ def import_cp(args, total_steps, label_weights=None):
     
         with open(training_config_path, "r") as f:
             training_config = json.load(f)
-        if training_config["model_name"] != args.model_name:
-            print("Model type mismatch. Expected %s, but found %s", args.model_name, training_config["model_name"])
+        if training_config["model_name"] != args.base_model:
+            print("Model type mismatch. Expected %s, but found %s", args.base_model, training_config["model_name"])
         
-    model = load_model(args,label_weights=label_weights)
+    model = load_model(args)
     optimizer, scheduler = build_optimizer(model, args,total_steps) 
     return {
         "model": model,
@@ -207,7 +232,9 @@ def train_epoch(
         val_dataset,
         optimizer,
         scheduler,
-        args): 
+        args,
+        collate_fn=None
+        ): 
     model.zero_grad()
     best_metric = 0 
     loss_history = deque(maxlen=10) 
@@ -216,14 +243,12 @@ def train_epoch(
  
     train_iterator = trange(num_epochs, position=0, leave=True, desc="Epoch") 
     scaler = GradScaler(enabled=args.fp16 and DEFAULT_DEVICE == "cuda")
-    global_step = 0
     for epoch in train_iterator:
-        train_dataloader = DataLoader(train_dataset, num_workers=0, pin_memory=True, batch_size=args.batch_size, collate_fn=TASK_DATASET.collate_fn, shuffle=True) 
+        train_dataloader = DataLoader(train_dataset, num_workers=0, pin_memory=True, batch_size=args.batch_size, collate_fn=collate_fn, shuffle=True) 
         epoch_iterator = tqdm(train_dataloader, desc="Iteration", position=1, leave=True)
 
  
         for step, (batch, _) in enumerate(epoch_iterator):
-            global_step += 1
             model.train()
             batch = batch_to_device(batch, DEFAULT_DEVICE)
             with autocast(device_type=DEFAULT_DEVICE, enabled=args.fp16):  # mixed precision training
@@ -259,14 +284,14 @@ def train_epoch(
                     "accuracy": accuracy
                 }
             })
-        
-        print(f"Evaluating at epoch {epoch}")
-        # Evaluate on validation dataset
+
+                # Evaluate on validation dataset
         val_predictions, val_loss = evaluate(
             model,
             val_dataset,
             batch_size=args.batch_size,
             is_test=False,
+            collate_fn=collate_fn
         )
         eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
         if eval_acc > best_metric:
@@ -283,9 +308,9 @@ def train_epoch(
         })
         
 @torch.no_grad() 
-def evaluate(model, dataset, batch_size, is_test=False): 
-    dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=TASK_DATASET.collate_fn, shuffle=False)
-    
+def evaluate(model, dataset, batch_size, is_test=False, collate_fn=None): 
+    dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
+
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0 if is_test else 2, leave=True)
 
  
@@ -303,6 +328,7 @@ def evaluate(model, dataset, batch_size, is_test=False):
         # collect data to put in the prediction dict
         predictions["pred_id"].extend(pred_id.tolist())
         predictions["label_id"].extend(batch["label_id"].detach().cpu().numpy().tolist())
+        predictions["logits"].extend(logits.tolist())
         acc = accuracy_score(batch["label_id"].detach().cpu().numpy(), pred_id)
         acc_history.append(acc)
         data_iterator.set_description(
@@ -312,106 +338,8 @@ def evaluate(model, dataset, batch_size, is_test=False):
             )
         )
         for key, value in meta.items():
-            predictions[key].extend(value) 
+            predictions[key].extend(value)
     pred_df = pd.DataFrame(predictions)
     eval_loss = np.mean(eval_loss)
     return pred_df, eval_loss 
-    
-
-
-def main(args):
-   
-    if args.freeze_encoder:
-        args.freeze_layers = 114514
-    set_seed(args.seed)
-    if not os.path.exists(args.save_dir):
-        os.makedirs(args.save_dir)
-    configure_logging(filename=os.path.join(args.save_dir, "train.log"))
-    wandb.login()
-    if args.log_wandb:
-        wandb.init(
-            config=vars(args),
-            dir=args.save_dir,
-        )
-    else:
-        wandb.init(mode="disabled")
-    print("Training arguments: %s", args)
-    # Load the dataset
-    ds = TASK_DATASET()
-    ds.get_encoding(tokenizer=get_tokenizer(args.model_name))
-    steps_per_epoch = int(np.ceil(len(ds.train) / args.batch_size)) 
-    total_steps = args.max_epoch * steps_per_epoch
-    label_weights = get_label_weights(ds.train) if args.weighted_loss else None
-    # Load the checkpoint 
-    cp = import_cp(args, total_steps, label_weights=label_weights)
-    model = cp["model"]
-    optimizer = cp["optimizer"]
-    scheduler = cp["scheduler"]
-    if not args.test_only:
-        model.train()
-        wandb.watch(model)
-        # Build optimizer and scheduler
-
-        # Training loop
-        print("***** Running training *****")
-        print("Num examples = %d", len(ds.train))
-        print("  Num Epochs = %d", args.max_epoch)
-        print("  Instantaneous batch size per GPU = %d", args.batch_size)
-        train_stats = train_epoch(
-            model,
-            ds.train,
-            ds.val,
-            optimizer,
-            scheduler,
-            args)  
-        print("***** Training finished *****")
-    # Evaluate on test dataset
-    # print(f"***** Running evaluation on test set *****")
-    # print("  Num examples = %d", len(ds.test))
-    # test_predictions, test_loss = evaluate(
-    #     model,
-    #     ds.test,
-    #     batch_size=args.batch_size,
-    #     is_test=True,
-    # )
-    # test_predictions = transform_for_inference(test_predictions)
-    # test_predictions.to_csv(os.path.join(args.save_dir, "test_predictions.csv"), index=False)
-    # test_report = eval_report(
-    #     test_predictions,
-    #     group_by="EssaySet",
-    # )
-    
-    for test in ["test_ua", "test_uq"]:
-        
-        test_ds = getattr(ds, test)
-        print(f"***** Running evaluation on {test} *****")
-        print("  Num examples = %d", len(test_ds))
-        test_predictions, test_loss = evaluate(
-            model,
-            test_ds,
-            batch_size=args.batch_size,
-            is_test=True,
-        )
-        test_predictions.to_csv(os.path.join(args.save_dir, f"{test}_predictions.csv"), index=False)
-        test_metrics = eval_report(test_predictions)
-        with open(os.path.join(args.save_dir, f"{test}_metrics.json"), "w") as f:
-            json.dump(test_metrics, f, indent=4)
-        metrics_wandb = {test: test_metrics}
-        wandb.log(metrics_wandb)
-    if args.no_save:
-        print("No-save flag is set. Deleting checkpoint.")
-        checkpoint_dir = os.path.join(args.save_dir, "checkpoint")
-        if os.path.exists(checkpoint_dir):
-            for file in os.listdir(checkpoint_dir):
-                file_path = os.path.join(checkpoint_dir, file)
-                try:
-                    if file_path.endswith(".pt") and os.path.isfile(file_path):
-                        os.remove(file_path)
-                except Exception as e:
-                    print("Error deleting file %s: %s", file_path, e)
-     
-if __name__ == "__main__":
-    args = get_args()
-    # Set up logging
-    main(args)
     

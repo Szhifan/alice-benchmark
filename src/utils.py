@@ -129,7 +129,21 @@ def transform_for_inference(pred_df, other_filds=None):
     pred_df["logit_label"] = pred_df['logits'].apply(lambda x: float(x[1])) if len(pred_df['logits'].iloc[0]) > 1 else pred_df['logits']
     final_fields = ["id", "rubric_level", "level", "logit_label"] + (other_filds if other_filds else [])
     final_df = pred_df.loc[pred_df.groupby('id')['logit_label'].idxmax()][final_fields]
-
     final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'label_id'})
     return final_df 
 
+if __name__ == "__main__":
+    import pandas as pd
+    def transform_for_inference(pred_df, other_filds=None):
+        # Convert string logits to lists first
+        pred_df["logits"] = pred_df["logits"].apply(lambda x: json.loads(x) if isinstance(x, str) else x)
+        pred_df["logit_label"] = pred_df['logits'].apply(lambda x: float(x[1]) if len(x) > 1 else float(x))
+        final_fields = ["id", "rubric_level", "level", "logit_label"] + (other_filds if other_filds else [])
+        final_df = pred_df.loc[pred_df.groupby('id')['logit_label'].idxmax()][final_fields]
+
+        final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'label_id'})
+        return final_df 
+    path_dr = "results/gbert/test_ua_raw_predictions.csv"
+    df = pd.read_csv(path_dr)
+    df = transform_for_inference(df)
+    df.to_csv("test.csv", index=False)

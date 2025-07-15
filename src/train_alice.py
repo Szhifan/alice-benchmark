@@ -15,9 +15,13 @@ from train_utils import (
     get_args
 )
 from data_prep_alice import (
-    AliceDataset
+    AliceRubricDataset, 
+    AliceRubricPointer, 
+    encode_rubric_pair,
+    encode_rubric_solution_pair,
+    encode_rubric_separate,
+    encode_rubric_span
 )
-
 
 def main(args):
    
@@ -37,19 +41,16 @@ def main(args):
         wandb.init(mode="disabled")
     print("Training arguments: %s", args)
     # Load the dataset
-    ds = AliceDataset
-    ds.merge_scores(args.merge_scores)
-    collate_fn = ds.collate_fns
-    ds.get_encoding(tokenizer=get_tokenizer(args.model_name))
+    ds = AliceRubricDataset(train_frac=args.train_frac) 
+    collate_fn = ds.collate_fn
+    ds.get_encoding(tokenizer=get_tokenizer(args.base_model))
     steps_per_epoch = int(np.ceil(len(ds.train) / args.batch_size)) 
     total_steps = args.max_epoch * steps_per_epoch
-
     # Load the checkpoint
     cp = import_cp(args, total_steps)
     model = cp["model"]
     optimizer = cp["optimizer"]
     scheduler = cp["scheduler"]
-
     if not args.test_only:
         model.train()
         wandb.watch(model)
@@ -83,14 +84,12 @@ def main(args):
             is_test=True,
             collate_fn=collate_fn
         )
-        
+        test_predictions.to_csv(os.path.join(args.save_dir, f"{test}_raw_predictions.csv"), index=False)
+        test_predictions = transform_for_inference(test_predictions)
         test_metrics = eval_report(test_predictions)
-        save_report(test_metrics, os.path.join(args.save_dir, f"{test}_report.json"))
-
+        save_report(test_metrics, os.path.join(args.save_dir, f"{test}_metrics.json"))
         metrics_wandb = {test: test_metrics}
-
         wandb.log(metrics_wandb)
-
     if args.no_save:
         print("No-save flag is set. Deleting checkpoint.")
         checkpoint_dir = os.path.join(args.save_dir, "checkpoint")
@@ -102,7 +101,7 @@ def main(args):
                         os.remove(file_path)
                 except Exception as e:
                     print("Error deleting file %s: %s", file_path, e)
-
+     
 if __name__ == "__main__":
     args = get_args()
     # Set up logging

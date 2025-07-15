@@ -14,9 +14,11 @@ from train_utils import (
     save_report,
     get_args
 )
-from data_prep_alice import (
-    AliceDataset
+from data_prep_asap import (
+    AsapRubric,
+
 )
+
 
 
 def main(args):
@@ -37,19 +39,16 @@ def main(args):
         wandb.init(mode="disabled")
     print("Training arguments: %s", args)
     # Load the dataset
-    ds = AliceDataset
-    ds.merge_scores(args.merge_scores)
-    collate_fn = ds.collate_fns
+    ds = AsapRubric(train_frac=args.train_frac)
+    collate_fn = ds.collate_fn
     ds.get_encoding(tokenizer=get_tokenizer(args.model_name))
     steps_per_epoch = int(np.ceil(len(ds.train) / args.batch_size)) 
     total_steps = args.max_epoch * steps_per_epoch
-
-    # Load the checkpoint
+    # Load the checkpoint 
     cp = import_cp(args, total_steps)
     model = cp["model"]
     optimizer = cp["optimizer"]
     scheduler = cp["scheduler"]
-
     if not args.test_only:
         model.train()
         wandb.watch(model)
@@ -71,26 +70,25 @@ def main(args):
         )
         print("***** Training finished *****")
     # Evaluate on test dataset
-    for test in ["test_ua", "test_uq"]:
-        
-        test_ds = getattr(ds, test)
-        print(f"***** Running evaluation on {test} *****")
-        print("  Num examples = %d", len(test_ds))
-        test_predictions, test_loss = evaluate(
-            model,
-            test_ds,
-            batch_size=args.batch_size,
-            is_test=True,
-            collate_fn=collate_fn
-        )
-        
-        test_metrics = eval_report(test_predictions)
-        save_report(test_metrics, os.path.join(args.save_dir, f"{test}_report.json"))
-
-        metrics_wandb = {test: test_metrics}
-
-        wandb.log(metrics_wandb)
-
+    print(f"***** Running evaluation on test set *****")
+    print("  Num examples = %d", len(ds.test))
+    test_predictions, test_loss = evaluate(
+        model,
+        ds.test,
+        batch_size=args.batch_size,
+        is_test=True,
+        collate_fn=collate_fn
+    )
+    test_predictions = transform_for_inference(test_predictions, other_filds=["EssaySet"])
+    test_predictions.to_csv(os.path.join(args.save_dir, "test_predictions.csv"), index=False)
+    test_report = eval_report(
+        test_predictions,
+        group_by="EssaySet",
+    )
+    save_report(test_report, os.path.join(args.save_dir, "test_report.json"))
+    metrics_wandb = {"test": test_report}
+    wandb.log(metrics_wandb)
+  
     if args.no_save:
         print("No-save flag is set. Deleting checkpoint.")
         checkpoint_dir = os.path.join(args.save_dir, "checkpoint")
@@ -102,7 +100,7 @@ def main(args):
                         os.remove(file_path)
                 except Exception as e:
                     print("Error deleting file %s: %s", file_path, e)
-
+     
 if __name__ == "__main__":
     args = get_args()
     # Set up logging

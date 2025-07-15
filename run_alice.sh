@@ -15,15 +15,14 @@ export WANDB_PROJECT="asap-rubrics"
 export WANDB_NAME="${EXP_NAME}"
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
-python src/train_bsl_asap.py --save-dir "${EXP_ROOT}" \
-    --model-name "bert-base-uncased" \
-    --batch-size 16 \
+python src/train_alice.py --save-dir "${EXP_ROOT}" \
+    --base-model "bert-base-multilingual-uncased" \
+    --batch-size 4 \
+    --train-frac 0.0005 \
     --lr 2e-5 \
-    --test-only \
     --lr2 5e-4 \
     --max-epoch 1 \
-    --freeze-layers 12 \
-    --freeze-embeddings 
+    --use-lora \
 
             
                 

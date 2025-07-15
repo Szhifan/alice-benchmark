@@ -29,7 +29,11 @@ def encode_solution_pair(example, tokenizer):
 
 def encode_rubric_pair(example, tokenizer):
     # for sequence pair classification with rubric
-    output = tokenizer(example["answer"], example["rubric"], max_length=512, truncation=True) 
+    sep_tok = tokenizer.sep_token if tokenizer.sep_token else tokenizer.eos_token  # for t5
+    structured_input = f"{sep_tok}".join([example["answer"], example["rubric"]])
+    nl_input = f"Answer: {example['answer']}. Rubric: {example['rubric']}." 
+
+    output = tokenizer(structured_input, max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
     return example
@@ -48,8 +52,10 @@ def encode_rubric_solution_pair(example, tokenizer):
     """
     Encode answer + rubric + sample_solution, seperated by the tokenizer's sep_token.
     """
-    text2encode = f"{tokenizer.sep_token}".join([example["answer"], example["sample_solution"], example["rubric"]])
-    output = tokenizer(text2encode, max_length=512, truncation=True)
+    sep_tok = tokenizer.sep_token if tokenizer.sep_token else tokenizer.eos_token  # for t5
+    structured_input = f"{sep_tok}".join([example["answer"], example["sample_solution"], example["rubric"]])
+    nl_input = f"Answer: {example['answer']}. Sample solution: {example['sample_solution']}. Rubric: {example['rubric']}. Does the rubric match the answer?"
+    output = tokenizer(structured_input, max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
     return example
@@ -112,7 +118,9 @@ class AliceDataset:
     def __init__(self, enc_fn=basic_encode,train_frac=1):
         assert train_frac <= 1 and train_frac > 0, "train_frac must be in (0, 1]"
         self.enc_fn = enc_fn
-        self.train = Dataset.from_csv(path_train).shuffle(seed=8964).select(range(int(len(self.train) * train_frac)))
+        self.train = Dataset.from_csv(path_train)
+        if train_frac < 1:
+            self.train = self.train.train_test_split(test_size=1-train_frac, seed=42)["train"]
         self.test_ua = Dataset.from_csv(path_ua)
         self.test_uq = Dataset.from_csv(path_uq)
         self.train, self.val = self.train.train_test_split(test_size=0.1, seed=8964).values()
@@ -217,17 +225,10 @@ class AliceRubricDataset(AliceDataset):
         """
         input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True)
         attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True)
-        if "token_type_ids" in input_batch[0]:
-            token_type_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["token_type_ids"]) for x in input_batch], batch_first=True)
-        else:
-            token_type_ids = None
-        
+
         rubric_input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["rubric_input_ids"]) for x in input_batch], batch_first=True)
         rubric_attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["rubric_attention_mask"]) for x in input_batch], batch_first=True)
-        if "rubric_token_type_ids" in input_batch[0]:
-            rubric_token_type_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["rubric_token_type_ids"]) for x in input_batch], batch_first=True)
-        else:
-            rubric_token_type_ids = None
+
         
         batch = {
             "input_ids_a": input_ids,
@@ -308,5 +309,10 @@ class AliceRubricPointer(AliceDataset):
         return batch, meta
 if __name__ == "__main__":
     from torch.utils.data import DataLoader
+    from transformers import AutoTokenizer
     import numpy as np
-    dts = AliceRubricDataset(enc_fn=encode_rubric_pair,)
+    dts = AliceRubricDataset(enc_fn=encode_rubric_pair)
+    tok = AutoTokenizer.from_pretrained("google-t5/t5-small")
+    dts.get_encoding(tok)
+    input_ids = dts.train[0]["input_ids"]
+    print(tok.decode(input_ids, skip_special_tokens=False))
