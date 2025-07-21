@@ -86,13 +86,7 @@ def main(args):
         print("No-save flag is set. Deleting checkpoint.")
         checkpoint_dir = os.path.join(args.save_dir, "checkpoint")
         if os.path.exists(checkpoint_dir):
-            for file in os.listdir(checkpoint_dir):
-                file_path = os.path.join(checkpoint_dir, file)
-                try:
-                    if file_path.endswith(".pt") and os.path.isfile(file_path):
-                        os.remove(file_path)
-                except Exception as e:
-                    print("Error deleting file %s: %s", file_path, e)
+            os.remove(checkpoint_dir)
      
 if __name__ == "__main__":
     args = get_args()

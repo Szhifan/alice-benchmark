@@ -79,8 +79,6 @@ def get_args():
     parser = argparse.ArgumentParser()
     add_training_args(parser)
     args = parser.parse_args()
-    if "t5" in args.base_model:
-        args.model_type = "asagxnet-t5"  
     return args
 
 
@@ -286,7 +284,7 @@ def train_epoch(
         if eval_acc > best_metric:
             best_metric = eval_acc
     
-            export_cp(model, optimizer, scheduler, args, model_name="model.pt")
+            export_cp(model, optimizer, scheduler, args)
             print("Best model saved at epoch %d", epoch + 1)
         print(f"Validation loss: {val_loss:.4f}, Validation accuracy: {eval_acc:.4f}")
         wandb.log({

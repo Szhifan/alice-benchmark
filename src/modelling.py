@@ -41,6 +41,75 @@ def get_tokenizer(base_model: str) -> AutoTokenizer:
     tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
     return tok
 
+class ClassificationHead(nn.Module):
+    """Head for sentence-level classification tasks."""
+
+    def __init__(self, hidden_size: int, n_labels: int):
+        super().__init__()
+        self.dense = nn.Linear(hidden_size, hidden_size)
+        self.dropout = nn.Dropout(p=0.1)
+        self.out_proj = nn.Linear(hidden_size, n_labels)
+    def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
+        hidden_states = self.dropout(hidden_states)
+        hidden_states = self.dense(hidden_states)
+        hidden_states = torch.tanh(hidden_states)
+        hidden_states = self.dropout(hidden_states)
+        hidden_states = self.out_proj(hidden_states)
+        return hidden_states
+class LatentAttention(nn.Module):
+    """
+    Latent Attention module where the query is the last hidden representation of an LLM,
+    and key and value are learnable parameters. Uses PyTorch's built-in attention mechanism.
+    """
+    def __init__(self, hidden_dim, num_latent_vectors=8, dropout_prob=0.1):
+        super().__init__()
+        self.hidden_dim = hidden_dim
+        self.num_latent_vectors = num_latent_vectors
+        
+        # Learnable key and value parameters
+        self.key = nn.Parameter(torch.randn(num_latent_vectors, hidden_dim))
+        self.value = nn.Parameter(torch.randn(num_latent_vectors, hidden_dim))
+        
+        # Layer normalization and dropout
+        self.layer_norm = nn.LayerNorm(hidden_dim)
+        self.dropout = nn.Dropout(dropout_prob)
+        
+        # Multi-head attention with 1 head
+        self.attention = nn.MultiheadAttention(
+            embed_dim=hidden_dim,
+            num_heads=1,
+            dropout=dropout_prob,
+            batch_first=True
+        )
+        
+        # Initialize parameters
+        nn.init.xavier_uniform_(self.key)
+        nn.init.xavier_uniform_(self.value)
+
+    def forward(self, query):
+        """
+        Args:
+            query: Last hidden representation from LLM [batch_size, hidden_dim]
+        Returns:
+            context_vector: Attended output [batch_size, hidden_dim]
+        """
+        batch_size = query.size(0)
+        
+        # Reshape query for attention
+        query = query.unsqueeze(1)  # [batch_size, 1, hidden_dim]
+        
+        # Expand key and value for batch processing
+        key = self.key.unsqueeze(0).expand(batch_size, -1, -1)  # [batch_size, num_latent, hidden_dim]
+        value = self.value.unsqueeze(0).expand(batch_size, -1, -1)  # [batch_size, num_latent, hidden_dim]
+        
+        # Apply multi-head attention
+        context, _ = self.attention(query, key, value)
+        context = context.squeeze(1)  # [batch_size, hidden_dim]
+        
+        # Apply layer normalization
+        context = self.layer_norm(context)
+        
+        return context
 
 class AsagConfig(PretrainedConfig):
 
@@ -55,7 +124,7 @@ class AsagConfig(PretrainedConfig):
         self.base_model_name_or_path = base_model_name_or_path or getattr(self, "name_or_path", None)
         self.n_labels = n_labels
         self.use_lora = use_lora
-
+ 
 
 class AsagXNet(PreTrainedModel):
     """
@@ -93,6 +162,13 @@ class AsagXNet(PreTrainedModel):
             labels=label_id
         )
         return encoder_outputs
+class AsagXNetLLM(PreTrainedModel):
+    """
+    LLM-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained
+    """
+    def __init__(self, config: AsagConfig):
+        super().__init__(config)
+        
 class PointerRubricModel(PreTrainedModel):
     """
     The implementation of GRASP
@@ -211,5 +287,8 @@ class AsagSNet(PreTrainedModel):
 if __name__ == "__main__":
     model_config = AsagConfig(base_model_name_or_path="bert-base-uncased", n_labels=2, use_lora=False)
     asagxnetmodel = AsagXNet(model_config)
-    for n, par in asagxnetmodel.named_parameters():
-        print(n, par.shape)
+    input_ids = torch.tensor([[101, 102, 0, 0], [101, 103, 104, 0]])
+    attention_mask = torch.tensor([[1, 1, 0, 0], [1, 1, 1, 0]])
+    label_id = torch.tensor([1, 0])
+    outputs = asagxnetmodel(input_ids=input_ids, attention_mask=attention_mask, label_id=label_id)
+    print(outputs.logits, outputs.loss)
