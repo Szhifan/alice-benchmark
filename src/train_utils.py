@@ -283,7 +283,7 @@ def train_epoch(
         eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
         if eval_acc > best_metric:
             best_metric = eval_acc
-    
+
             export_cp(model, optimizer, scheduler, args)
             print("Best model saved at epoch %d", epoch + 1)
         print(f"Validation loss: {val_loss:.4f}, Validation accuracy: {eval_acc:.4f}")

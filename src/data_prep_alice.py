@@ -27,7 +27,7 @@ def encode_solution_pair(example, tokenizer):
         example[field] = output[field]
     return example
 
-def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubrics"], use_nl: bool = False):
+def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric"], use_nl: bool = False):
     """
     Encode the fields of the example using the tokenizer. Availbale fields are: rubric, question, sample_solution
     If use_nl is True, use natural langauge to separate the fields.
@@ -38,8 +38,10 @@ def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric
             text2encode.append(f"{field.capitalize()}: {example[field]}")
         else:
             text2encode.append(example[field] + tokenizer.sep_token)
+    if not use_nl and tokenizer.cls_token:
+        text2encode = [tokenizer.cls_token] + text2encode
     text2encode = "".join(text2encode)
-    output = tokenizer(text2encode, max_length=512, truncation=True)
+    output = tokenizer(text2encode, max_length=512, truncation=True, add_special_tokens=False)
     for field in output:
         example[field] = output[field]
     return example
@@ -294,8 +296,8 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
     from transformers import AutoTokenizer
     import numpy as np
-    dts = RubricRetrievalDataset(input_fields=["answer","rubric","question","sample_solution"], use_nl=False)
-    tok = AutoTokenizer.from_pretrained("google-t5/t5-small")
+    dts = RubricRetrievalDataset(input_fields=["answer","rubric"], use_nl=False)
+    tok = AutoTokenizer.from_pretrained("roberta-base")
     tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
     dts.get_encoding(tok)
     input_ids = dts.train[0]["input_ids"]
