@@ -204,8 +204,10 @@ def import_cp(args, total_steps):
 
         with open(config_path, "r") as f:
             config = json.load(f)
-            assert config["architectures"] == args.model_type, "Model architecture mismatch in checkpoint."
-        
+            assert config["architectures"].lower() == args.model_type, "Model architecture mismatch in checkpoint: expected {}, got {}".format(
+                args.model_type, config["architectures"]
+            )
+
     model = load_model(args)
     optimizer, scheduler = build_optimizer(model, args,total_steps) 
     return {

@@ -14,7 +14,11 @@ from train_utils import (
     save_report,
     get_args
 )
-from data_prep_alice import RubricRetrievalDataset
+from data_prep_alice import (
+    RubricRetrievalDataset,
+    encode_with_fields,
+    encode_rubric_pair
+)
 
 def main(args):
    
@@ -35,7 +39,8 @@ def main(args):
     # Load the dataset
     ds = RubricRetrievalDataset(train_frac=args.train_frac) 
     collate_fn = ds.collate_fn
-    ds.get_encoding(tokenizer=get_tokenizer(args.base_model))
+    # you can change the encoding function here
+    ds.get_encoding(tokenizer=get_tokenizer(args.base_model), enc_fn=encode_rubric_pair)
     steps_per_epoch = int(np.ceil(len(ds.train) / args.batch_size)) 
     total_steps = args.max_epoch * steps_per_epoch
     # Load the checkpoint

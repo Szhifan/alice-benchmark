@@ -34,24 +34,17 @@ def encode_rubric_pair(example, tokenizer):
     for field in output:
         example[field] = output[field]
     return example
-def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric"], use_nl: bool = False):
+def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric"], add_instruction: bool = False):
     """
-    Encode the fields of the example using the tokenizer. Availbale fields are: rubric, question, sample_solution
-    If use_nl is True, use natural langauge to separate the fields.
+    Encode the fields of the example using the tokenizer with natural language.
     """
     text2encode = ""
     for field in fields:
         if field not in example:
             continue
-        if use_nl:
-            text2encode += f"{field.capitalize()}: {example[field]} "
-        else:
-            text2encode += example[field] + tokenizer.sep_token
-
-    if not use_nl and tokenizer.cls_token:
-        text2encode = tokenizer.cls_token + text2encode
-
-
+        text2encode += f"{field.capitalize()}: {example[field]} "
+    if add_instruction:
+        text2encode = "Determine if rubric is satisfied by the answer. " + text2encode
     output = tokenizer(text2encode, max_length=512, truncation=True, add_special_tokens=False)
     for field in output:
         example[field] = output[field]
@@ -103,20 +96,19 @@ class BaseDataset:
     """
     Base alice dataset.
     """
-    def __init__(self, enc_fn=basic_encode,train_frac=1):
+    def __init__(self, train_frac=1):
         assert train_frac <= 1 and train_frac > 0, "train_frac must be in (0, 1]"
-        self.enc_fn = enc_fn
         self.train = Dataset.from_csv(path_train)
         if train_frac < 1:
             self.train = self.train.train_test_split(test_size=1-train_frac, seed=42)["train"]
         self.test_ua = Dataset.from_csv(path_ua)
         self.test_uq = Dataset.from_csv(path_uq)
         self.train, self.val = self.train.train_test_split(test_size=0.1, seed=8964).values()
-    def get_encoding(self, tokenizer):
-        self.train = self.train.map(lambda x: self.enc_fn(x, tokenizer))
-        self.val = self.val.map(lambda x: self.enc_fn(x, tokenizer))
-        self.test_ua = self.test_ua.map(lambda x: self.enc_fn(x, tokenizer))
-        self.test_uq = self.test_uq.map(lambda x: self.enc_fn(x, tokenizer))
+    def get_encoding(self, tokenizer, enc_fn, *args, **kwargs):
+        self.train = self.train.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
+        self.val = self.val.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
+        self.test_ua = self.test_ua.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
+        self.test_uq = self.test_uq.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
     def merge_scores(self,score="low"):
         """
         convert the selected level to 1 and the rest to 0. This is for binary clasification 
@@ -160,13 +152,13 @@ class BaseDataset:
         return batch, meta 
 
 class RubricRetrievalDataset(BaseDataset):
-    def __init__(self, enc_fn=encode_with_fields, train_frac=1, input_fields: list[str] = ["answer","rubric"], use_nl: bool = False):
+    def __init__(self, train_frac=1, input_fields: list[str] = ["answer","rubric"], use_nl: bool = False):
         """
         Alice datast for sbert and cross-ecoder pair-wise ranking. 
         Each entry is expended to include all rubric levels.
         The label_id is 1 if the level matches the rubric level, otherwise 0.
         """
-        super().__init__(enc_fn=enc_fn, train_frac=train_frac)
+        super().__init__(train_frac=train_frac)
         self.expand_with_rubric()
         self.input_fields = input_fields
         self.use_nl = use_nl
@@ -187,11 +179,7 @@ class RubricRetrievalDataset(BaseDataset):
         self.val = _expand_dataset(self.val)
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
-    def get_encoding(self, tokenizer):
-        self.train = self.train.map(lambda x: self.enc_fn(x, tokenizer, fields=self.input_fields, use_nl=self.use_nl))
-        self.val = self.val.map(lambda x: self.enc_fn(x, tokenizer, fields=self.input_fields, use_nl=self.use_nl))
-        self.test_ua = self.test_ua.map(lambda x: self.enc_fn(x, tokenizer, fields=self.input_fields, use_nl=self.use_nl))
-        self.test_uq = self.test_uq.map(lambda x: self.enc_fn(x, tokenizer, fields=self.input_fields, use_nl=self.use_nl))
+
         
     @staticmethod
     def collate_fn(input_batch):
@@ -309,12 +297,5 @@ if __name__ == "__main__":
     dts = RubricRetrievalDataset(input_fields=["answer","rubric"], use_nl=False)
     tok = AutoTokenizer.from_pretrained("bert-base-multilingual-uncased")
     tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
-    dts.get_encoding(tok)
-
-    train_loader = DataLoader(dts.train, batch_size=2, collate_fn=dts.collate_fn)
-    for batch, meta in train_loader:
-        print(batch["input_ids"])
-        print(batch["attention_mask"])
-        print(tok.convert_ids_to_tokens(batch["input_ids"][0]))
-        print(tok.convert_ids_to_tokens(batch["input_ids"][1]))
-        break
+    dts.get_encoding(tok, encode_with_fields, fields=["answer","rubric"], add_instruction=True)
+   
