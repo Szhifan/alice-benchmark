@@ -297,8 +297,13 @@ if __name__ == "__main__":
     from transformers import AutoTokenizer
     import numpy as np
     dts = RubricRetrievalDataset(input_fields=["answer","rubric"], use_nl=False)
-    tok = AutoTokenizer.from_pretrained("roberta-base")
+    tok = AutoTokenizer.from_pretrained("bert-base-multilingual-uncased")
     tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
     dts.get_encoding(tok)
-    input_ids = dts.train[0]["input_ids"]
-    print(tok.decode(input_ids, skip_special_tokens=False))
+
+    train_loader = DataLoader(dts.train, batch_size=2, collate_fn=dts.collate_fn)
+    for batch, meta in train_loader:
+        print(batch["input_ids"])
+        print(batch["attention_mask"])
+        print(tok.batch_decode(batch["input_ids"], skip_special_tokens=False))
+        break

@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import AutoTokenizer, T5EncoderModel, PreTrainedModel, PretrainedConfig, AutoModelForSequenceClassification, AutoModel, T5ForSequenceClassification
+from transformers import AutoTokenizer, T5EncoderModel, PreTrainedModel, PretrainedConfig, AutoModel 
 from transformers.modeling_outputs import SequenceClassifierOutputWithPast
 import torch
 from torch.nn import CrossEntropyLoss, Bilinear, CosineEmbeddingLoss
@@ -129,23 +129,29 @@ class AsagConfig(PretrainedConfig):
 class AsagXNet(PreTrainedModel):
     """
     Encoder-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained
+    The encoder model is bert or roberta type 
     """
-
     def __init__(self, config: AsagConfig, label_weights: Optional[torch.Tensor] = None):
         super().__init__(config)
         # load underlying encoder
         self.label_weights = label_weights
-        self.encoder = AutoModelForSequenceClassification.from_pretrained(config.base_model_name_or_path)
+        self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path)
         config.encoder_config = self.encoder.config
+        
+        # Define custom classifier head
+        self.classifier = ClassificationHead(
+            hidden_size=self.encoder.config.hidden_size,
+            n_labels=config.n_labels
+        )
+        
         # optional LoRA wrapping
         if config.use_lora:
-            # freeze_model(self.encoder)
             self.encoder = get_peft_model(self.encoder, lora_config)
             self.encoder.print_trainable_parameters()
-        
 
         # this initializes weights and ties embeddings if needed
         self.post_init()
+        
     def forward(
         self, 
         input_ids: torch.Tensor, 
@@ -153,15 +159,33 @@ class AsagXNet(PreTrainedModel):
         token_type_ids: Optional[torch.Tensor] = None, 
         label_id: Optional[torch.Tensor] = None
     ) -> ModelOutput:
-  
         
+        # Get raw hidden states from encoder
         encoder_outputs = self.encoder(
             input_ids=input_ids,
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
-            labels=label_id
         )
-        return encoder_outputs
+        
+        # Get sequence representation (mean pooling or CLS token)
+        hidden_states = encoder_outputs.last_hidden_state
+        pooled_output = hidden_states[:, 0, :]  # Use [CLS] token for classification 
+        
+        # Apply classifier head
+        logits = self.classifier(pooled_output)
+        
+        # Compute loss if labels provided
+        loss = None
+        if label_id is not None:
+            if self.config.n_labels == 1:
+                loss_fct = nn.MSELoss()
+                loss = loss_fct(logits.view(-1), label_id.float().view(-1))
+            else:
+                loss_fct = CrossEntropyLoss(weight=self.label_weights)
+                loss = loss_fct(logits.view(-1, self.config.n_labels), label_id.view(-1))
+        
+        return ModelOutput(logits=logits, loss=loss)
+
 class AsagXNetLLM(PreTrainedModel):
     """
     LLM-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained
@@ -291,4 +315,4 @@ if __name__ == "__main__":
     attention_mask = torch.tensor([[1, 1, 0, 0], [1, 1, 1, 0]])
     label_id = torch.tensor([1, 0])
     outputs = asagxnetmodel(input_ids=input_ids, attention_mask=attention_mask, label_id=label_id)
-    print(outputs.logits, outputs.loss)
+    print(outputs)
