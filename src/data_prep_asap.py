@@ -223,6 +223,7 @@ class AsapRubricPointer(AsapDataset):
             "answer": [x["EssayText"] for x in input_batch],
         }
         return batch, meta
+
 if __name__ == "__main__":
     # Example usage
     from torch.utils.data import DataLoader

@@ -14,7 +14,7 @@ path_train = "alice_data/ALICE_train_new.csv"
 path_ua = "alice_data/ALICE_UA_new.csv"
 path_uq = "alice_data/ALICE_UQ_new.csv"
 def basic_encode(example, tokenizer):
-    # basic encoding 
+    # encode answer only  
     output = tokenizer(example["answer"], max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
@@ -27,19 +27,27 @@ def encode_solution_pair(example, tokenizer):
         example[field] = output[field]
     return example
 
-def encode_rubric_pair(example, tokenizer):
-    # for sequence pair classification with rubric
-    sep_tok = tokenizer.sep_token if tokenizer.sep_token else tokenizer.eos_token  # for t5
-    structured_input = f"{sep_tok}".join([example["answer"], example["rubric"]])
-    nl_input = f"Answer: {example['answer']}. Rubric: {example['rubric']}." 
-
-    output = tokenizer(structured_input, max_length=512, truncation=True)
+def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubrics"], use_nl: bool = False):
+    """
+    Encode the fields of the example using the tokenizer. Availbale fields are: rubric, question, sample_solution
+    If use_nl is True, use natural langauge to separate the fields.
+    """
+    text2encode = []
+    for field in fields:
+        if use_nl:
+            text2encode.append(f"{field.capitalize()}: {example[field]}")
+        else:
+            text2encode.append(example[field] + tokenizer.sep_token)
+    text2encode = "".join(text2encode)
+    output = tokenizer(text2encode, max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
     return example
+
+ 
 def encode_rubric_separate(example, tokenizer):
     """
-    Encode rubric and answer separately into different keys for double encoder models.
+    Encode rubric and answer separately into different keys for SNet 
     """
     answer_output = tokenizer(example["answer"], max_length=512, truncation=True)
     rubric_output = tokenizer(example["rubric"], max_length=512, truncation=True)
@@ -48,17 +56,7 @@ def encode_rubric_separate(example, tokenizer):
     for field in rubric_output:
         example[f"rubric_{field}"] = rubric_output[field]
     return example
-def encode_rubric_solution_pair(example, tokenizer):
-    """
-    Encode answer + rubric + sample_solution, seperated by the tokenizer's sep_token.
-    """
-    sep_tok = tokenizer.sep_token if tokenizer.sep_token else tokenizer.eos_token  # for t5
-    structured_input = f"{sep_tok}".join([example["answer"], example["sample_solution"], example["rubric"]])
-    nl_input = f"Answer: {example['answer']}. Sample solution: {example['sample_solution']}. Rubric: {example['rubric']}. Does the rubric match the answer?"
-    output = tokenizer(structured_input, max_length=512, truncation=True)
-    for field in output:
-        example[field] = output[field]
-    return example
+
 def encode_rubric_span(example, tokenizer):
     """
     Grasp encoding 
@@ -88,30 +86,8 @@ def encode_rubric_span(example, tokenizer):
     
     example["answer_span"] = (answers_start, answer_end)
     return example
-def encode_rubric_span_separate(example, tokenizer):
-    """
-    Grasp encoding with separate encoding for answer and rubric.
-    """
-    answer_output = tokenizer(example["answer"], example["question"], max_length=512, truncation=True)
-    rubrics = example["rubric"]
-    cls_token = tokenizer.cls_token
-    sep_token = tokenizer.sep_token
-    rubric_tokens = [cls_token]
-    rubric_indeces = []
-    for rubric in rubrics:
-        start = len(rubric_tokens)
-        rub_tokens = tokenizer.tokenize(rubric) + [sep_token]
-        rubric_tokens.extend(rub_tokens)
-        end = len(rubric_tokens)
-        rubric_indeces.append((start, end))
-    rubric_output = tokenizer(rubric_tokens, is_split_into_words=True, max_length=512, truncation=True)
-    for field in answer_output:
-        example[field] = answer_output[field]
-    for field in rubric_output:
-        example[f"rubric_{field}"] = rubric_output[field]
-    example["rubric_indeces"] = rubric_indeces
-    return example
-class AliceDataset:
+
+class BaseDataset:
     """
     Base alice dataset.
     """
@@ -171,8 +147,8 @@ class AliceDataset:
         }
         return batch, meta 
 
-class AliceRubricDataset(AliceDataset):
-    def __init__(self, enc_fn=encode_rubric_pair, train_frac=1):
+class RubricRetrievalDataset(BaseDataset):
+    def __init__(self, enc_fn=encode_with_fields, train_frac=1, input_fields: list[str] = ["answer","rubric"], use_nl: bool = False):
         """
         Alice datast for sbert and cross-ecoder pair-wise ranking. 
         Each entry is expended to include all rubric levels.
@@ -180,6 +156,8 @@ class AliceRubricDataset(AliceDataset):
         """
         super().__init__(enc_fn=enc_fn, train_frac=train_frac)
         self.expand_with_rubric()
+        self.input_fields = input_fields
+        self.use_nl = use_nl
     def expand_with_rubric(self):
         def _expand_dataset(dataset):
             expanded_data = []
@@ -197,7 +175,12 @@ class AliceRubricDataset(AliceDataset):
         self.val = _expand_dataset(self.val)
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
-
+    def get_encoding(self, tokenizer):
+        self.train = self.train.map(lambda x: self.enc_fn(x, tokenizer, fields=self.input_fields, use_nl=self.use_nl))
+        self.val = self.val.map(lambda x: self.enc_fn(x, tokenizer, fields=self.input_fields, use_nl=self.use_nl))
+        self.test_ua = self.test_ua.map(lambda x: self.enc_fn(x, tokenizer, fields=self.input_fields, use_nl=self.use_nl))
+        self.test_uq = self.test_uq.map(lambda x: self.enc_fn(x, tokenizer, fields=self.input_fields, use_nl=self.use_nl))
+        
     @staticmethod
     def collate_fn(input_batch):
         input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True)
@@ -244,7 +227,7 @@ class AliceRubricDataset(AliceDataset):
             "level": [x["level"] for x in input_batch],
         }
         return batch, meta
-class AliceRubricPointer(AliceDataset):
+class RubricPointerDataset(BaseDataset):
     def __init__(self, enc_fn=encode_rubric_span, train_frac=1):
         super().__init__(enc_fn=enc_fn, train_frac=train_frac)
         self.tranform_rubric()
@@ -311,8 +294,9 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
     from transformers import AutoTokenizer
     import numpy as np
-    dts = AliceRubricDataset(enc_fn=encode_rubric_pair)
+    dts = RubricRetrievalDataset(input_fields=["answer","rubric","question","sample_solution"], use_nl=False)
     tok = AutoTokenizer.from_pretrained("google-t5/t5-small")
+    tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
     dts.get_encoding(tok)
     input_ids = dts.train[0]["input_ids"]
     print(tok.decode(input_ids, skip_special_tokens=False))

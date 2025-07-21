@@ -14,19 +14,11 @@ from train_utils import (
     save_report,
     get_args
 )
-from data_prep_alice import (
-    AliceRubricDataset, 
-    AliceRubricPointer, 
-    encode_rubric_pair,
-    encode_rubric_solution_pair,
-    encode_rubric_separate,
-    encode_rubric_span
-)
+from data_prep_alice import RubricRetrievalDataset
 
 def main(args):
    
-    if args.freeze_encoder:
-        args.freeze_layers = 114514
+   
     set_seed(args.seed)
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
@@ -41,7 +33,7 @@ def main(args):
         wandb.init(mode="disabled")
     print("Training arguments: %s", args)
     # Load the dataset
-    ds = AliceRubricDataset(train_frac=args.train_frac) 
+    ds = RubricRetrievalDataset(train_frac=args.train_frac) 
     collate_fn = ds.collate_fn
     ds.get_encoding(tokenizer=get_tokenizer(args.base_model))
     steps_per_epoch = int(np.ceil(len(ds.train) / args.batch_size)) 

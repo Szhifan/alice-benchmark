@@ -24,11 +24,11 @@ from utils import (
     transform_for_inference
     )
 from data_prep_asap import AsapRubric
-from data_prep_alice import AliceRubricDataset, AliceDataset
-from models import (AsagXNet,
+from data_prep_alice import RubricRetrievalDataset, BaseDataset
+from modelling import (AsagXNet,
                     AsagSNet,
-                    AsagXNetT5,
                     PointerRubricModel,
+                    AsagConfig,
                     get_tokenizer)
 from sklearn.metrics import cohen_kappa_score, f1_score, accuracy_score
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
@@ -37,7 +37,6 @@ print("Using device:", DEFAULT_DEVICE)
 MODEL_REGISTRY = {
     "asagxnet": AsagXNet,
     "asagsnet": AsagSNet,
-    "asagxnet-t5": AsagXNetT5,
     "pointer": PointerRubricModel,
 }
 
@@ -51,7 +50,7 @@ def add_training_args(parser):
     parser.add_argument('--n-labels', default=2, type=int)
     parser.add_argument('--train-frac', default=1.0, type=float)
     parser.add_argument('--model-type', default='asagxnet', type=str, 
-                        choices=['asagxnet', 'asagsnet', 'asagxnet-t5'],
+                        choices=['asagxnet', 'asagsnet'],
                         help='type of model architecture to use')
     parser.add_argument('--use-lora', action='store_true', help='use LoRA for training')
     parser.add_argument('--merge-scores', action='store_true', help='merge scores only for binary classification')
@@ -73,9 +72,6 @@ def add_training_args(parser):
     parser.add_argument('--model-path', default=None, type=str, help='path to the model checkpoint to load')
     # other arguments
     parser.add_argument('--dropout', type=float,default=0.1 ,metavar='D', help='dropout probability')
-    parser.add_argument('--freeze-layers',default=0,type=int, metavar='F', help='number of encoder layers in bert whose parameters to be frozen')
-    parser.add_argument('--freeze-embeddings', action='store_true', help='freeze the embeddings')
-    parser.add_argument('--freeze-encoder', action='store_true', help='freeze the encoder')
     parser.add_argument('--test-only', action='store_true', help='test model only')
     parser.add_argument('--fp16', action='store_true', help='use 16-bit float precision instead of 32-bit')
     parser.add_argument('--log-wandb',action='store_true', help='log experiment to wandb')
@@ -172,52 +168,45 @@ def eval_report(pred_df, group_by=None):
             results[f"{group}_accuracy"] = group_metrics["accuracy"]
     return results
     
-def export_cp(model, optimizer, scheduler, args, model_name="model.pt"):
+def export_cp(model, optimizer, scheduler, args):
  
     # save model checkpoint 
-    output_dir = os.path.join(args.save_dir, "checkpoint")
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    cp_dir = os.path.join(args.save_dir, "checkpoint")
     model_to_save = model.module if hasattr(model, "module") else model
     # Save a trained model
-    torch.save(model_to_save.state_dict(), os.path.join(output_dir, model_name))
-    # Save training arguments
-    training_config = args.__dict__.copy()
-    with open(os.path.join(output_dir, "training_config.json"), "w") as f:
-        json.dump(training_config, f, indent=4) 
-    print("Saving model checkpoint to %s", output_dir)
-    torch.save(optimizer.state_dict(), os.path.join(output_dir, "optimizer.pt"))
-    torch.save(scheduler.state_dict(), os.path.join(output_dir, "scheduler.pt"))
-    print("Saving optimizer and scheduler states to %s", output_dir)
+    model_to_save.save_pretrained(cp_dir)
+
+    print("Saving model checkpoint to %s", cp_dir)
+    torch.save(optimizer.state_dict(), os.path.join(cp_dir, "optimizer.pt"))
+    torch.save(scheduler.state_dict(), os.path.join(cp_dir, "scheduler.pt"))
+    print("Saving optimizer and scheduler states to %s", cp_dir)
 
 def load_model(args):
     if args.model_type not in MODEL_REGISTRY:
         raise ValueError(f"Model type {args.model_type} is not supported. Choose from {list(MODEL_REGISTRY.keys())}.")
     # Load the model based on the specified type
-    model_class = MODEL_REGISTRY[args.model_type]
-    model = model_class(
-        base_model=args.base_model,
+    config = AsagConfig(
+        base_model_name_or_path=args.base_model,
         n_labels=args.n_labels,
-        freeze_layers=args.freeze_layers,
-        freeze_embeddings=args.freeze_embeddings,
-        use_lora=args.use_lora,
+        use_lora=args.use_lora
     )
+    model_class = MODEL_REGISTRY[args.model_type]
+    model = model_class(config)
     if args.model_path:
-        checkpoint_path = os.path.join(args.cpt_path, "checkpoint", "model.pt")
-        model.load_state_dict(torch.load(checkpoint_path, map_location=DEFAULT_DEVICE))
+        model.from_pretrained(args.model_path)
+        
 
     model = model.to(DEFAULT_DEVICE)
     return model
 def import_cp(args, total_steps):
     # check if cp exists 
-    if os.path.exists(os.path.join(args.save_dir, "checkpoint/model.pt")):
+    if os.path.exists(os.path.join(args.save_dir, "checkpoint")):
         print("Loading checkpoint from %s", args.save_dir)
-        training_config_path = os.path.join(args.save_dir, "checkpoint", "training_config.json")
-    
-        with open(training_config_path, "r") as f:
-            training_config = json.load(f)
-        if training_config["model_name"] != args.base_model:
-            print("Model type mismatch. Expected %s, but found %s", args.base_model, training_config["model_name"])
+        config_path = os.path.join(args.save_dir, "checkpoint", "config.json")
+
+        with open(config_path, "r") as f:
+            config = json.load(f)
+            assert config["architectures"] == args.model_type, "Model architecture mismatch in checkpoint."
         
     model = load_model(args)
     optimizer, scheduler = build_optimizer(model, args,total_steps) 
