@@ -26,27 +26,37 @@ def encode_solution_pair(example, tokenizer):
     for field in output:
         example[field] = output[field]
     return example
-
+def encode_rubric_pair(example, tokenizer):
+    """
+    Encode rubric and answer as a sequence pair.
+    """
+    output = tokenizer(example["rubric"], example["answer"], max_length=512, truncation=True)
+    for field in output:
+        example[field] = output[field]
+    return example
 def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric"], use_nl: bool = False):
     """
     Encode the fields of the example using the tokenizer. Availbale fields are: rubric, question, sample_solution
     If use_nl is True, use natural langauge to separate the fields.
     """
-    text2encode = []
+    text2encode = ""
     for field in fields:
+        if field not in example:
+            continue
         if use_nl:
-            text2encode.append(f"{field.capitalize()}: {example[field]}")
+            text2encode += f"{field.capitalize()}: {example[field]} "
         else:
-            text2encode.append(example[field] + tokenizer.sep_token)
+            text2encode += example[field] + tokenizer.sep_token
+
     if not use_nl and tokenizer.cls_token:
-        text2encode = [tokenizer.cls_token] + text2encode
-    text2encode = "".join(text2encode)
+        text2encode = tokenizer.cls_token + text2encode
+
+
     output = tokenizer(text2encode, max_length=512, truncation=True, add_special_tokens=False)
     for field in output:
         example[field] = output[field]
     return example
 
- 
 def encode_rubric_separate(example, tokenizer):
     """
     Encode rubric and answer separately into different keys for SNet 
@@ -305,5 +315,6 @@ if __name__ == "__main__":
     for batch, meta in train_loader:
         print(batch["input_ids"])
         print(batch["attention_mask"])
-        print(tok.batch_decode(batch["input_ids"], skip_special_tokens=False))
+        print(tok.convert_ids_to_tokens(batch["input_ids"][0]))
+        print(tok.convert_ids_to_tokens(batch["input_ids"][1]))
         break
