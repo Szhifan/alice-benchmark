@@ -185,7 +185,53 @@ class AsagXNet(PreTrainedModel):
                 loss = loss_fct(logits.view(-1, self.config.n_labels), label_id.view(-1))
         
         return ModelOutput(logits=logits, loss=loss)
-
+class AsagXNetT5(PreTrainedModel):
+    """
+    T5-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained
+    """
+    def __init__(self, config: AsagConfig):
+        super().__init__(config)
+        self.encoder = T5EncoderModel.from_pretrained(config.base_model_name_or_path)
+        config.encoder_config = self.encoder.config
+        
+        # Define custom classifier head
+        self.classifier = ClassificationHead(
+            hidden_size=self.encoder.config.hidden_size,
+            n_labels=config.n_labels
+        )
+        
+        # this initializes weights and ties embeddings if needed
+        self.post_init()
+    def forward(
+        self, 
+        input_ids: torch.Tensor, 
+        attention_mask: torch.Tensor, 
+        token_type_ids: Optional[torch.Tensor] = None, 
+        label_id: Optional[torch.Tensor] = None
+    ) -> ModelOutput:
+        
+        # Get raw hidden states from encoder
+        encoder_outputs = self.encoder(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+        )
+        
+        # Get sequence representation (mean pooling or CLS token)
+        hidden_states = encoder_outputs.last_hidden_state
+        pooled_output = eos_embeddings(hidden_states, attention_mask)  # Use last non-padding token for classification
+        # Apply classifier head
+        logits = self.classifier(pooled_output)
+        # Compute loss if labels provided
+        loss = None
+        if label_id is not None:
+            if self.config.n_labels == 1:
+                loss_fct = nn.MSELoss()
+                loss = loss_fct(logits.view(-1), label_id.float().view(-1))
+            else:
+                loss_fct = CrossEntropyLoss()
+                loss = loss_fct(logits.view(-1, self.config.n_labels), label_id.view(-1))
+        return ModelOutput(logits=logits, loss=loss)
 class AsagXNetLLM(PreTrainedModel):
     """
     LLM-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained

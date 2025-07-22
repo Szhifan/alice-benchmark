@@ -13,6 +13,8 @@ EXP_NAME="mbert"
 EXP_ROOT="${RESULTS_ROOT}/${EXP_NAME}"
 export WANDB_PROJECT="alice-rubrics"
 export WANDB_NAME="${EXP_NAME}"
+export WANDB_NOTES="Training Alice with mBERT base model"
+export WANDB_TAGS="mbert,alice,rubrics"
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
 python src/train_alice.py --save-dir "${EXP_ROOT}" \
