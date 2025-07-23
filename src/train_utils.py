@@ -54,6 +54,7 @@ def add_training_args(parser):
     parser.add_argument('--use-lora', action='store_true', help='use LoRA for training')
     parser.add_argument('--use-bidirectional', action='store_true', help='use bidirectional attention, only works for Llama')
     parser.add_argument('--use-latent-attention', action='store_true', help='use latent attention mechanism, only works for Llama')
+    parser.add_argument('--use-label-weights', action='store_true', help='use label weights for imbalanced dataset')
     
 
     # Add optimization arguments
@@ -156,7 +157,6 @@ def eval_report(pred_df, group_by=None):
     results["qwk"] = metrics["qwk"]
     results["f1"] = metrics["f1"]
     results["accuracy"] = metrics["accuracy"]
-
     # Calculate metrics for each group if group_by is provided
     if group_by:
         grouped = pred_df.groupby(group_by)
@@ -190,13 +190,12 @@ def load_model(args):
         use_lora=args.use_lora,
         use_bidirectional=args.use_bidirectional,
         use_latent_attention=args.use_latent_attention,
+        use_label_weights=args.use_label_weights,
     )
     model_class = MODEL_REGISTRY[args.model_type]
     model = model_class(config)
     if args.model_path:
         model.from_pretrained(args.model_path)
-        
-
     model = model.to(DEFAULT_DEVICE)
     return model
 def import_cp(args, total_steps):

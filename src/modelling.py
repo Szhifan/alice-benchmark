@@ -112,8 +112,9 @@ class AsagConfig(PretrainedConfig):
         base_model_name_or_path: str = None,
         n_labels: int = 1,
         use_lora: bool = False,
-        use_bidirectional: bool = True,  # 添加此配置
-        use_latent_attention: bool = False,  # 添加此配置
+        use_bidirectional: bool = True,  
+        use_latent_attention: bool = False, 
+        use_label_weights: bool = True,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -121,7 +122,9 @@ class AsagConfig(PretrainedConfig):
         self.n_labels = n_labels
         self.use_lora = use_lora
         self.use_bidirectional = use_bidirectional
-        self.use_latent_attention = use_latent_attention
+        self.use_latent_attention = use_latent_attention,
+        self.use_label_weights = use_label_weights
+
  
 
 class AsagXNet(PreTrainedModel):
@@ -138,7 +141,8 @@ class AsagXNet(PreTrainedModel):
             num_labels=config.n_labels
         )
         config.encoder_config = self.model.config
-        
+        # Class weights for imbalanced dataset (label 0: 2/3, label 1: 1/3)
+        self.label_weights = torch.tensor([0.75, 1.5])  if config.use_label_weights else None
         # optional LoRA wrapping
         if config.use_lora:
             lora_config.task_type = TaskType.SEQ_CLS
@@ -160,10 +164,18 @@ class AsagXNet(PreTrainedModel):
         outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            token_type_ids=token_type_ids,
-            labels=label_id if label_id is not None else None
+            token_type_ids=token_type_ids
         )
         
+        loss = None
+        if label_id is not None:
+            if self.config.n_labels == 1:
+                loss_fct = nn.MSELoss()
+                loss = loss_fct(outputs.logits.view(-1), label_id.view(-1).float())
+            else:
+                loss_fct = CrossEntropyLoss(weight=self.label_weights.to(outputs.logits.device))
+                loss = loss_fct(outputs.logits.view(-1, self.config.n_labels), label_id.view(-1))
+                outputs.loss = loss
 
         return ModelOutput(logits=outputs.logits, loss=outputs.loss)
 

@@ -130,7 +130,7 @@ class BaseLoader:
         return batch, meta 
 
 class RubricRetrievalLoader(BaseLoader):
-    def __init__(self, train_frac=1, input_fields: list[str] = ["answer","rubric"], use_nl: bool = False):
+    def __init__(self, train_frac=1, input_fields: list[str] = ["answer","rubric"]):
         """
         Alice dataset for sbert and cross-ecoder pair-wise ranking. 
         Each entry is expended to include all rubric levels.
@@ -139,7 +139,6 @@ class RubricRetrievalLoader(BaseLoader):
         super().__init__(train_frac=train_frac)
         self.expand_with_rubric()
         self.input_fields = input_fields
-        self.use_nl = use_nl
     def expand_with_rubric(self):
         def _expand_dataset(dataset):
             expanded_data = []
@@ -215,5 +214,15 @@ class RubricRetrievalLoader(BaseLoader):
 if __name__ == "__main__":
     from torch.utils.data import DataLoader
     from transformers import AutoTokenizer
-    import numpy as np
-    
+    loader = RubricRetrievalLoader(train_frac=0.1, input_fields=["answer", "rubric"])
+    tokenizer = get_tokenizer("bert-base-uncased")
+    loader.get_encoding(tokenizer, encode_with_fields, fields=loader.input_fields)
+    train_loader = DataLoader(loader.train, batch_size=2, collate_fn=loader.collate_fn)
+    for batch, meta in train_loader:
+        print("Batch:")
+        print(batch)
+        print("\nDecoded tokens:")
+        for i, input_ids in enumerate(batch["input_ids"]):
+            tokens = tokenizer.convert_ids_to_tokens(input_ids.tolist())
+            print(f"Sample {i}: {tokens}")
+        break  # Just to test the first batch
