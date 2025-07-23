@@ -1,5 +1,5 @@
 from typing import Literal
-from datasets import load_dataset, enable_caching, Dataset,disable_caching
+from datasets import load_dataset, enable_caching, Dataset, disable_caching
 import json
 import torch
 from transformers import AutoTokenizer
@@ -9,10 +9,17 @@ Dataprep pipeline:
 2. Encode the dataset using the provided encoding functions for different model settings.
 3. Provide collate functions for batching the dataset.
 """
-disable_caching()
-path_train = "alice_data/ALICE_train_new.csv"
-path_ua = "alice_data/ALICE_UA_new.csv"
-path_uq = "alice_data/ALICE_UQ_new.csv"
+enable_caching()
+path_train = "alice_data/train.csv"
+path_ua = "alice_data/test_ua.csv"
+path_uq = "alice_data/test_uq.csv"
+def get_tokenizer(base_model: str) -> AutoTokenizer:
+    tok = AutoTokenizer.from_pretrained(base_model)
+    if "llama" in base_model.lower():
+        tok.padding_side = "right"
+        tok.pad_token = tok.eos_token  # Ensure pad_token is set
+    tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
+    return tok
 def basic_encode(example, tokenizer):
     # encode answer only  
     output = tokenizer(example["answer"], max_length=512, truncation=True)
@@ -30,7 +37,7 @@ def encode_rubric_pair(example, tokenizer):
     """
     Encode rubric and answer as a sequence pair.
     """
-    output = tokenizer(example["rubric"], example["answer"], max_length=512, truncation=True)
+    output = tokenizer(example["answer"], example["rubric"], max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
     return example
@@ -45,7 +52,7 @@ def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric
         text2encode += f"{field.capitalize()}: {example[field]} "
     if add_instruction:
         text2encode = "Determine if rubric is satisfied by the answer. " + text2encode
-    output = tokenizer(text2encode, max_length=512, truncation=True, add_special_tokens=False)
+    output = tokenizer(text2encode, max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
     return example
@@ -62,39 +69,10 @@ def encode_rubric_separate(example, tokenizer):
         example[f"rubric_{field}"] = rubric_output[field]
     return example
 
-def encode_rubric_span(example, tokenizer):
-    """
-    Grasp encoding 
-    """
-    answer = example["answer"]
-    question = example["question"]
-    rubrics = example["rubric"]
-    cls_token = tokenizer.cls_token
-    sep_token = tokenizer.sep_token
-    tokens = [cls_token]
-    rubric_indeces = []
-    for rubric in rubrics:
-        start = len(tokens)
-        rub_tokens = tokenizer.tokenize(rubric) + [sep_token]
-        tokens.extend(rub_tokens)
-        end = len(tokens)
-        rubric_indeces.append((start, end))
-    answers_start = len(tokens)
-    # qa_tokens = tokenizer.tokenize("Question: " + question + " Answer: " + answer)
-    qa_tokens = tokenizer.tokenize(answer)
-    tokens.extend(qa_tokens)
-    answer_end = len(tokens)
-    enc = tokenizer(tokens, is_split_into_words=True)
-    for field in enc:
-        example[field] = enc[field]
-    example["rubric_indeces"] = rubric_indeces
-    
-    example["answer_span"] = (answers_start, answer_end)
-    return example
 
-class BaseDataset:
+class BaseLoader:
     """
-    Base alice dataset.
+    Load the splits of Alice dataset.
     """
     def __init__(self, train_frac=1):
         assert train_frac <= 1 and train_frac > 0, "train_frac must be in (0, 1]"
@@ -151,10 +129,10 @@ class BaseDataset:
         }
         return batch, meta 
 
-class RubricRetrievalDataset(BaseDataset):
+class RubricRetrievalLoader(BaseLoader):
     def __init__(self, train_frac=1, input_fields: list[str] = ["answer","rubric"], use_nl: bool = False):
         """
-        Alice datast for sbert and cross-ecoder pair-wise ranking. 
+        Alice dataset for sbert and cross-ecoder pair-wise ranking. 
         Each entry is expended to include all rubric levels.
         The label_id is 1 if the level matches the rubric level, otherwise 0.
         """
@@ -182,8 +160,11 @@ class RubricRetrievalDataset(BaseDataset):
 
         
     @staticmethod
-    def collate_fn(input_batch):
-        input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True)
+    def collate_fn(input_batch, tokenizer=None):
+        pad_ids = 0
+        if tokenizer:
+            pad_ids = tokenizer.pad_token_id
+        input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True, padding_value=pad_ids)
         attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True)
         if "token_type_ids" in input_batch[0]:
             token_type_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["token_type_ids"]) for x in input_batch], batch_first=True)
@@ -202,11 +183,14 @@ class RubricRetrievalDataset(BaseDataset):
         }
         return batch, meta
     @staticmethod
-    def collate_rubric_seperate(input_batch):
+    def collate_rubric_seperate(input_batch, tokenizer=None):
         """
         colllate function for settings where the rubric and answer are encoded separately.
         """
-        input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True)
+        pad_ids = 0 
+        if tokenizer:
+            pad_ids = tokenizer.pad_token_id
+        input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True, padding_value=pad_ids)
         attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True)
 
         rubric_input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["rubric_input_ids"]) for x in input_batch], batch_first=True)
@@ -227,75 +211,9 @@ class RubricRetrievalDataset(BaseDataset):
             "level": [x["level"] for x in input_batch],
         }
         return batch, meta
-class RubricPointerDataset(BaseDataset):
-    def __init__(self, enc_fn=encode_rubric_span, train_frac=1):
-        super().__init__(enc_fn=enc_fn, train_frac=train_frac)
-        self.tranform_rubric()
-    def tranform_rubric(self):
-        def _transform(example):
-            rubric = json.loads(example["rubric"])
-            example["rubric"] = [rub for rub in rubric.values()]
-             
-            return example
-        self.train = self.train.map(lambda x: _transform(x))
-        self.val = self.val.map(lambda x: _transform(x))
-        self.test_ua = self.test_ua.map(lambda x: _transform(x))
-        self.test_uq = self.test_uq.map(lambda x: _transform(x))
-    @staticmethod
-    def collate_fn(input_batch):
-        batch = {
-        "input_ids": torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True),
-        "attention_mask": torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True),
-        "label_id": torch.tensor([x["level"] for x in input_batch]),
-        }
-        max_rubrics = max(len(x["rubric"]) for x in input_batch)
-        span_tensor = torch.zeros((len(input_batch), max_rubrics, 2), dtype=torch.long)
-        mask_tensor = torch.zeros((len(input_batch), max_rubrics), dtype=torch.bool)
-        for i, example in enumerate(input_batch):
-            for j, (start, end) in enumerate(example["rubric_indeces"]):
-                span_tensor[i, j, 0] = start
-                span_tensor[i, j, 1] = end
-                mask_tensor[i, j] = True
-        batch["rubric_span"] = span_tensor
-        batch["rubric_mask"] = mask_tensor
-        batch["answer_span"] = torch.tensor([example["answer_span"] for example in input_batch], dtype=torch.long)
-        meta = {"id": [x["sid"] for x in input_batch],
-                "answer": [x["answer"] for x in input_batch],
-          }
-        return batch, meta
-    @staticmethod
-    def collate_rubric_separate(input_batch):   
-        """
-        colllate function for settings where the rubric and answer are encoded separately.
-        """
-        batch = {
-            "ans_input_ids": torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True),
-            "ans_attention_mask": torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True),
-            "rubric_input_ids": torch.nn.utils.rnn.pad_sequence([torch.tensor(x["rubric_input_ids"]) for x in input_batch], batch_first=True),
-            "rubric_attention_mask": torch.nn.utils.rnn.pad_sequence([torch.tensor(x["rubric_attention_mask"]) for x in input_batch], batch_first=True),
-            "label_id": torch.tensor([x["level"] for x in input_batch]),
-        }
-        max_rubrics = max(len(x["rubric_indeces"]) for x in input_batch)
-        span_tensor = torch.zeros((len(input_batch), max_rubrics, 2), dtype=torch.long)
-        mask_tensor = torch.zeros((len(input_batch), max_rubrics), dtype=torch.bool)
-        for i, example in enumerate(input_batch):
-            for j, (start, end) in enumerate(example["rubric_indeces"]):
-                span_tensor[i, j, 0] = start
-                span_tensor[i, j, 1] = end
-                mask_tensor[i, j] = True
-        batch["rubric_span"] = span_tensor
-        batch["rubric_mask"] = mask_tensor
-        meta = {
-            "id": [x["sid"] for x in input_batch],
-            "answer": [x["answer"] for x in input_batch],
-        }
-        return batch, meta
+
 if __name__ == "__main__":
     from torch.utils.data import DataLoader
     from transformers import AutoTokenizer
     import numpy as np
-    dts = RubricRetrievalDataset(input_fields=["answer","rubric"], use_nl=False)
-    tok = AutoTokenizer.from_pretrained("bert-base-multilingual-uncased")
-    tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
-    dts.get_encoding(tok, encode_with_fields, fields=["answer","rubric"], add_instruction=True)
-   
+    

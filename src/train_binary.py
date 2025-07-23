@@ -15,7 +15,7 @@ from train_utils import (
     get_args
 )
 from data_prep_alice import (
-    BaseDataset
+    BaseLoader
 )
 
 
@@ -37,7 +37,7 @@ def main(args):
         wandb.init(mode="disabled")
     print("Training arguments: %s", args)
     # Load the dataset
-    ds = BaseDataset
+    ds = BaseLoader
     ds.merge_scores(args.merge_scores)
     collate_fn = ds.collate_fns
     ds.get_encoding(tokenizer=get_tokenizer(args.model_name))

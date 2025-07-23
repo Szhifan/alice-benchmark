@@ -23,13 +23,11 @@ from utils import (
     save_report,
     transform_for_inference
     )
-from data_prep_asap import AsapRubric
-from data_prep_alice import RubricRetrievalDataset, BaseDataset
 from modelling import (AsagXNet,
                     AsagSNet,
+                    AsagXNetLlama,
                     PointerRubricModel,
-                    AsagConfig,
-                    get_tokenizer)
+                    AsagConfig)
 from sklearn.metrics import cohen_kappa_score, f1_score, accuracy_score
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 # logger = logging.getLogger(__name__)
@@ -37,6 +35,7 @@ print("Using device:", DEFAULT_DEVICE)
 MODEL_REGISTRY = {
     "asagxnet": AsagXNet,
     "asagsnet": AsagSNet,
+    "asagxnetllama": AsagXNetLlama,
     "pointer": PointerRubricModel,
 }
 
@@ -53,7 +52,10 @@ def add_training_args(parser):
                         choices=['asagxnet', 'asagsnet'],
                         help='type of model architecture to use')
     parser.add_argument('--use-lora', action='store_true', help='use LoRA for training')
-    parser.add_argument('--merge-scores', action='store_true', help='merge scores only for binary classification')
+    parser.add_argument('--use-bidirectional', action='store_true', help='use bidirectional attention, only works for Llama')
+    parser.add_argument('--use-latent-attention', action='store_true', help='use latent attention mechanism, only works for Llama')
+    
+
     # Add optimization arguments
     parser.add_argument('--batch-size', default=32, type=int, help='maximum number of sentences in a batch')
     parser.add_argument('--max-epoch', default=3, type=int, help='force stop training at specified epoch')
@@ -61,7 +63,6 @@ def add_training_args(parser):
     parser.add_argument('--lr', default=5e-5, type=float, help='learning rate')
     parser.add_argument('--lr2', default=3e-5, type=float, help='learning rate for the second optimizer')
     parser.add_argument('--patience', default=3, type=int,help='number of epochs without improvement on validation set before early stopping')
-    parser.add_argument('--weighted-loss', action='store_true', help='use weighted loss')
     parser.add_argument('--grad-accumulation-steps', default=1, type=int, help='number of updates steps to accumulate before performing a backward/update pass')
     parser.add_argument('--weight-decay', default=0.01, type=float, help='weight decay for Adam')
     parser.add_argument('--adam-epsilon', default=1e-8, type=float, help='epsilon for Adam optimizer')
@@ -186,7 +187,9 @@ def load_model(args):
     config = AsagConfig(
         base_model_name_or_path=args.base_model,
         n_labels=args.n_labels,
-        use_lora=args.use_lora
+        use_lora=args.use_lora,
+        use_bidirectional=args.use_bidirectional,
+        use_latent_attention=args.use_latent_attention,
     )
     model_class = MODEL_REGISTRY[args.model_type]
     model = model_class(config)
@@ -204,7 +207,7 @@ def import_cp(args, total_steps):
 
         with open(config_path, "r") as f:
             config = json.load(f)
-            assert config["architectures"].lower() == args.model_type, "Model architecture mismatch in checkpoint: expected {}, got {}".format(
+            assert config["architectures"][0].lower() == args.model_type, "Model architecture mismatch in checkpoint: expected {}, got {}".format(
                 args.model_type, config["architectures"]
             )
 
@@ -222,7 +225,8 @@ def train_epoch(
         optimizer,
         scheduler,
         args,
-        collate_fn=None
+        collate_fn, 
+        tokenizer
         ): 
     model.zero_grad()
     best_metric = 0 
@@ -233,7 +237,7 @@ def train_epoch(
     train_iterator = trange(num_epochs, position=0, leave=True, desc="Epoch") 
     scaler = GradScaler(enabled=args.fp16 and DEFAULT_DEVICE == "cuda")
     for epoch in train_iterator:
-        train_dataloader = DataLoader(train_dataset, num_workers=0, pin_memory=True, batch_size=args.batch_size, collate_fn=collate_fn, shuffle=True) 
+        train_dataloader = DataLoader(train_dataset, num_workers=0, pin_memory=True, batch_size=args.batch_size, collate_fn=lambda x: collate_fn(x, tokenizer), shuffle=True) 
         epoch_iterator = tqdm(train_dataloader, desc="Iteration", position=1, leave=True)
 
  
@@ -280,7 +284,8 @@ def train_epoch(
             val_dataset,
             batch_size=args.batch_size,
             is_test=False,
-            collate_fn=collate_fn
+            collate_fn=collate_fn,
+            tokenizer=tokenizer
         )
         eval_acc = accuracy_score(val_predictions["label_id"], val_predictions["pred_id"])
         if eval_acc > best_metric:
@@ -297,8 +302,8 @@ def train_epoch(
         })
         
 @torch.no_grad() 
-def evaluate(model, dataset, batch_size, is_test=False, collate_fn=None): 
-    dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
+def evaluate(model, dataset, batch_size, is_test=False, collate_fn=None, tokenizer=None): 
+    dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=lambda x: collate_fn(x, tokenizer), shuffle=False) 
 
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0 if is_test else 2, leave=True)
 

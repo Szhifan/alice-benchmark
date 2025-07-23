@@ -184,53 +184,7 @@ class AsapRubric(AsapDataset):
 
         return batch, meta
 
-
-class AsapRubricPointer(AsapDataset):
-    def __init__(self, enc_fn=encode_rubric_span):
-        super().__init__(enc_fn=enc_fn)
-        self.add_rubric()
-    def add_rubric(self):
-        def _add_rubric(example):
-            essay_set = int(example["EssaySet"]) - 1
-            example["rubric"] = [rub for rub in RUBRICS[essay_set]["rubrics"].values()]
-            return example
-        self.train = self.train.map(lambda x: _add_rubric(x))
-        self.val = self.val.map(lambda x: _add_rubric(x))
-        self.test = self.test.map(lambda x: _add_rubric(x))
-    @staticmethod
-    def collate_fn(input_batch):
-        batch = {
-            "input_ids": torch.nn.utils.rnn.pad_sequence(
-                [torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True
-            ),
-            "attention_mask": torch.nn.utils.rnn.pad_sequence(
-                [torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True,
-            ),
-            "answer_span": torch.tensor([x["answer_span"] for x in input_batch], dtype=torch.long),
-            }
-        max_rubrics = max(len(x["rubric"]) for x in input_batch)
-        rubric_span_tensor = torch.zeros(len(input_batch), max_rubrics, 2, dtype=torch.long)
-        rubric_mask_tensor = torch.zeros(len(input_batch), max_rubrics, dtype=torch.bool)
-        for i, example in enumerate(input_batch):
-            for j, (start, end) in enumerate(example["rubric_indeces"]):
-                rubric_span_tensor[i, j, 0] = start
-                rubric_span_tensor[i, j, 1] = end
-                rubric_mask_tensor[i, j] = True
-        batch["rubric_span"] = rubric_span_tensor
-        batch["rubric_mask"] = rubric_mask_tensor
-        batch["label_id"] = torch.tensor([x["score"] for x in input_batch])
-        meta = {
-            "answer": [x["EssayText"] for x in input_batch],
-        }
-        return batch, meta
-
 if __name__ == "__main__":
     # Example usage
     from torch.utils.data import DataLoader
-    dts = AsapRubricPointer()
-    dts.get_encoding(AutoTokenizer.from_pretrained("bert-base-uncased"))
-    tr_loader = DataLoader(
-        dts.train, batch_size=16, shuffle=True, collate_fn=dts.collate_fn
-    )
-    print(len(tr_loader))
     

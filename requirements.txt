@@ -8,3 +8,4 @@ scikit-learn
 sentence-transformers
 sentencepiece
 peft
+bitsandbytes

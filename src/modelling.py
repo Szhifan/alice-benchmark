@@ -1,20 +1,26 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import AutoTokenizer, T5EncoderModel, PreTrainedModel, PretrainedConfig, AutoModel 
-from transformers.modeling_outputs import SequenceClassifierOutputWithPast
+from transformers import (
+    PreTrainedModel,
+    PretrainedConfig,
+    AutoModel,
+    AutoModelForSequenceClassification,
+    BitsAndBytesConfig, 
+    LlamaModel
+)
 import torch
 from torch.nn import CrossEntropyLoss, Bilinear, CosineEmbeddingLoss
-from torch.nn.functional import sigmoid, cosine_similarity
+from torch.nn.functional import cosine_similarity
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional
 import re 
-from peft import LoraConfig, TaskType, get_peft_model, PeftModel
+from peft import LoraConfig, TaskType, get_peft_model, prepare_model_for_kbit_training
 lora_config = LoraConfig(
-    r=128,
-    lora_alpha=128,
-    lora_dropout=0.1,
-    bias="none"
-)
+        r=128,
+        lora_alpha=128,
+        lora_dropout=0.1,
+        bias="none"
+        )
 @dataclass
 class ModelOutput:
     logits: torch.Tensor
@@ -30,16 +36,6 @@ def mean_pooling(
     sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, 1)
     sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
     return sum_embeddings / sum_mask 
-def eos_embeddings(hiden_states: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
-    """
-    Get the embeddings of the last non-padding token in each sequence.
-    """
-    eos_pos = attention_mask.sum(dim=1) - 1  # End of sequence positions
-    return hiden_states[torch.arange(hiden_states.size(0)), eos_pos]
-def get_tokenizer(base_model: str) -> AutoTokenizer:
-    tok = AutoTokenizer.from_pretrained(base_model)
-    tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
-    return tok
 
 class ClassificationHead(nn.Module):
     """Head for sentence-level classification tasks."""
@@ -52,16 +48,14 @@ class ClassificationHead(nn.Module):
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         hidden_states = self.dropout(hidden_states)
         hidden_states = self.dense(hidden_states)
-        hidden_states = torch.tanh(hidden_states)
-        hidden_states = self.dropout(hidden_states)
         hidden_states = self.out_proj(hidden_states)
         return hidden_states
 class LatentAttention(nn.Module):
     """
     Latent Attention module where the query is the last hidden representation of an LLM,
-    and key and value are learnable parameters. Uses PyTorch's built-in attention mechanism.
+    and key and value are learnable parameters. 
     """
-    def __init__(self, hidden_dim, num_latent_vectors=8, dropout_prob=0.1):
+    def __init__(self, hidden_dim, num_latent_vectors=512, dropout_prob=0.1):
         super().__init__()
         self.hidden_dim = hidden_dim
         self.num_latent_vectors = num_latent_vectors
@@ -77,7 +71,7 @@ class LatentAttention(nn.Module):
         # Multi-head attention with 1 head
         self.attention = nn.MultiheadAttention(
             embed_dim=hidden_dim,
-            num_heads=1,
+            num_heads=8,
             dropout=dropout_prob,
             batch_first=True
         )
@@ -86,28 +80,28 @@ class LatentAttention(nn.Module):
         nn.init.xavier_uniform_(self.key)
         nn.init.xavier_uniform_(self.value)
 
-    def forward(self, query):
+    def forward(self, hidden_states):
         """
         Args:
-            query: Last hidden representation from LLM [batch_size, hidden_dim]
+            hidden_states: Hidden representation from LLM [batch_size, seq_len, hidden_dim]
         Returns:
-            context_vector: Attended output [batch_size, hidden_dim]
+            context_vector: Attended output [batch_size, seq_len, hidden_dim]
         """
-        batch_size = query.size(0)
+        batch_size, seq_len, _ = hidden_states.shape
         
-        # Reshape query for attention
-        query = query.unsqueeze(1)  # [batch_size, 1, hidden_dim]
+        # Use hidden states as queries
+        query = hidden_states  # [batch_size, seq_len, hidden_dim]
         
         # Expand key and value for batch processing
         key = self.key.unsqueeze(0).expand(batch_size, -1, -1)  # [batch_size, num_latent, hidden_dim]
         value = self.value.unsqueeze(0).expand(batch_size, -1, -1)  # [batch_size, num_latent, hidden_dim]
         
         # Apply multi-head attention
-        context, _ = self.attention(query, key, value)
-        context = context.squeeze(1)  # [batch_size, hidden_dim]
+        context, _ = self.attention(query, key, value)  # [batch_size, seq_len, hidden_dim]
         
-        # Apply layer normalization
-        context = self.layer_norm(context)
+        # Apply layer normalization and residual connection
+        context = self.layer_norm(context + hidden_states)
+        context = self.dropout(context)
         
         return context
 
@@ -116,38 +110,40 @@ class AsagConfig(PretrainedConfig):
     def __init__(
         self,
         base_model_name_or_path: str = None,
-        n_labels: int = 2,
+        n_labels: int = 1,
         use_lora: bool = False,
+        use_bidirectional: bool = True,  # 添加此配置
+        use_latent_attention: bool = False,  # 添加此配置
         **kwargs
     ):
         super().__init__(**kwargs)
         self.base_model_name_or_path = base_model_name_or_path or getattr(self, "name_or_path", None)
         self.n_labels = n_labels
         self.use_lora = use_lora
+        self.use_bidirectional = use_bidirectional
+        self.use_latent_attention = use_latent_attention
  
 
 class AsagXNet(PreTrainedModel):
     """
     Encoder-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained
-    The encoder model is bert or roberta type 
+    The encoder model is a sequence classification model (BERT, RoBERTa, etc.)
     """
-    def __init__(self, config: AsagConfig, label_weights: Optional[torch.Tensor] = None):
+
+    def __init__(self, config: AsagConfig):
         super().__init__(config)
-        # load underlying encoder
-        self.label_weights = label_weights
-        self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path)
-        config.encoder_config = self.encoder.config
-        
-        # Define custom classifier head
-        self.classifier = ClassificationHead(
-            hidden_size=self.encoder.config.hidden_size,
-            n_labels=config.n_labels
+        # load underlying sequence classification model
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            config.base_model_name_or_path,
+            num_labels=config.n_labels
         )
+        config.encoder_config = self.model.config
         
         # optional LoRA wrapping
         if config.use_lora:
-            self.encoder = get_peft_model(self.encoder, lora_config)
-            self.encoder.print_trainable_parameters()
+            lora_config.task_type = TaskType.SEQ_CLS
+            self.model = get_peft_model(self.model, lora_config)
+            self.model.print_trainable_parameters()
 
         # this initializes weights and ties embeddings if needed
         self.post_init()
@@ -160,137 +156,117 @@ class AsagXNet(PreTrainedModel):
         label_id: Optional[torch.Tensor] = None
     ) -> ModelOutput:
         
-        # Get raw hidden states from encoder
-        encoder_outputs = self.encoder(
+
+        outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
+            labels=label_id if label_id is not None else None
         )
         
-        # Get sequence representation (mean pooling or CLS token)
-        hidden_states = encoder_outputs.last_hidden_state
-        pooled_output = hidden_states[:, 0, :]  # Use [CLS] token for classification 
-        
-        # Apply classifier head
-        logits = self.classifier(pooled_output)
-        
-        # Compute loss if labels provided
-        loss = None
-        if label_id is not None:
-            if self.config.n_labels == 1:
-                loss_fct = nn.MSELoss()
-                loss = loss_fct(logits.view(-1), label_id.float().view(-1))
-            else:
-                loss_fct = CrossEntropyLoss(weight=self.label_weights)
-                loss = loss_fct(logits.view(-1, self.config.n_labels), label_id.view(-1))
-        
-        return ModelOutput(logits=logits, loss=loss)
-class AsagXNetT5(PreTrainedModel):
+
+        return ModelOutput(logits=outputs.logits, loss=outputs.loss)
+
+class AsagXNetLlama(PreTrainedModel):
     """
-    T5-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained
+    Llama-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained
+    The encoder model is a sequence classification model (Llama)
     """
     def __init__(self, config: AsagConfig):
         super().__init__(config)
-        self.encoder = T5EncoderModel.from_pretrained(config.base_model_name_or_path)
-        config.encoder_config = self.encoder.config
+        self.config = config
+        self.use_bidirectional = getattr(config, 'use_bidirectional', True)
+        self.use_latent_attention = getattr(config, 'use_latent_attention', False)
         
-        # Define custom classifier head
-        self.classifier = ClassificationHead(
-            hidden_size=self.encoder.config.hidden_size,
-            n_labels=config.n_labels
+        self.bnb_config = BitsAndBytesConfig(
+            load_in_4bit = True, # Activate 4-bit precision base model loading
+            bnb_4bit_use_double_quant = True, # Activate nested quantization for 4-bit base models (double quantization)
+            bnb_4bit_quant_type = "nf4",# Quantization type (fp4 or nf4)
+            bnb_4bit_compute_dtype = torch.bfloat16, # Compute data type for 4-bit base models
         )
         
-        # this initializes weights and ties embeddings if needed
+        self.model = LlamaModel.from_pretrained(
+            config.base_model_name_or_path,
+            quantization_config=self.bnb_config if torch.cuda.is_available() else None,
+            trust_remote_code=True
+        )
+        
+        hidden_size = self.model.config.hidden_size
+        
+        if self.use_latent_attention:
+            self.latent_attn = LatentAttention(hidden_size)
+
+        self.classifier = ClassificationHead(hidden_size, config.n_labels)
+        if config.use_lora:
+            self.model = prepare_model_for_kbit_training(self.model)
+            self.model = get_peft_model(self.model, lora_config)
+            self.model.print_trainable_parameters()
         self.post_init()
+    def get_last_hidden_state(self, hidden_states: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+        # Find the positions of the last non-padding tokens
+        seq_lengths = attention_mask.sum(dim=1) - 1  # -1 because indices are 0-based
+        batch_size = hidden_states.shape[0]
+        
+        # Gather the hidden states of the last tokens
+        last_hidden = hidden_states[torch.arange(batch_size, device=hidden_states.device), seq_lengths]
+        return last_hidden
+    def create_bidirectional_mask(self, attention_mask: torch.Tensor, input_ids: torch.Tensor) -> torch.Tensor:
+        batch_size, seq_length = input_ids.shape
+        device = input_ids.device
+
+
+        bidirectional_mask = torch.zeros(
+            (batch_size, 1, seq_length, seq_length),
+            dtype=torch.float32, 
+            device=device
+        )
+        if attention_mask is not None:
+            seq_lengths = attention_mask.sum(dim=1)
+            for i in range(batch_size):
+                valid_len = seq_lengths[i].item()
+                bidirectional_mask[i, 0, :valid_len, :valid_len] = 0.0
+
+                min_val = torch.finfo(torch.float32).min
+                bidirectional_mask[i, 0, valid_len:, :] = min_val
+                bidirectional_mask[i, 0, :, valid_len:] = min_val
+        
+        return bidirectional_mask
     def forward(
         self, 
         input_ids: torch.Tensor, 
         attention_mask: torch.Tensor, 
-        token_type_ids: Optional[torch.Tensor] = None, 
         label_id: Optional[torch.Tensor] = None
     ) -> ModelOutput:
         
-        # Get raw hidden states from encoder
-        encoder_outputs = self.encoder(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            token_type_ids=token_type_ids,
-        )
+        # Set bidirectional attention if needed (non-causal)
+        if self.use_bidirectional:
+            # Create bidirectional attention mask
+            extended_attention_mask = self.create_bidirectional_mask(attention_mask, input_ids)
+            outputs = self.model(
+                input_ids=input_ids,
+                attention_mask=extended_attention_mask
+            )
+        else:
+            # Use default causal attention
+            outputs = self.model(
+                input_ids=input_ids,
+                attention_mask=attention_mask
+            )
         
-        # Get sequence representation (mean pooling or CLS token)
-        hidden_states = encoder_outputs.last_hidden_state
-        pooled_output = eos_embeddings(hidden_states, attention_mask)  # Use last non-padding token for classification
-        # Apply classifier head
-        logits = self.classifier(pooled_output)
-        # Compute loss if labels provided
-        loss = None
-        if label_id is not None:
-            if self.config.n_labels == 1:
-                loss_fct = nn.MSELoss()
-                loss = loss_fct(logits.view(-1), label_id.float().view(-1))
-            else:
-                loss_fct = CrossEntropyLoss()
-                loss = loss_fct(logits.view(-1, self.config.n_labels), label_id.view(-1))
-        return ModelOutput(logits=logits, loss=loss)
-class AsagXNetLLM(PreTrainedModel):
-    """
-    LLM-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained
-    """
-    def __init__(self, config: AsagConfig):
-        super().__init__(config)
-        
-class PointerRubricModel(PreTrainedModel):
-    """
-    The implementation of GRASP
-    """
-    def __init__(self, config: AsagConfig):
-        super().__init__(config)
-        config.model_type = PointerRubricModel
-        self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path)
-
-        self.pointer_head = nn.Bilinear(self.encoder.config.hidden_size, self.encoder.config.hidden_size, 1)
-        
-    def forward(
-        self,
-        input_ids: torch.Tensor,
-        attention_mask: torch.Tensor,
-        rubric_span: torch.Tensor,
-        answer_span: torch.Tensor,
-        rubric_mask: torch.Tensor,
-        label_id: Optional[torch.Tensor] = None
-    ) -> ModelOutput:
-        """
-        Forward method for the Pointer Rubric Model.
-        """
-        encoder_outputs = self.encoder(
-            input_ids=input_ids,
-            attention_mask=attention_mask
-        )
-        seq_embeddings = encoder_outputs.last_hidden_state
-        B, R = rubric_span.size(0), rubric_span.size(1)
-        H = seq_embeddings.size(-1)
-        rubric_embeddings = torch.zeros((B, R, H), dtype=seq_embeddings.dtype, device=seq_embeddings.device)
-        for i in range(R):
-            starts, ends = rubric_span[:, i, 0], rubric_span[:, i, 1]
-            emb = torch.stack([
-                seq_embeddings[b, starts[b]:ends[b]].mean(dim=0) 
-                if rubric_mask[b, i] else torch.zeros(H, dtype=seq_embeddings.dtype, device=seq_embeddings.device)
-                for b in range(B)
-            ])
-            rubric_embeddings[:, i, :] = emb
-        ans_starts, ans_ends = answer_span[:, 0], answer_span[:, 1]
-        answer_embeddings = torch.stack([
-            seq_embeddings[b, ans_starts[b]:ans_ends[b]].mean(dim=0) 
-            for b in range(B)
-        ])
-        answer_embeddings = answer_embeddings.unsqueeze(1).expand(-1, R, -1)  # Expand to match rubric embeddings
-        scores = self.pointer_head(rubric_embeddings, answer_embeddings).squeeze(-1)  # Shape: (B, R)
-        scores = scores.masked_fill(~rubric_mask, float('-inf'))  # Apply mask to scores
-        logits = F.softmax(scores, dim=-1)  # Convert scores to probabilities
+        # Get the last token representation for classification
+    
+        last_hidden_states = outputs.last_hidden_state
+        if self.use_latent_attention:
+            last_hidden_states = self.latent_attn(last_hidden_states)
+            pool_output = mean_pooling(last_hidden_states, attention_mask)
+            logits = self.classifier(pool_output)
+        else:
+            pool_output = self.get_last_hidden_state(last_hidden_states, attention_mask)
+            logits = self.classifier(pool_output)
         loss = None
         if label_id is not None:
             loss_fct = CrossEntropyLoss()
-            loss = loss_fct(logits.view(-1, logits.size(-1)), label_id.view(-1))
+            loss = loss_fct(logits.view(-1, self.config.n_labels), label_id.view(-1))
         return ModelOutput(logits=logits, loss=loss)
 
 class AsagSNet(PreTrainedModel):
@@ -303,11 +279,6 @@ class AsagSNet(PreTrainedModel):
         # load underlying encoder
         self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path)
         config.encoder_config = self.encoder.config
-        # optional LoRA wrapping
-        if config.use_lora:
-            # freeze_model(self.encoder)
-            self.encoder = get_peft_model(self.encoder, lora_config)
-            self.encoder.print_trainable_parameters()
 
         # this initializes weights and ties embeddings if needed
         self.post_init()
@@ -352,13 +323,73 @@ class AsagSNet(PreTrainedModel):
             label_id_cosine[label_id_cosine == 0] = -1
             loss = loss_fct(logits, label_id_cosine)
         return ModelOutput(logits=logits, loss=loss)
+class AsagSNetLlama(AsagSNet):
+    """
+    Llama-based Sentence Transformer model for ASAG that computes cosine similarity between
+    separately encoded student answers and rubrics.
+    """
+    def __init__(self, config: AsagConfig):
+        # Initialize PreTrainedModel directly instead of AsagSNet.__init__
+        PreTrainedModel.__init__(self, config)
+        self.config = config
+        self.use_bidirectional = getattr(config, 'use_bidirectional', True)
+        self.use_latent_attention = getattr(config, 'use_latent_attention', False)
+        
+        self.bnb_config = BitsAndBytesConfig(
+            load_in_4bit = True,
+            bnb_4bit_use_double_quant = True,
+            bnb_4bit_quant_type = "nf4",
+            bnb_4bit_compute_dtype = torch.bfloat16,
+        )
+        
+        # Use Llama encoder instead of AutoModel
+        self.encoder = LlamaModel.from_pretrained(
+            config.base_model_name_or_path,
+            quantization_config=self.bnb_config if torch.cuda.is_available() else None,
+            trust_remote_code=True
+        )
+        config.encoder_config = self.encoder.config
+        
+        hidden_size = self.encoder.config.hidden_size
+        
+        if self.use_latent_attention:
+            self.latent_attn = LatentAttention(hidden_size)
 
+        if config.use_lora:
+            self.encoder = prepare_model_for_kbit_training(self.encoder)
+            self.encoder = get_peft_model(self.encoder, lora_config)
+            self.encoder.print_trainable_parameters()
+        
+        self.post_init()
+
+    # Inherit create_bidirectional_mask from AsagXNetLlama
+    create_bidirectional_mask = AsagXNetLlama.create_bidirectional_mask
+
+    def encode(self, input_ids, attention_mask):
+        if self.use_bidirectional:
+            extended_attention_mask = self.create_bidirectional_mask(attention_mask, input_ids)
+            outputs = self.encoder(
+                input_ids=input_ids,
+                attention_mask=extended_attention_mask
+            )
+        else:
+            outputs = self.encoder(
+                input_ids=input_ids,
+                attention_mask=attention_mask
+            )
+        
+        last_hidden_state = outputs.last_hidden_state
+        
+        if self.use_latent_attention:
+            last_hidden_state = self.latent_attn(last_hidden_state)
+        
+        embeddings = mean_pooling(last_hidden_state, attention_mask)
+        return embeddings
         
 if __name__ == "__main__":
-    model_config = AsagConfig(base_model_name_or_path="bert-base-uncased", n_labels=2, use_lora=False)
-    asagxnetmodel = AsagXNet(model_config)
-    input_ids = torch.tensor([[101, 102, 0, 0], [101, 103, 104, 0]])
-    attention_mask = torch.tensor([[1, 1, 0, 0], [1, 1, 1, 0]])
-    label_id = torch.tensor([1, 0])
-    outputs = asagxnetmodel(input_ids=input_ids, attention_mask=attention_mask, label_id=label_id)
+    model_config = AsagConfig(base_model_name_or_path="meta-llama/Llama-3.2-1B", n_labels=1, use_lora=False, use_latent_attention=True, use_bidirectional=True)
+    asagllm = AsagXNetLlama(model_config)
+    input_ids = torch.randint(0, 1000, (2, 128))  # Example input
+    attention_mask = torch.randint(0, 2, (2, 128))  # Example attention mask
+    outputs = asagllm(input_ids=input_ids, attention_mask=attention_mask)
     print(outputs)
