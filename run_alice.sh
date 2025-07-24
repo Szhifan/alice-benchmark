@@ -11,7 +11,7 @@ EXP_NAME="mbert"
 
 ## Local variables for current experiment
 EXP_ROOT="${RESULTS_ROOT}/${EXP_NAME}"
-export HF_HOME=""
+export HF_HOME="/home/hf_home"
 export WANDB_PROJECT="alice-rubrics"
 export WANDB_NAME="${EXP_NAME}"
 export WANDB_NOTES="Training Alice with mBERT base model"

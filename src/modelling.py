@@ -157,7 +157,7 @@ class AsagXNet(PreTrainedModel):
         input_ids: torch.Tensor, 
         attention_mask: torch.Tensor, 
         token_type_ids: Optional[torch.Tensor] = None, 
-        label_id: Optional[torch.Tensor] = None
+        labels: Optional[torch.Tensor] = None
     ) -> ModelOutput:
         
 
@@ -166,15 +166,15 @@ class AsagXNet(PreTrainedModel):
             attention_mask=attention_mask,
             token_type_ids=token_type_ids
         )
-        
+
         loss = None
-        if label_id is not None:
+        if labels is not None:
             if self.config.n_labels == 1:
                 loss_fct = nn.MSELoss()
-                loss = loss_fct(outputs.logits.view(-1), label_id.view(-1).float())
+                loss = loss_fct(outputs.logits.view(-1), labels.view(-1).float())
             else:
                 loss_fct = CrossEntropyLoss(weight=self.label_weights.to(outputs.logits.device))
-                loss = loss_fct(outputs.logits.view(-1, self.config.n_labels), label_id.view(-1))
+                loss = loss_fct(outputs.logits.view(-1, self.config.n_labels), labels.view(-1))
                 outputs.loss = loss
 
         return ModelOutput(logits=outputs.logits, loss=outputs.loss)
@@ -247,7 +247,7 @@ class AsagXNetLlama(PreTrainedModel):
         self, 
         input_ids: torch.Tensor, 
         attention_mask: torch.Tensor, 
-        label_id: Optional[torch.Tensor] = None
+        labels: Optional[torch.Tensor] = None
     ) -> ModelOutput:
         
         # Set bidirectional attention if needed (non-causal)
@@ -276,9 +276,9 @@ class AsagXNetLlama(PreTrainedModel):
             pool_output = self.get_last_hidden_state(last_hidden_states, attention_mask)
             logits = self.classifier(pool_output)
         loss = None
-        if label_id is not None:
+        if labels is not None:
             loss_fct = CrossEntropyLoss()
-            loss = loss_fct(logits.view(-1, self.config.n_labels), label_id.view(-1))
+            loss = loss_fct(logits.view(-1, self.config.n_labels), labels.view(-1))
         return ModelOutput(logits=logits, loss=loss)
 
 class AsagSNet(PreTrainedModel):
@@ -311,7 +311,7 @@ class AsagSNet(PreTrainedModel):
         attention_mask_a: torch.Tensor,
         input_ids_b: torch.Tensor,  # Rubric
         attention_mask_b: torch.Tensor,
-        label_id: Optional[torch.Tensor] = None
+        labels: Optional[torch.Tensor] = None
     ) -> ModelOutput:
         
         # Encode student answer
@@ -330,8 +330,8 @@ class AsagSNet(PreTrainedModel):
         # Convert label 0 to -1 for cosine embedding loss
 
         loss_fct = CosineEmbeddingLoss()
-        if label_id is not None:
-            label_id_cosine = label_id.clone()
+        if labels is not None:
+            label_id_cosine = labels.clone()
             label_id_cosine[label_id_cosine == 0] = -1
             loss = loss_fct(logits, label_id_cosine)
         return ModelOutput(logits=logits, loss=loss)
