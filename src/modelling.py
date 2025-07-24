@@ -8,23 +8,15 @@ from transformers import (
     BitsAndBytesConfig, 
     LlamaModel
 )
+from transformers.utils.generic import ModelOutput
 import torch
 from torch.nn import CrossEntropyLoss, Bilinear, CosineEmbeddingLoss
 from torch.nn.functional import cosine_similarity
 from dataclasses import dataclass
 from typing import Optional
 import re 
-from peft import LoraConfig, TaskType, get_peft_model, prepare_model_for_kbit_training
-lora_config = LoraConfig(
-        r=128,
-        lora_alpha=128,
-        lora_dropout=0.1,
-        bias="none"
-        )
-@dataclass
-class ModelOutput:
-    logits: torch.Tensor
-    loss: Optional[torch.Tensor] = None
+
+
 def mean_pooling(
     token_embeddings: torch.Tensor,
     attention_mask: Optional[torch.Tensor] = None
@@ -111,7 +103,6 @@ class AsagConfig(PretrainedConfig):
         self,
         base_model_name_or_path: str = None,
         n_labels: int = 1,
-        use_lora: bool = False,
         use_bidirectional: bool = True,  
         use_latent_attention: bool = False, 
         use_label_weights: bool = True,
@@ -120,10 +111,10 @@ class AsagConfig(PretrainedConfig):
         super().__init__(**kwargs)
         self.base_model_name_or_path = base_model_name_or_path or getattr(self, "name_or_path", None)
         self.n_labels = n_labels
-        self.use_lora = use_lora
         self.use_bidirectional = use_bidirectional
-        self.use_latent_attention = use_latent_attention,
+        self.use_latent_attention = use_latent_attention
         self.use_label_weights = use_label_weights
+        self._name_or_path = self.base_model_name_or_path
 
  
 
@@ -140,14 +131,11 @@ class AsagXNet(PreTrainedModel):
             config.base_model_name_or_path,
             num_labels=config.n_labels
         )
+        
         config.encoder_config = self.model.config
         # Class weights for imbalanced dataset (label 0: 2/3, label 1: 1/3)
         self.label_weights = torch.tensor([0.75, 1.5])  if config.use_label_weights else None
-        # optional LoRA wrapping
-        if config.use_lora:
-            lora_config.task_type = TaskType.SEQ_CLS
-            self.model = get_peft_model(self.model, lora_config)
-            self.model.print_trainable_parameters()
+
 
         # this initializes weights and ties embeddings if needed
         self.post_init()
@@ -173,7 +161,7 @@ class AsagXNet(PreTrainedModel):
                 loss_fct = nn.MSELoss()
                 loss = loss_fct(outputs.logits.view(-1), labels.view(-1).float())
             else:
-                loss_fct = CrossEntropyLoss(weight=self.label_weights.to(outputs.logits.device))
+                loss_fct = CrossEntropyLoss()
                 loss = loss_fct(outputs.logits.view(-1, self.config.n_labels), labels.view(-1))
                 outputs.loss = loss
 
@@ -209,10 +197,6 @@ class AsagXNetLlama(PreTrainedModel):
             self.latent_attn = LatentAttention(hidden_size)
 
         self.classifier = ClassificationHead(hidden_size, config.n_labels)
-        if config.use_lora:
-            self.model = prepare_model_for_kbit_training(self.model)
-            self.model = get_peft_model(self.model, lora_config)
-            self.model.print_trainable_parameters()
         self.post_init()
     def get_last_hidden_state(self, hidden_states: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
         # Find the positions of the last non-padding tokens
@@ -366,11 +350,6 @@ class AsagSNetLlama(AsagSNet):
         
         if self.use_latent_attention:
             self.latent_attn = LatentAttention(hidden_size)
-
-        if config.use_lora:
-            self.encoder = prepare_model_for_kbit_training(self.encoder)
-            self.encoder = get_peft_model(self.encoder, lora_config)
-            self.encoder.print_trainable_parameters()
         
         self.post_init()
 
@@ -401,7 +380,4 @@ class AsagSNetLlama(AsagSNet):
 if __name__ == "__main__":
     model_config = AsagConfig(base_model_name_or_path="meta-llama/Llama-3.2-1B", n_labels=1, use_lora=False, use_latent_attention=True, use_bidirectional=True)
     asagllm = AsagXNetLlama(model_config)
-    input_ids = torch.randint(0, 1000, (2, 128))  # Example input
-    attention_mask = torch.randint(0, 2, (2, 128))  # Example attention mask
-    outputs = asagllm(input_ids=input_ids, attention_mask=attention_mask)
-    print(outputs)
+    

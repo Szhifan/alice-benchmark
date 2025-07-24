@@ -3,21 +3,25 @@ import os
 import numpy as np
 import wandb
 from train_utils import (
-    set_seed,
-    configure_logging,
-    import_cp,
-    train_epoch,
-    evaluate,
-    transform_for_inference,
-    eval_report,
-    save_report,
+    AsagTrainer,
     get_args
 )
-from data_prep_alice import (
+from utils import (
+    set_seed,
+    configure_logging,
+    eval_report,
+    save_report,
+    transform_for_inference
+)
+from inference import evaluate
+from data_prep import (
     RubricRetrievalLoader,
     encode_with_fields,
     encode_rubric_pair,
-    get_tokenizer
+    get_tokenizer,
+    xnet_collate_fn,
+    snet_collate_fn,
+    collate_fn
 )
 
 def main(args):
@@ -36,50 +40,43 @@ def main(args):
     else:
         wandb.init(mode="disabled")
     print("Training arguments: %s", args)
+    
     # Load the dataset
     ds = RubricRetrievalLoader(train_frac=args.train_frac) 
-    collate_fn = ds.collate_fn
     tokenizer = get_tokenizer(args.base_model)
     # you can change the encoding function here
     ds.get_encoding(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
-    steps_per_epoch = int(np.ceil(len(ds.train) / args.batch_size)) 
-    total_steps = args.max_epoch * steps_per_epoch
-    # Load the checkpoint
-    cp = import_cp(args, total_steps)
-    model = cp["model"]
-    optimizer = cp["optimizer"]
-    scheduler = cp["scheduler"]
+    
+    # Determine the correct collate function
+    if "xnet" in args.model_type:
+        collate_fn_to_use = xnet_collate_fn
+    elif "snet" in args.model_type:
+        collate_fn_to_use = snet_collate_fn
+    else:
+        collate_fn_to_use = collate_fn
+    
+    # Initialize trainer
+    trainer = AsagTrainer(args, ds.train, ds.val)
+    
     if not args.test_only:
-        model.train()
-        wandb.watch(model)
-        # Training loop
         print("***** Running training *****")
         print("Num examples = %d", len(ds.train))
         print("  Num Epochs = %d", args.max_epoch)
         print("  Instantaneous batch size per GPU = %d", args.batch_size)
-        train_stats = train_epoch(
-            model,
-            ds.train,
-            ds.val,
-            optimizer,
-            scheduler,
-            args,
-            collate_fn=collate_fn,
-            tokenizer=tokenizer
-        )
+        trainer.train()
         print("***** Training finished *****")
+    
     # Evaluate on test dataset
     for test in ["test_ua", "test_uq"]:
-        
         test_ds = getattr(ds, test)
         print(f"***** Running evaluation on {test} *****")
         print("  Num examples = %d", len(test_ds))
         test_predictions, test_loss = evaluate(
-            model,
+            trainer.model,
             test_ds,
             batch_size=args.batch_size,
             is_test=True,
-            collate_fn=collate_fn,
+            collate_fn=lambda x: collate_fn_to_use(x, pad_id=tokenizer.pad_token_id, return_meta=True),
             tokenizer=tokenizer
         )
         test_predictions.to_csv(os.path.join(args.save_dir, f"{test}_raw_predictions.csv"), index=False)
