@@ -21,7 +21,7 @@ mkdir -p ${EXP_ROOT}
 python src/train_seq.py --save-dir "${EXP_ROOT}" \
     --base-model "bert-base-multilingual-uncased" \
     --batch-size 16 \
-    --train-frac 0.01 \
+    --train-frac 1 \
     --lr 2e-5 \
     --max-epoch 5
 

@@ -23,7 +23,15 @@ from data_prep import (
     snet_collate_fn,
     collate_fn
 )
-
+def find_best_checkpoint(save_dir):
+    cp_list = [os.path.join(save_dir, f) for f in os.listdir(save_dir) if f.startswith("checkpoint")]
+    if len(cp_list) == 0:
+        return None
+    if len(cp_list) == 1:
+        return cp_list[0]
+    for cp in cp_list:
+        if "last" not in cp:
+            return cp 
 def main(args):
     if "t5" in args.base_model:
         args.model_type = "asagxnett5"
@@ -67,22 +75,29 @@ def main(args):
         print("***** Training finished *****")
     
     # Evaluate on test dataset
+    cp_path = find_best_checkpoint(args.save_dir)
+    if cp_path is None:
+        print("No checkpoints found. Exiting.")
+        return
+    test_model = trainer.model.from_pretrained(cp_path)
     for test in ["test_ua", "test_uq"]:
         test_ds = getattr(ds, test)
         print(f"***** Running evaluation on {test} *****")
         print("  Num examples = %d", len(test_ds))
         test_predictions, test_loss = evaluate(
-            trainer.model,
+            test_model,
             test_ds,
             batch_size=args.batch_size,
-            is_test=True,
-            collate_fn=lambda x: collate_fn_to_use(x, pad_id=tokenizer.pad_token_id, return_meta=True),
-            tokenizer=tokenizer
+            collate_fn=lambda x: collate_fn_to_use(x, pad_id=tokenizer.pad_token_id, return_meta=True)
         )
-        test_predictions.to_csv(os.path.join(args.save_dir, f"{test}_raw_predictions.csv"), index=False)
+        pred_dir = os.path.join(args.save_dir, "predictions")
+        if not os.path.exists(pred_dir):
+            os.makedirs(pred_dir)
+        test_predictions.to_csv(os.path.join(pred_dir, f"{test}_raw_predictions.csv"), index=False)
         test_predictions = transform_for_inference(test_predictions)
+        test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
         test_metrics = eval_report(test_predictions)
-        save_report(test_metrics, os.path.join(args.save_dir, f"{test}_metrics.json"))
+        save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
         metrics_wandb = {test: test_metrics}
         wandb.log(metrics_wandb)
     if args.no_save:

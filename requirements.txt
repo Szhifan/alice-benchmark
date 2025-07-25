@@ -10,3 +10,4 @@ sentencepiece
 peft
 bitsandbytes
 trl 
+evaluate

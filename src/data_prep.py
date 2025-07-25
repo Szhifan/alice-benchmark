@@ -42,7 +42,7 @@ def encode_rubric_pair(example, tokenizer):
     for field in output:
         example[field] = output[field]
     return example
-def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric"], add_instruction: bool = False, format: Literal["natural_lang", "structured"] = "natural_lang"):
+def encode_with_fields(example, tokenizer, fields: list[str] = ["answer"], add_instruction: bool = False, format: Literal["natural_lang", "structured"] = "natural_lang"):
     """
     Encode the fields of the example using the tokenizer with natural language.
     Available fields: answer, question, sample_solution, rubric.
@@ -55,7 +55,11 @@ def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric
             text2encode += f"{field}: {example[field]}\n"
         elif format == "structured":
             text2encode += f"<{field}>{example[field]}</{field}>\n"
-
+    if format == "natural_lang":
+        rubric_text = f"rubric: {example['rubric']}"
+    elif format == "structured":
+        rubric_text = f"<rubric>{example['rubric']}</rubric>"
+    text2encode += rubric_text
     if add_instruction:
         text2encode = "Determine if rubric is satisfied by the answer:\n" + text2encode
     output = tokenizer(text2encode, max_length=512, truncation=True)

@@ -165,7 +165,7 @@ class AsagTrainer:
             logging_steps=10,
             save_strategy="epoch",
             eval_strategy="epoch",
-            save_total_limit=3,
+            save_total_limit=1,
             fp16=self.args.fp16,
             load_best_model_at_end=True,
             lr_scheduler_type="cosine",
@@ -175,6 +175,8 @@ class AsagTrainer:
             gradient_checkpointing=True if self.args.use_lora else False,
             metric_for_best_model="eval_accuracy", 
             label_names=["labels"],
+            greater_is_better=True,
+            save_only_model=True,
         )
         trainer = SFTTrainer(
             model=self.model,
@@ -188,6 +190,8 @@ class AsagTrainer:
         train_res = trainer.train()
         trainer.log_metrics("train", train_res.metrics)
         trainer.save_metrics("train", train_res.metrics)
-        trainer.save_model()
-        self.tok.save_pretrained(self.args.save_dir)
+        best_model_path = os.path.join(self.args.save_dir, "checkpoint_last")
+        if not os.path.exists(best_model_path):
+            os.makedirs(best_model_path)
+        trainer.save_model(best_model_path)
         print("Training completed.")
