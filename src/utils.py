@@ -62,14 +62,14 @@ def get_optimizer_step(optimizer):
     
 
    
-def metrics_calc(label_id, pred_id):
+def metrics_calc(labels, pred_id):
     """
     Calculate the metrics for the predictions, including Quadratic Weighted Kappa (QWK), F1 score, and accuracy.
     """
     
-    qwk = cohen_kappa_score(label_id, pred_id, weights="quadratic")
-    f1 = f1_score(label_id, pred_id, average='weighted')
-    acc = accuracy_score(label_id, pred_id)
+    qwk = cohen_kappa_score(labels, pred_id, weights="quadratic")
+    f1 = f1_score(labels, pred_id, average='weighted')
+    acc = accuracy_score(labels, pred_id)
     
     metrics = {
         "qwk": qwk,
@@ -88,14 +88,14 @@ def eval_report(pred_df, group_by=None):
     results = {}
 
     # Calculate overall metrics
-    metrics = metrics_calc(pred_df["pred_id"].values, pred_df["label_id"].values)
+    metrics = metrics_calc(pred_df["pred_id"].values, pred_df["labels"].values)
     results["qwk"] = metrics["qwk"]
 
     # Calculate QWK for each group if group_by is provided
     if group_by:
         grouped = pred_df.groupby(group_by)
         for group, group_df in grouped:
-            group_metrics = metrics_calc(group_df["label_id"].values, group_df["pred_id"].values)
+            group_metrics = metrics_calc(group_df["labels"].values, group_df["pred_id"].values)
             results[f"{group}_qwk"] = group_metrics["qwk"]
     return results
 
@@ -115,7 +115,7 @@ def save_prediction(pred_df,id2label,path):
         pred_df.to_csv(f, index=False) 
 
 
-def get_label_weights(dataset,label_field="label_id"):
+def get_label_weights(dataset,label_field="labels"):
     """
     Calculate label weights for the optimizer based on the label distribution in the dataset.
     """
@@ -129,7 +129,7 @@ def transform_for_inference(pred_df, other_filds=None):
     pred_df["logit_label"] = pred_df['logits'].apply(lambda x: float(x[1])) if len(pred_df['logits'].iloc[0]) > 1 else pred_df['logits']
     final_fields = ["id", "rubric_level", "level", "logit_label"] + (other_filds if other_filds else [])
     final_df = pred_df.loc[pred_df.groupby('id')['logit_label'].idxmax()][final_fields]
-    final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'label_id'})
+    final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'labels'})
     return final_df 
 
 if __name__ == "__main__":
@@ -141,7 +141,7 @@ if __name__ == "__main__":
         final_fields = ["id", "rubric_level", "level", "logit_label"] + (other_filds if other_filds else [])
         final_df = pred_df.loc[pred_df.groupby('id')['logit_label'].idxmax()][final_fields]
 
-        final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'label_id'})
+        final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'labels'})
         return final_df 
     path_dr = "results/gbert/test_ua_raw_predictions.csv"
     df = pd.read_csv(path_dr)

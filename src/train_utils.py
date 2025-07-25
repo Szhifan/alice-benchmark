@@ -173,9 +173,9 @@ class AsagTrainer:
             optim="paged_adamw_32bit" if self.args.use_lora else "adamw_torch",
             remove_unused_columns=False,
             gradient_checkpointing=True if self.args.use_lora else False,
-            metric_for_best_model="eval_accuracy", 
+            metric_for_best_model="eval_loss", 
             label_names=["labels"],
-            greater_is_better=True,
+            greater_is_better=False,
             save_only_model=True,
         )
         trainer = SFTTrainer(
