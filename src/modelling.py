@@ -14,7 +14,9 @@ from torch.nn import CrossEntropyLoss, Bilinear, CosineEmbeddingLoss
 from torch.nn.functional import cosine_similarity
 from dataclasses import dataclass
 from typing import Optional
-import re 
+from transformers.models.auto.modeling_auto import MODEL_MAPPING
+from transformers.models.auto.configuration_auto import CONFIG_MAPPING
+
 
 
 def mean_pooling(
@@ -116,14 +118,13 @@ class AsagConfig(PretrainedConfig):
         self.use_label_weights = use_label_weights
         self._name_or_path = self.base_model_name_or_path
 
- 
 
 class AsagXNet(PreTrainedModel):
     """
     Encoder-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained
     The encoder model is a sequence classification model (BERT, RoBERTa, etc.)
     """
-
+    config_class = AsagConfig
     def __init__(self, config: AsagConfig):
         super().__init__(config)
         # load underlying sequence classification model
@@ -172,6 +173,7 @@ class AsagXNetLlama(PreTrainedModel):
     Llama-based ASAG model inheriting from PreTrainedModel to leverage save_pretrained and from_pretrained
     The encoder model is a sequence classification model (Llama)
     """
+    config_class = AsagConfig
     def __init__(self, config: AsagConfig):
         super().__init__(config)
         self.config = config
@@ -270,6 +272,7 @@ class AsagSNet(PreTrainedModel):
     Sentence Transformer model for ASAG that computes cosine similarity between
     separately encoded student answers and rubrics.
     """
+    config_class = AsagConfig
     def __init__(self, config: AsagConfig):
         super().__init__(config)
         # load underlying encoder
@@ -324,6 +327,7 @@ class AsagSNetLlama(AsagSNet):
     Llama-based Sentence Transformer model for ASAG that computes cosine similarity between
     separately encoded student answers and rubrics.
     """
+    config_class = AsagConfig
     def __init__(self, config: AsagConfig):
         # Initialize PreTrainedModel directly instead of AsagSNet.__init__
         PreTrainedModel.__init__(self, config)
@@ -378,6 +382,14 @@ class AsagSNetLlama(AsagSNet):
         return embeddings
         
 if __name__ == "__main__":
-    model_config = AsagConfig(base_model_name_or_path="meta-llama/Llama-3.2-1B", n_labels=1, use_lora=False, use_latent_attention=True, use_bidirectional=True)
-    asagllm = AsagXNetLlama(model_config)
-    
+    config = AsagConfig(
+        base_model_name_or_path="bert-base-uncased",
+        n_labels=2,
+        use_bidirectional=True,
+        use_latent_attention=False,
+        use_label_weights=True
+    )
+    model = AsagXNet(config)
+    model.save_pretrained("asag_xnet_model")
+    model = AsagXNet.from_pretrained("asag_xnet_model")
+   
