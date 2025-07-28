@@ -26,6 +26,7 @@ def basic_encode(example, tokenizer):
     output = tokenizer(example["answer"], max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
+    example["labels"] = int(example["level"])
     return example
 
 def encode_solution_pair(example, tokenizer):
@@ -33,6 +34,7 @@ def encode_solution_pair(example, tokenizer):
     output = tokenizer(example["sample_solution"], example["answer"], max_length=512, truncation=True) 
     for field in output:
         example[field] = output[field]
+    example["labels"] = int(example["level"])
     return example
 def encode_rubric_pair(example, tokenizer):
     """
@@ -42,6 +44,19 @@ def encode_rubric_pair(example, tokenizer):
     for field in output:
         example[field] = output[field]
     return example
+def encode_fields_special_tokens(example, tokenizer, fields: list[str] = ["answer"]): 
+    ""
+    text2encode = []
+    for field in fields: 
+        if field not in example:
+            continue 
+        if field == "rubric":
+            continue 
+        text2encode.append(example[field])
+    text2encode.append(example["rubric"])
+    text2encode = tokenizer.sep_token.join(text2encode)
+    output = tokenizer(text2encode, max_length=512, truncation=True, add_special_tokens=True)
+    return output
 def encode_with_fields(example, tokenizer, fields: list[str] = ["answer"], add_instruction: bool = False, format: Literal["natural_lang", "structured"] = "natural_lang"):
     """
     Encode the fields of the example using the tokenizer with natural language.
@@ -78,6 +93,7 @@ def encode_rubric_separate(example, tokenizer):
     for field in rubric_output:
         example[f"rubric_{field}"] = rubric_output[field]
     return example
+
 def encode_with_fields_separate_rubric(
     example, tokenizer, fields: list[str] = ["answer"], 
     add_instruction: bool = False, format: Literal["natural_lang", "structured"] = "natural_lang"

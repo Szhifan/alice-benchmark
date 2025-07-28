@@ -90,6 +90,8 @@ def eval_report(pred_df, group_by=None):
     # Calculate overall metrics
     metrics = metrics_calc(pred_df["pred_id"].values, pred_df["labels"].values)
     results["qwk"] = metrics["qwk"]
+    results["f1"] = metrics["f1"]
+    results["accuracy"] = metrics["accuracy"]
 
     # Calculate QWK for each group if group_by is provided
     if group_by:
