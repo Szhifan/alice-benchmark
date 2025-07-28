@@ -33,6 +33,18 @@ def add_training_args(parser):
     """
     add training related args 
     """ 
+        # add experiment arguments 
+    parser.add_argument('--base-model', default='bert-base-uncased', type=str)
+    parser.add_argument('--seed', default=114514, type=int)
+    parser.add_argument('--n-labels', default=2, type=int)
+    parser.add_argument('--train-frac', default=1.0, type=float)
+    parser.add_argument('--model-type', default='asagxnet', type=str, 
+                        choices=['asagxnet', 'asagsnet'],
+                        help='type of model architecture to use')
+    parser.add_argument('--use-lora', action='store_true', help='use LoRA for training')
+    parser.add_argument('--use-bidirectional', action='store_true', help='use bidirectional attention, only works for Llama')
+    parser.add_argument('--use-latent-attention', action='store_true', help='use latent attention mechanism, only works for Llama')
+    parser.add_argument('--use-label-weights', action='store_true', help='use label weights for imbalanced dataset')
     # Add optimization arguments
     parser.add_argument('--batch-size', default=32, type=int, help='maximum number of sentences in a batch')
     parser.add_argument('--max-epoch', default=3, type=int, help='force stop training at specified epoch')

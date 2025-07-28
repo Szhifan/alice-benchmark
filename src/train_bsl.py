@@ -20,30 +20,7 @@ from data_prep import (
     collate_fn
 
 )
-def add_experiment_args(parser):
-    """
-    add experiment related args 
-    """ 
-    # add experiment arguments 
-    parser.add_argument('--base-model', default='bert-base-multilingual-cased', type=str)
-    parser.add_argument('--model-type', default='asagbsl', type=str)
-    parser.add_argument('--n-labels', default=3, type=int)
-    parser.add_argument('--seed', default=114514, type=int)
-    parser.add_argument('--train-frac', default=1.0, type=float)
-    parser.add_argument('--use-label-weights', action='store_true', help='use label weights for imbalanced dataset')
-    # irrelevant to BSL
-    parser.add_argument('--use-lora', action='store_true', help='use LoRA for training')
-    parser.add_argument('--use-bidirectional', action='store_true', help='use bidirectional attention, only works for Llama')
-    parser.add_argument('--use-latent-attention', action='store_true', help='use latent attention mechanism, only works for Llama')
-    
-def get_experiment_args():
-    parser = argparse.ArgumentParser()
-    add_experiment_args(parser)
-    experiment_args = parser.parse_args()
-    other_args = get_args()
-    # Merge experiment args into main args
-    other_args.__dict__.update(vars(experiment_args))
-    return other_args
+
 def find_best_checkpoint(save_dir):
     cp_list = [os.path.join(save_dir, f) for f in os.listdir(save_dir) if f.startswith("checkpoint")]
     if len(cp_list) == 0:
@@ -118,6 +95,5 @@ def main(args):
             os.remove(checkpoint_dir)
      
 if __name__ == "__main__":
-    experiment_args = get_experiment_args()
-    # Set up logging
+    experiment_args = get_args()
     main(experiment_args)

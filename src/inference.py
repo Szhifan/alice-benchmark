@@ -14,7 +14,7 @@ def evaluate(model, dataset, batch_size, collate_fn=None):
 
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0)
 
- 
+    model.to(DEFAULT_DEVICE)
     model.eval()
     eval_loss = []
     acc_history = deque(maxlen=10)
