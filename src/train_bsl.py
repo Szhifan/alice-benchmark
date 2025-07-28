@@ -31,6 +31,7 @@ def find_best_checkpoint(save_dir):
         if "last" not in cp:
             return cp 
 def main(args):
+    args.model_type = "asagbsl"
     set_seed(args.seed)
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)

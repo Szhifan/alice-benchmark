@@ -18,7 +18,7 @@ export WANDB_NOTES="Training Alice with mBERT base model"
 export WANDB_TAGS="mbert,alice,rubrics"
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
-python src/train_seq.py --save-dir "${EXP_ROOT}" \
+python src/train_rubretrieval.py --save-dir "${EXP_ROOT}" \
     --base-model "bert-base-multilingual-uncased" \
     --batch-size 16 \
     --train-frac 1 \

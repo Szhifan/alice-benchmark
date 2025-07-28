@@ -178,9 +178,6 @@ class AsagTrainer:
             label_names=["labels"],
             greater_is_better=False,
             save_only_model=True,
-            ddp_find_unused_parameters=False,
-            dataloader_pin_memory=True,
-            local_rank=self.args.local_rank if hasattr(self.args, 'local_rank') else -1,
         )
         trainer = SFTTrainer(
             model=self.model,

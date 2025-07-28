@@ -34,6 +34,7 @@ class AsagBsl(PreTrainedModel):
         token_type_ids: Optional[torch.Tensor] = None,
         labels: Optional[torch.Tensor] = None,
     ) -> Union[Tuple[torch.Tensor], ModelOutput]:
+        print(labels)
         outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
