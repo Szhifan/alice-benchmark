@@ -100,7 +100,7 @@ class AsagConfig(PretrainedConfig):
     def __init__(
         self,
         base_model_name_or_path: str = None,
-        n_labels: int = 1,
+        num_labels: int = 1,
         use_bidirectional: bool = True,  
         use_latent_attention: bool = False, 
         use_label_weights: bool = True,
@@ -108,7 +108,7 @@ class AsagConfig(PretrainedConfig):
     ):
         super().__init__(**kwargs)
         self.base_model_name_or_path = base_model_name_or_path or getattr(self, "name_or_path", None)
-        self.n_labels = n_labels
+        self.num_labels = num_labels
         self.use_bidirectional = use_bidirectional
         self.use_latent_attention = use_latent_attention
         self.use_label_weights = use_label_weights

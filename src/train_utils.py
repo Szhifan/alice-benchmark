@@ -36,7 +36,7 @@ def add_training_args(parser):
         # add experiment arguments 
     parser.add_argument('--base-model', default='bert-base-uncased', type=str)
     parser.add_argument('--seed', default=114514, type=int)
-    parser.add_argument('--n-labels', default=2, type=int)
+    parser.add_argument('--num-labels', default=2, type=int)
     parser.add_argument('--train-frac', default=1.0, type=float)
     parser.add_argument('--model-type', default='asagxnet', type=str, 
                         choices=['asagxnet', 'asagsnet'],
@@ -79,7 +79,7 @@ def load_model(args):
     # Load the model based on the specified type
     config = AsagConfig(
         base_model_name_or_path=args.base_model,
-        n_labels=args.n_labels,
+        num_labels=args.num_labels,
         use_lora=args.use_lora,
         use_bidirectional=args.use_bidirectional,
         use_latent_attention=args.use_latent_attention,

@@ -22,6 +22,7 @@ python src/train_bsl.py --save-dir "${EXP_ROOT}" \
     --base-model "bert-base-multilingual-uncased" \
     --batch-size 16 \
     --train-frac 1 \
+    --num-labels 3 \
     --lr 2e-5 \
     --max-epoch 5
 
