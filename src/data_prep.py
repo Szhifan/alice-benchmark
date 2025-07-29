@@ -44,16 +44,16 @@ def encode_rubric_pair(example, tokenizer):
     for field in output:
         example[field] = output[field]
     return example
-def encode_fields_special_tokens(example, tokenizer, fields: list[str] = ["answer"]): 
-    ""
+def encode_fields_special_tokens(example, tokenizer, fields: list[str] = ["answer","rubric"]): 
+    """
+    Encode fields with special tokens.
+    """
     text2encode = []
     for field in fields: 
         if field not in example:
-            continue 
-        if field == "rubric":
-            continue 
+            raise ValueError(f"Field '{field}' not found in the example.")
         text2encode.append(example[field])
-    text2encode.append(example["rubric"])
+
     text2encode = tokenizer.sep_token.join(text2encode)
     output = tokenizer(text2encode, max_length=512, truncation=True, add_special_tokens=True)
     return output
@@ -149,7 +149,6 @@ def xnet_collate_fn(input_batch, pad_id=0, return_meta=False):
     """
     collate function for cross-encoder settings where all fields are encoded together.
     """
-  
     input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True, padding_value=pad_id)
     attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True)
     if "token_type_ids" in input_batch[0]:
@@ -172,9 +171,8 @@ def xnet_collate_fn(input_batch, pad_id=0, return_meta=False):
     return batch
 def snet_collate_fn(input_batch, pad_id=0, return_meta=False):
     """
-    colllate function for settings where the rubric and answer are encoded separately.
+    collate function for settings where the rubric and answer are encoded separately.
     """
-
     input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True, padding_value=pad_id)
     attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True)
 

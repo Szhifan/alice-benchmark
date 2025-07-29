@@ -16,7 +16,7 @@ from utils import (
 from inference import evaluate
 from data_prep import (
     RubricRetrievalLoader,
-    encode_with_fields,
+    encode_fields_special_tokens,
     encode_rubric_pair,
     get_tokenizer,
     xnet_collate_fn,
@@ -24,19 +24,7 @@ from data_prep import (
     collate_fn
 )
 
-
-def find_best_checkpoint(save_dir):
-    cp_list = [os.path.join(save_dir, f) for f in os.listdir(save_dir) if f.startswith("checkpoint")]
-    if len(cp_list) == 0:
-        return None
-    if len(cp_list) == 1:
-        return cp_list[0]
-    for cp in cp_list:
-        if "last" not in cp:
-            return cp 
 def main(args):
-    if "t5" in args.base_model:
-        args.model_type = "asagxnett5"
     set_seed(args.seed)
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
@@ -55,13 +43,12 @@ def main(args):
     ds = RubricRetrievalLoader(train_frac=args.train_frac) 
     tokenizer = get_tokenizer(args.base_model)
     # you can change the encoding function here
-    ds.get_encoding(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
-    # ds.get_encoding(
-    #     tokenizer=tokenizer,
-    #     enc_fn=encode_with_fields,
-    #     fields=["question", "answer"],
-    #     max_length=args.max_length
-    # )
+    # ds.get_encoding(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
+    ds.get_encoding(
+        tokenizer=tokenizer,
+        enc_fn=encode_fields_special_tokens,
+        fields=["answer", "rubric", "question"],
+    )
     
     # Determine the correct collate function
     if "xnet" in args.model_type:
@@ -83,11 +70,7 @@ def main(args):
         print("***** Training finished *****")
     
     # Evaluate on test dataset
-    cp_path = find_best_checkpoint(args.save_dir)
-    if cp_path is None:
-        print("No checkpoints found. Exiting.")
-        return
-    test_model = trainer.model.from_pretrained(cp_path)
+    test_model = trainer.model
     for test in ["test_ua", "test_uq"]:
         test_ds = getattr(ds, test)
         print(f"***** Running evaluation on {test} *****")

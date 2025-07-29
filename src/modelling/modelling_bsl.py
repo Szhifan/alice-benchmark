@@ -8,8 +8,7 @@ from transformers import (
 from transformers.utils.generic import ModelOutput
 import torch 
 from typing import Optional, Tuple, Union 
-from .modelling import AsagConfig
-
+from modelling.modelling_berts import AsagConfig
 
 class AsagBsl(PreTrainedModel):
     """
@@ -19,12 +18,12 @@ class AsagBsl(PreTrainedModel):
     base_model_prefix = "asag_baseline"
     supports_gradient_checkpointing = True
 
-    def __init__(self, config: PretrainedConfig):
+    def __init__(self, config: AsagConfig):
         super().__init__(config)
         self.config = config
         self.model = AutoModelForSequenceClassification.from_pretrained(
             config.base_model_name_or_path, 
-            num_labels=config.num_labels,
+            n_labels=config.n_labels,
         )
 
 

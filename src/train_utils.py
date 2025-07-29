@@ -4,11 +4,11 @@ from trl import SFTTrainer
 import torch
 import os 
 import argparse
-from modelling.modelling import (AsagXNet,
+from modelling.modelling_berts import (AsagXNet,
                     AsagSNet,
-                    AsagXNetLlama,
                     AsagConfig)
 from modelling.modelling_bsl import AsagBsl
+from modelling.modelling_llm import AsagXNetLlama
 from data_prep import get_tokenizer, collate_fn, snet_collate_fn, xnet_collate_fn
 from inference import evaluate
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
@@ -36,7 +36,7 @@ def add_training_args(parser):
         # add experiment arguments 
     parser.add_argument('--base-model', default='bert-base-uncased', type=str)
     parser.add_argument('--seed', default=114514, type=int)
-    parser.add_argument('--num-labels', default=2, type=int)
+    parser.add_argument('--n-labels', default=2, type=int)
     parser.add_argument('--train-frac', default=1.0, type=float)
     parser.add_argument('--model-type', default='asagxnet', type=str, 
                         choices=['asagxnet', 'asagsnet'],
@@ -58,7 +58,7 @@ def add_training_args(parser):
     # Add checkpoint arguments
     parser.add_argument('--save-dir', default='results/checkpoints', help='path to save checkpoints')
     parser.add_argument('--no-save', action='store_true', help='don\'t save models or checkpoints')
-    parser.add_argument('--model-path', default=None, type=str, help='path to the model checkpoint to load')
+    parser.add_argument('--cp-path', default=None, type=str, help='path to the model checkpoint to load')
     # other arguments
     parser.add_argument('--dropout', type=float,default=0.1 ,metavar='D', help='dropout probability')
     parser.add_argument('--test-only', action='store_true', help='test model only')
@@ -79,7 +79,7 @@ def load_model(args):
     # Load the model based on the specified type
     config = AsagConfig(
         base_model_name_or_path=args.base_model,
-        num_labels=args.num_labels,
+        n_labels=args.n_labels,
         use_lora=args.use_lora,
         use_bidirectional=args.use_bidirectional,
         use_latent_attention=args.use_latent_attention,
@@ -87,9 +87,9 @@ def load_model(args):
     )
     model_class = MODEL_REGISTRY[args.model_type]
     model = model_class(config)
-    if args.model_path:
-        print(f"Loading model from {args.model_path}")
-        model.from_pretrained(args.model_path)
+    if args.cp_path:
+        print(f"Loading model from {args.cp_path}")
+        model.from_pretrained(args.cp_path)
     model = model.to(DEFAULT_DEVICE)
     return model
 
@@ -126,8 +126,6 @@ class AsagTrainer:
         self.validation_dataset = validation_dataset
         self.model = load_model(args)
         self.tok = get_tokenizer(args.base_model)
-
-        
         self.lora_config = LoraConfig(
             r=256,
             lora_alpha=256,
@@ -166,18 +164,18 @@ class AsagTrainer:
             logging_steps=10,
             save_strategy="epoch",
             eval_strategy="epoch",
-            save_total_limit=1,
+            save_total_limit=2,
             fp16=self.args.fp16,
-            load_best_model_at_end=True,
             lr_scheduler_type="cosine",
             report_to="wandb" if self.args.log_wandb else "none",
             optim="paged_adamw_32bit" if self.args.use_lora else "adamw_torch",
             remove_unused_columns=False,
             gradient_checkpointing=True if self.args.use_lora else False,
-            metric_for_best_model="eval_loss", 
             label_names=["labels"],
             greater_is_better=False,
             save_only_model=True,
+            load_best_model_at_end=True,
+            metric_for_best_model="eval_accuracy",
         )
         trainer = SFTTrainer(
             model=self.model,
@@ -189,10 +187,4 @@ class AsagTrainer:
             compute_metrics=compute_metrics,  # 添加计算指标函数
         )
         train_res = trainer.train()
-        trainer.log_metrics("train", train_res.metrics)
-        trainer.save_metrics("train", train_res.metrics)
-        best_model_path = os.path.join(self.args.save_dir, "checkpoint_last")
-        if not os.path.exists(best_model_path):
-            os.makedirs(best_model_path)
-        trainer.save_model(best_model_path)
-        print("Training completed.")
+        
