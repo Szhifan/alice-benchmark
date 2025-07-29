@@ -4,7 +4,8 @@ import numpy as np
 import wandb
 from train_utils import (
     AsagTrainer,
-    get_args
+    get_training_args,
+    add_training_args
 )
 from utils import (
     set_seed,
@@ -18,17 +19,38 @@ from data_prep import (
     RubricRetrievalLoader,
     encode_fields_special_tokens,
     encode_rubric_pair,
-    get_tokenizer,
-    xnet_collate_fn,
-    snet_collate_fn,
-    collate_fn
+    get_tokenizer
 )
+
+def add_experiment_args(parser):
+    """
+    add experiment related args 
+    """ 
+    parser.add_argument('--base-model', default='bert-base-uncased', type=str)
+    parser.add_argument('--seed', default=114514, type=int)
+    parser.add_argument('--n-labels', default=2, type=int)
+    parser.add_argument('--train-frac', default=1.0, type=float)
+    parser.add_argument('--model-type', default='asagxnet', type=str, 
+                        choices=['asagxnet', 'asagsnet'],
+                        help='type of model architecture to use')
+    parser.add_argument('--use-label-weights', action='store_true', help='use label weights for imbalanced dataset')
+    parser.add_argument('--input-fields', nargs='+', default=['answer', 'rubric'], 
+                        help='fields to use as input for the model, e.g. "answer rubric question"')
+
+def get_args():
+    """
+    Get combined experiment and training arguments
+    """
+    parser = argparse.ArgumentParser()
+    add_experiment_args(parser)
+    add_training_args(parser)
+    args = parser.parse_args()
+    return args
 
 def main(args):
     set_seed(args.seed)
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
-    configure_logging(filename=os.path.join(args.save_dir, "train.log"))
     wandb.login()
     if args.log_wandb:
         wandb.init(
@@ -42,23 +64,18 @@ def main(args):
     # Load the dataset
     ds = RubricRetrievalLoader(train_frac=args.train_frac) 
     tokenizer = get_tokenizer(args.base_model)
-    # you can change the encoding function here
-    # ds.get_encoding(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
-    ds.get_encoding(
-        tokenizer=tokenizer,
-        enc_fn=encode_fields_special_tokens,
-        fields=["answer", "rubric", "question"],
-    )
     
-    # Determine the correct collate function
-    if "xnet" in args.model_type:
-        collate_fn_to_use = xnet_collate_fn
-    elif "snet" in args.model_type:
-        collate_fn_to_use = snet_collate_fn
+    
+    if args.input_fields:
+        ds.get_encoding(
+            tokenizer=tokenizer,
+            enc_fn=encode_fields_special_tokens,
+            fields=args.input_fields,
+        )
     else:
-        collate_fn_to_use = collate_fn
-    
-    # Initialize trainer
+        ds.get_encoding(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
+
+
     trainer = AsagTrainer(args, ds.train, ds.val)
     
     if not args.test_only:
@@ -79,7 +96,7 @@ def main(args):
             test_model,
             test_ds,
             batch_size=args.batch_size,
-            collate_fn=lambda x: collate_fn_to_use(x, pad_id=tokenizer.pad_token_id, return_meta=True)
+            collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
         )
         pred_dir = os.path.join(args.save_dir, "predictions")
         if not os.path.exists(pred_dir):

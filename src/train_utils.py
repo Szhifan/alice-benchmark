@@ -23,6 +23,12 @@ MODEL_REGISTRY = {
     "asagxnetllama": AsagXNetLlama,
     "asagbsl": AsagBsl,
 }
+MODEL_TO_COLLATE_FN = {
+    "asagxnet": xnet_collate_fn,
+    "asagsnet": snet_collate_fn,
+    "asagxnetllama": xnet_collate_fn,
+    "asagbsl": collate_fn,
+}
 accuracy = evaluate.load("accuracy")
 def compute_metrics(eval_pred):
     predictions, labels = eval_pred
@@ -31,20 +37,12 @@ def compute_metrics(eval_pred):
 
 def add_training_args(parser):
     """
-    add training related args 
+    add training related args only
     """ 
-        # add experiment arguments 
-    parser.add_argument('--base-model', default='bert-base-uncased', type=str)
-    parser.add_argument('--seed', default=114514, type=int)
-    parser.add_argument('--n-labels', default=2, type=int)
-    parser.add_argument('--train-frac', default=1.0, type=float)
-    parser.add_argument('--model-type', default='asagxnet', type=str, 
-                        choices=['asagxnet', 'asagsnet'],
-                        help='type of model architecture to use')
+    # llm-related args
     parser.add_argument('--use-lora', action='store_true', help='use LoRA for training')
-    parser.add_argument('--use-bidirectional', action='store_true', help='use bidirectional attention, only works for Llama')
-    parser.add_argument('--use-latent-attention', action='store_true', help='use latent attention mechanism, only works for Llama')
-    parser.add_argument('--use-label-weights', action='store_true', help='use label weights for imbalanced dataset')
+    parser.add_argument('--use-bidirectional', action='store_true', help='use bidirectional attention')
+    parser.add_argument('--use-latent-attention', action='store_true', help='use latent attention mechanism')
     # Add optimization arguments
     parser.add_argument('--batch-size', default=32, type=int, help='maximum number of sentences in a batch')
     parser.add_argument('--max-epoch', default=3, type=int, help='force stop training at specified epoch')
@@ -64,7 +62,10 @@ def add_training_args(parser):
     parser.add_argument('--test-only', action='store_true', help='test model only')
     parser.add_argument('--fp16', action='store_true', help='use 16-bit float precision instead of 32-bit')
     parser.add_argument('--log-wandb',action='store_true', help='log experiment to wandb')
-def get_args():
+def get_training_args():
+    """
+    Get training-related arguments only
+    """
     parser = argparse.ArgumentParser()
     add_training_args(parser)
     args = parser.parse_args()
@@ -135,22 +136,21 @@ class AsagTrainer:
             task_type=None,
             modules_to_save=["classifier", "latent_attention"]
         )  
-        if "xnet" in args.model_type:
-            self.collate_fn = xnet_collate_fn
-        elif "snet" in args.model_type:
-            self.collate_fn = snet_collate_fn
-        else:
-            self.collate_fn = collate_fn
+        if args.model_type not in MODEL_TO_COLLATE_FN:
+            raise ValueError(f"No collate function found for model type {args.model_type}.")
+        self.collate_fn = MODEL_TO_COLLATE_FN[args.model_type]
 
-
-
-    def train(self):
-        print("Starting training...")
-        if isinstance(self.model, AsagXNetLlama) and self.args.use_lora:
+    def load_peft_model(self):
+        """
+        Load the PEFT model with LoRA configuration.
+        """
+        if self.args.use_lora:
             self.model.gradient_checkpointing_enable()
             self.model = prepare_model_for_kbit_training(self.model, use_gradient_checkpointing=True)
             self.model = get_peft_model(self.model, self.lora_config)
         print_trainable_parameters(self.model, use_4bit=self.args.use_lora)
+    def train(self):
+        print("Starting training...")
         train_args = TrainingArguments(
             output_dir=self.args.save_dir,
             num_train_epochs=self.args.max_epoch,
@@ -172,7 +172,7 @@ class AsagTrainer:
             remove_unused_columns=False,
             gradient_checkpointing=True if self.args.use_lora else False,
             label_names=["labels"],
-            greater_is_better=False,
+            greater_is_better=True,
             save_only_model=True,
             load_best_model_at_end=True,
             metric_for_best_model="eval_accuracy",

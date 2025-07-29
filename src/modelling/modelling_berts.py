@@ -5,38 +5,13 @@ from transformers import (
     PretrainedConfig,
     AutoModel,
     AutoModelForSequenceClassification,
-    BitsAndBytesConfig, 
-    LlamaModel
 )
 from transformers.utils.generic import ModelOutput
 import torch
 from torch.nn import CrossEntropyLoss, CosineEmbeddingLoss
 from torch.nn.functional import cosine_similarity
 from typing import Optional
-
-
-
-def mean_pooling(
-    token_embeddings: torch.Tensor,
-    attention_mask: Optional[torch.Tensor] = None
-) -> torch.Tensor:
-    """
-    Perform mean pooling on the model output.
-    """
-    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-    sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, 1)
-    sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-    return sum_embeddings / sum_mask 
-
-class AsagConfig(PretrainedConfig):
-
-    def __init__(
-        self,
-        **kwargs
-    ):
-        super().__init__(**kwargs)
-
-        
+from modelling.modelling_utils import AsagConfig, Pooler
 
 
 class AsagXNet(PreTrainedModel):
@@ -97,18 +72,18 @@ class AsagSNet(PreTrainedModel):
         super().__init__(config)
         # load underlying encoder
         self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path)
-        config.encoder_config = self.encoder.config
+        self.config.update(self.encoder.config.to_dict())
 
         # this initializes weights and ties embeddings if needed
         self.post_init()
+        self.pooler = Pooler(pool_type="avg")
     def encode(self, input_ids, attention_mask):
         outputs = self.encoder(
             input_ids=input_ids,
             attention_mask=attention_mask
         )
-        # Mean pooling or use [CLS] token for embeddings
-        embeddings = mean_pooling(outputs.last_hidden_state, attention_mask)
-        # embeddings =  outputs.last_hidden_state[:, 0, :]
+        # Mean pooling
+        embeddings = self.pooler(outputs.last_hidden_state, attention_mask)
 
         return embeddings
         

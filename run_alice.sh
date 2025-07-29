@@ -18,7 +18,7 @@ export WANDB_NOTES=""
 export WANDB_TAGS="gbert,multiseq"
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
-python src/train_rubretrieval.py --save-dir "${EXP_ROOT}" \
+python src/train_bert_retrieve.py --save-dir "${EXP_ROOT}" \
     --base-model "bert-base-uncased" \
     --batch-size 4 \
     --train-frac 0.01 \

@@ -17,7 +17,7 @@ path_uq = "alice_data/test_uq.csv"
 def get_tokenizer(base_model: str) -> AutoTokenizer:
     tok = AutoTokenizer.from_pretrained(base_model)
     if "llama" in base_model.lower():
-        tok.padding_side = "right"
+        tok.padding_side = "right"  
         tok.pad_token = tok.eos_token  # Ensure pad_token is set
     tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
     return tok
@@ -179,7 +179,6 @@ def snet_collate_fn(input_batch, pad_id=0, return_meta=False):
     rubric_input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["rubric_input_ids"]) for x in input_batch], batch_first=True, padding_value=pad_id)
     rubric_attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["rubric_attention_mask"]) for x in input_batch], batch_first=True)
 
-    
     batch = {
         "input_ids_a": input_ids,
         "attention_mask_a": attention_mask,
@@ -215,6 +214,7 @@ class BaseLoader:
         self.val = self.val.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
         self.test_ua = self.test_ua.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
         self.test_uq = self.test_uq.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
+    
     def merge_scores(self,score="low"):
         """
         convert the selected level to 1 and the rest to 0. This is for binary clasification 

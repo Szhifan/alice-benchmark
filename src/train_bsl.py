@@ -4,7 +4,7 @@ import numpy as np
 import wandb
 from train_utils import (
     AsagTrainer,
-    get_args
+    add_training_args
 )
 from utils import (
     set_seed,
@@ -17,9 +17,30 @@ from data_prep import (
     BaseLoader,
     encode_solution_pair,
     get_tokenizer,
-    collate_fn
-
 )
+
+def add_experiment_args(parser):
+    """
+    add experiment related args for BSL training
+    """ 
+    parser.add_argument('--base-model', default='bert-base-uncased', type=str)
+    parser.add_argument('--seed', default=114514, type=int)
+    parser.add_argument('--n-labels', default=3, type=int)
+    parser.add_argument('--train-frac', default=1.0, type=float)
+    parser.add_argument('--model-type', default='asagbsl', type=str, 
+                        choices=['asagbsl'],
+                        help='type of model architecture to use')
+
+
+def get_args():
+    """
+    Get combined experiment and training arguments for BSL
+    """
+    parser = argparse.ArgumentParser()
+    add_experiment_args(parser)
+    add_training_args(parser)
+    args = parser.parse_args()
+    return args
 
 def find_best_checkpoint(save_dir):
     cp_list = [os.path.join(save_dir, f) for f in os.listdir(save_dir) if f.startswith("checkpoint")]
@@ -35,7 +56,6 @@ def main(args):
     set_seed(args.seed)
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
-    configure_logging(filename=os.path.join(args.save_dir, "train.log"))
     wandb.login()
     if args.log_wandb:
         wandb.init(
@@ -78,7 +98,7 @@ def main(args):
             test_model,
             test_ds,
             batch_size=args.batch_size,
-            collate_fn=lambda x: collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
+            collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
         )
         pred_dir = os.path.join(args.save_dir, "predictions")
         if not os.path.exists(pred_dir):
