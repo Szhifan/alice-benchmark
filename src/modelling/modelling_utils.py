@@ -40,9 +40,11 @@ class ClassificationHead(nn.Module):
         self.dense = nn.Linear(hidden_size, hidden_size)
         self.dropout = nn.Dropout(p=0.1)
         self.out_proj = nn.Linear(hidden_size, n_labels)
+        self.gelu = nn.GELU()
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         hidden_states = self.dropout(hidden_states)
         hidden_states = self.dense(hidden_states)
+        hidden_states = self.gelu(hidden_states)
         hidden_states = self.out_proj(hidden_states)
         return hidden_states
 class LatentAttention(nn.Module):
