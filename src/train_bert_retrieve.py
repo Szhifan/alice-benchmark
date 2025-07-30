@@ -51,6 +51,7 @@ def main(args):
     set_seed(args.seed)
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
+
     wandb.login()
     if args.log_wandb:
         wandb.init(
