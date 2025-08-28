@@ -3,3 +3,4 @@ wandb/*
 asap-sas-data/raw/* 
 asap-sas-data/rubrics/*pdf
 move.sh
+__pycache__/

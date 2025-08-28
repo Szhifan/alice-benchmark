@@ -1,98 +1,74 @@
 from torch.optim import AdamW
-from transformers import TrainingArguments
-from trl import SFTTrainer
+from transformers import (
+    AutoTokenizer, 
+    BitsAndBytesConfig, 
+    AutoModelForSequenceClassification,
+    AutoConfig,
+    LlamaConfig,
+    Trainer,
+    TrainingArguments
+)
+from modelling.modelling_snet import AsagSNet
 import torch
 import os 
-import argparse
-from modelling.modelling_berts import (AsagXNet,
-                    AsagSNet,
-                    AsagConfig)
-from modelling.modelling_bsl import AsagBsl
-from modelling.modelling_llm import AsagXNetLlama
-from data_prep import get_tokenizer, collate_fn, snet_collate_fn, xnet_collate_fn
+from dataclasses import dataclass, field
+from data_prep import snet_collate_fn, xnet_collate_fn
 from inference import evaluate
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from peft import LoraConfig, get_peft_model, AutoPeftModelForSequenceClassification
 import evaluate
 import numpy as np
+from accelerate import PartialState
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 # logger = logging.getLogger(__name__)
 print("Using device:", DEFAULT_DEVICE)
-MODEL_REGISTRY = {
-    "asagxnet": AsagXNet,
-    "asagsnet": AsagSNet,
-    "asagxnetllama": AsagXNetLlama,
-    "asagbsl": AsagBsl,
-}
-MODEL_TO_COLLATE_FN = {
-    "asagxnet": xnet_collate_fn,
-    "asagsnet": snet_collate_fn,
-    "asagxnetllama": xnet_collate_fn,
-    "asagbsl": collate_fn,
-}
+
 accuracy = evaluate.load("accuracy")
 def compute_metrics(eval_pred):
     predictions, labels = eval_pred
     predictions = np.argmax(predictions, axis=1)
     return accuracy.compute(predictions=predictions, references=labels)
 
-def add_training_args(parser):
-    """
-    add training related args only
-    """ 
-    # llm-related args
-    parser.add_argument('--use-lora', action='store_true', help='use LoRA for training')
-    parser.add_argument('--use-bidirectional', action='store_true', help='use bidirectional attention')
-    parser.add_argument('--use-latent-attention', action='store_true', help='use latent attention mechanism')
-    # Add optimization arguments
-    parser.add_argument('--batch-size', default=32, type=int, help='maximum number of sentences in a batch')
-    parser.add_argument('--max-epoch', default=3, type=int, help='force stop training at specified epoch')
-    parser.add_argument('--clip-norm', default=1, type=float, help='clip threshold of gradients')
-    parser.add_argument('--lr', default=5e-5, type=float, help='learning rate')
-    parser.add_argument('--patience', default=3, type=int,help='number of epochs without improvement on validation set before early stopping')
-    parser.add_argument('--grad-accumulation-steps', default=1, type=int, help='number of updates steps to accumulate before performing a backward/update pass')
-    parser.add_argument('--weight-decay', default=0.01, type=float, help='weight decay for Adam')
-    parser.add_argument('--adam-epsilon', default=1e-8, type=float, help='epsilon for Adam optimizer')
-    parser.add_argument('--warmup-ratio', default=0.01, type=float, help='proportion of warmup steps')
-    # Add checkpoint arguments
-    parser.add_argument('--save-dir', default='results/checkpoints', help='path to save checkpoints')
-    parser.add_argument('--no-save', action='store_true', help='don\'t save models or checkpoints')
-    parser.add_argument('--cp-path', default=None, type=str, help='path to the model checkpoint to load')
-    # other arguments
-    parser.add_argument('--dropout', type=float,default=0.1 ,metavar='D', help='dropout probability')
-    parser.add_argument('--test-only', action='store_true', help='test model only')
-    parser.add_argument('--fp16', action='store_true', help='use 16-bit float precision instead of 32-bit')
-    parser.add_argument('--log-wandb',action='store_true', help='log experiment to wandb')
-def get_training_args():
-    """
-    Get training-related arguments only
-    """
-    parser = argparse.ArgumentParser()
-    add_training_args(parser)
-    args = parser.parse_args()
-    return args
+# encoding functions 
+def get_tokenizer(base_model: str) -> AutoTokenizer:
+    tok = AutoTokenizer.from_pretrained(base_model)
+    if "llama" in base_model.lower():
+        tok.padding_side = "right"  
+        tok.pad_token = tok.eos_token  # Ensure pad_token is set
+    tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
+    return tok
 
+@dataclass
+class AsagTrainingArguments:
+    """Training arguments dataclass"""
+    batch_size: int = field(default=32, metadata={"help": "maximum number of sentences in a batch"})
+    max_epoch: int = field(default=3, metadata={"help": "force stop training at specified epoch"})
+    clip_norm: float = field(default=1.0, metadata={"help": "clip threshold of gradients"})
+    lr: float = field(default=5e-5, metadata={"help": "learning rate"})
+    patience: int = field(default=3, metadata={"help": "number of epochs without improvement on validation set before early stopping"})
+    grad_accumulation_steps: int = field(default=1, metadata={"help": "number of updates steps to accumulate before performing a backward/update pass"})
+    weight_decay: float = field(default=0.01, metadata={"help": "weight decay for Adam"})
+    adam_epsilon: float = field(default=1e-8, metadata={"help": "epsilon for Adam optimizer"})
+    warmup_ratio: float = field(default=0.01, metadata={"help": "proportion of warmup steps"})
+    save_dir: str = field(default="results/checkpoints", metadata={"help": "path to save checkpoints"})
+    no_save: bool = field(default=False, metadata={"help": "don't save models or checkpoints"})
+    cp_dir: str = field(default=None, metadata={"help": "path to the model checkpoint to load"})
+    dropout: float = field(default=0.1, metadata={"help": "dropout probability"})
+    test_only: bool = field(default=False, metadata={"help": "test model only"})
+    fp16: bool = field(default=False, metadata={"help": "use 16-bit float precision instead of 32-bit"})
+    log_wandb: bool = field(default=False, metadata={"help": "log experiment to wandb"})
+    use_lora: bool = field(default=False, metadata={"help": "use LoRA for training"})
+    use_bnb: bool = field(default=False, metadata={"help": "use 4-bit quantization for training"})
 
+    def __post_init__(self):
+        """Validation checks after initialization"""
+        assert self.batch_size > 0, "batch_size must be positive"
+        assert self.max_epoch > 0, "max_epoch must be positive" 
+        assert self.lr > 0, "learning rate must be positive"
+        assert self.patience >= 0, "patience must be non-negative"
+        assert self.grad_accumulation_steps > 0, "grad_accumulation_steps must be positive"
+        assert 0 <= self.dropout <= 1, "dropout must be between 0 and 1"
+        assert 0 <= self.warmup_ratio <= 1, "warmup_ratio must be between 0 and 1"
 
-
-def load_model(args):
-    if args.model_type not in MODEL_REGISTRY:
-        raise ValueError(f"Model type {args.model_type} is not supported. Choose from {list(MODEL_REGISTRY.keys())}.")
-    # Load the model based on the specified type
-    config = AsagConfig(
-        base_model_name_or_path=args.base_model,
-        n_labels=args.n_labels,
-        use_lora=args.use_lora,
-        use_bidirectional=args.use_bidirectional,
-        use_latent_attention=args.use_latent_attention,
-        use_label_weights=args.use_label_weights,
-    )
-    model_class = MODEL_REGISTRY[args.model_type]
-    model = model_class(config)
-    if args.cp_path:
-        print(f"Loading model from {args.cp_path}")
-        model.from_pretrained(args.cp_path)
-    model = model.to(DEFAULT_DEVICE)
-    return model
 
 
 def print_trainable_parameters(model, use_4bit=False):
@@ -111,80 +87,190 @@ def print_trainable_parameters(model, use_4bit=False):
 
     if use_4bit:
         trainable_params /= 2
-    
-    # 确保 trainable_params 是整数用于格式化
     trainable_params_int = int(trainable_params)
     print(
         f"All Parameters: {all_param:,d} || Trainable Parameters: {trainable_params_int:,d} || Trainable Parameters %: {100 * trainable_params / all_param:.2f}"
     )
+class ModelLoader:
+    """Model loading and initialization utilities."""
+
+    def __init__(self, task_args, train_args, custom_model_args=None, device_map="auto"):
+        self.task_args = task_args
+        self.train_args = train_args
+        self.custom_model_args = custom_model_args
+        self.device_map = device_map
+        self.lora_config = LoraConfig(
+            r=8,
+            lora_alpha=8,
+            lora_dropout=0.1,
+            bias='none',
+            target_modules="all-linear",
+            modules_to_save=["classifier","score"],
+            task_type="SEQ_CLS",
+        )
+        self.bnb_config = BitsAndBytesConfig(
+            load_in_4bit = True, # Activate 4-bit precision base model loading
+            bnb_4bit_use_double_quant = True, # Activate nested quantization for 4-bit base models (double quantization)
+            bnb_4bit_quant_type = "nf4",# Quantization type (fp4 or nf4)
+            bnb_4bit_compute_dtype = torch.bfloat16, # Compute data type for 4-bit base models
+            )
+        self.use_custom_model = "llama" in self.task_args.base_model
+        self.is_snet = self.task_args.model_class == "snet"
+    def _update_with_custom_config(self, config, model_args):
+        """
+        Update autoconfig with backwardsarguments 
+        """
+
+        for key, value in self.custom_model_args.to_dict().items():
+            setattr(config, key, value)
+        return config
+
+    def init_model(self):
+
+        
+        config = AutoConfig.from_pretrained(self.task_args.base_model)
+        if self.use_custom_model:
+            print("Detected Llama model - preparing custom configuration...")
+            config = self._update_with_custom_config(config, self.model_args)
+        self.train_args.use_bnb = (self.train_args.use_bnb and torch.cuda.is_available()) or self.use_custom_model
+        self.train_args.use_lora = (self.train_args.use_lora and torch.cuda.is_available()) or self.use_custom_model
+        if self.is_snet:
+            config.pool_type = self.custom_model_args.pool_type if self.custom_model_args else "avg"
+            config.base_model_name_or_path = self.task_args.base_model
+            model = AsagSNet(config,
+                             lora_config=self.lora_config if self.train_args.use_lora else None,
+                             bnb_config=self.bnb_config if self.train_args.use_bnb else None)
+            device = f"cuda:{PartialState().process_index}" if torch.cuda.is_available() else DEFAULT_DEVICE
+            model = model.to(device)
+        else:
+            print("Loading with AutoModelForSequenceClassification...")
+            model = AutoModelForSequenceClassification.from_pretrained(
+                self.task_args.base_model,
+                config=config,  # Pass custom config if it's a Llama model
+                quantization_config=self.bnb_config if self.train_args.use_bnb else None,
+                device_map=self.device_map,
+            )
+
+        config.num_labels = self.task_args.n_labels
+        model = self._init_peft_model(model)
+        return model
+    def _init_peft_model(self, model):
+        """Wrap the model with LoRA."""
+        if self.is_snet and self.train_args.use_lora:
+            model = model.init_peft()
+        elif self.train_args.use_lora:
+            model = get_peft_model(model, self.lora_config)
+        print_trainable_parameters(model, use_4bit=self.train_args.use_bnb)
+        return model
+    def _load_peft_model(self,cp_path:str):
+        model =  AutoPeftModelForSequenceClassification.from_pretrained(
+            str(cp_path)+'/',
+            torch_dtype=torch.float16,
+            device_map={"": "cuda:0"} if torch.cuda.is_available() else {"": "cpu"},# inference on one device
+            num_labels=self.task_args.n_labels,
+        )
+        model = model.merge_and_unload()
+        return model
+    def load_model(self, cp_path: str, use_lora=False):
+        """
+        Load a model from a checkpoint path, with or without LoRA (PEFT).
+        :param cp_path: Path to the model checkpoint.
+        :param use_lora: Whether to load the model with LoRA (PEFT).
+        :return: Loaded model.
+        """
+        if self.is_snet:
+            print(f"Loading SNet model from checkpoint: {cp_path}")
+            model = AsagSNet.from_pretrained(
+                cp_path,
+                config=AutoConfig.from_pretrained(cp_path),
+                lora_config=self.lora_config if use_lora else None,
+            )
+        else:
+            if use_lora:
+                print(f"Loading sequence classification model with LoRA from checkpoint: {cp_path}")
+                model = self._load_peft_model(cp_path)
+            else:
+                print(f"Loading standard sequence classification model from checkpoint: {cp_path}")
+                model = AutoModelForSequenceClassification.from_pretrained(
+                    cp_path,
+                    config=AutoConfig.from_pretrained(cp_path),
+                )
+
+        # Ensure the number of labels matches the task configuration
+        model.config.num_labels = self.task_args.n_labels
+
+        print("Model successfully loaded.")
+        return model
+                
+    
+
 class AsagTrainer:
     """
     Trainer class for training and evaluating the AsagXNet, AsagSNet, or AsagXNetLlama models.
     """
-    def __init__(self, args, train_dataset,validation_dataset=None):
-        self.args = args
+    def __init__(self, train_args, task_args, train_dataset, validation_dataset=None, custom_model_args=None, multi_gpu=False):
+        self.train_args = train_args
+        self.task_args = task_args
         self.train_dataset = train_dataset
         self.validation_dataset = validation_dataset
-        self.model = load_model(args)
-        self.tok = get_tokenizer(args.base_model)
-        self.lora_config = LoraConfig(
-            r=256,
-            lora_alpha=256,
-            lora_dropout=0.1,
-            bias='none',
-            target_modules="all-linear",
-            task_type=None,
-            modules_to_save=["classifier", "latent_attention"]
-        )  
-        if args.model_type not in MODEL_TO_COLLATE_FN:
-            raise ValueError(f"No collate function found for model type {args.model_type}.")
-        self.collate_fn = MODEL_TO_COLLATE_FN[args.model_type]
+        if multi_gpu:
+            device_map="DDP" # for DDP and running with `accelerate launch test_sft.py`
+            device_string = PartialState().process_index
+            device_map={'':device_string}
+        else:   
+            device_map="auto"
+        self.model_loader = ModelLoader(task_args, train_args, custom_model_args=custom_model_args, device_map=device_map)
+        self.model  = self.model_loader.init_model()
+        self.tok = get_tokenizer(task_args.base_model)
+        self.collate_fn =  xnet_collate_fn if task_args.model_class == "xnet" else snet_collate_fn
+        self.multi_gpu = multi_gpu
+        self.is_llm = "llama" in task_args.base_model
+    def load_model(self):
+        """Load the model for inference or evaluation."""
+        cp_path = self.train_args.cp_dir or self.train_args.save_dir
+        return self.model_loader.load_model(cp_path, use_lora=self.train_args.use_lora)
 
-    def load_peft_model(self):
-        """
-        Load the PEFT model with LoRA configuration.
-        """
-        if self.args.use_lora:
-            self.model.gradient_checkpointing_enable()
-            self.model = prepare_model_for_kbit_training(self.model, use_gradient_checkpointing=True)
-            self.model = get_peft_model(self.model, self.lora_config)
-        print_trainable_parameters(self.model, use_4bit=self.args.use_lora)
     def train(self):
         print("Starting training...")
         train_args = TrainingArguments(
-            output_dir=self.args.save_dir,
-            num_train_epochs=self.args.max_epoch,
-            per_device_train_batch_size=self.args.batch_size,
-            gradient_accumulation_steps=self.args.grad_accumulation_steps,
-            learning_rate=self.args.lr,
-            weight_decay=self.args.weight_decay,
-            max_grad_norm=self.args.clip_norm,
-            warmup_ratio=self.args.warmup_ratio,
-            logging_dir=os.path.join(self.args.save_dir, "logs"),
-            logging_steps=10,
-            save_strategy="epoch",
-            eval_strategy="epoch",
-            save_total_limit=2,
-            fp16=self.args.fp16,
+            # optimization parameters
+            num_train_epochs=self.train_args.max_epoch,
+            per_device_train_batch_size=self.train_args.batch_size,
+            gradient_accumulation_steps=self.train_args.grad_accumulation_steps,
+            learning_rate=self.train_args.lr,
+            weight_decay=self.train_args.weight_decay,
+            max_grad_norm=self.train_args.clip_norm,
+            warmup_ratio=self.train_args.warmup_ratio,
+            fp16=self.is_llm,
             lr_scheduler_type="cosine",
-            report_to="wandb" if self.args.log_wandb else "none",
-            optim="paged_adamw_32bit" if self.args.use_lora else "adamw_torch",
+            optim="paged_adamw_32bit" if self.is_llm else "adamw_torch",
             remove_unused_columns=False,
-            gradient_checkpointing=True if self.args.use_lora else False,
+            gradient_checkpointing=True if self.is_llm else False,
+            gradient_checkpointing_kwargs = {"use_reentrant": False} if self.multi_gpu else None,
+            # logging and saving parameters
             label_names=["labels"],
             greater_is_better=True,
             save_only_model=True,
             load_best_model_at_end=True,
             metric_for_best_model="eval_accuracy",
+            logging_dir=os.path.join(self.train_args.save_dir, "logs"),
+            logging_steps=100,
+            save_strategy="best",
+            eval_strategy="epoch",
+            save_total_limit=2,
+            output_dir=self.train_args.save_dir,
+            report_to="wandb" if self.train_args.log_wandb else "none"
         )
-        trainer = SFTTrainer(
+        trainer = Trainer(
             model=self.model,
             args=train_args,
             train_dataset=self.train_dataset,
             eval_dataset=self.validation_dataset,
             data_collator=lambda batch: self.collate_fn(batch, self.tok.pad_token_id),
-            peft_config=self.lora_config if self.args.use_lora else None,
-            compute_metrics=compute_metrics,  # 添加计算指标函数
+            compute_metrics=compute_metrics,
         )
-        train_res = trainer.train()
-        
+        trainer.train()
+        trainer.model.save_pretrained(self.train_args.save_dir)
+        trainer.tokenizer.save_pretrained(self.train_args.save_dir)
+
+

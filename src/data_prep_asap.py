@@ -10,10 +10,22 @@ Dataprep pipeline:
 3. Provide collate functions for batching the dataset.
 """
 enable_caching()
-path_train = "alice_lp/train.csv"
-path_ua = "alice_lp/test_ua.csv"
-path_uq = "alice_lp/test_uq.csv"
+path_train = "asap-sas-data/train.csv"
+path_test = "asap-sas-data/test.csv"
 
+RUBRICS = {}
+for i in range(1,11):
+    path_rub = f"asap-sas-data/rubrics/set{i}.json"
+    with open(path_rub, "r") as f:
+        RUBRICS[i] = json.load(f)["rubrics"]
+# encoding functions 
+def get_tokenizer(base_model: str) -> AutoTokenizer:
+    tok = AutoTokenizer.from_pretrained(base_model)
+    if "llama" in base_model.lower():
+        tok.padding_side = "right"  
+        tok.pad_token = tok.eos_token  # Ensure pad_token is set
+    tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
+    return tok
 def basic_encode(example, tokenizer):
     # encode answer only  
     output = tokenizer(example["answer"], max_length=512, truncation=True)
@@ -174,6 +186,7 @@ def snet_collate_fn(input_batch, pad_id=0, return_meta=False):
         "attention_mask_b": rubric_attention_mask,
         "labels": torch.tensor([x["labels"] for x in input_batch]),
     }
+
     meta = {
         "id": [x["id"] for x in input_batch],
         "rubric_level": [x["rubric_level"] for x in input_batch],
@@ -193,14 +206,12 @@ class BaseLoader:
         self.train = Dataset.from_csv(path_train)
         if train_frac < 1:
             self.train = self.train.train_test_split(test_size=1-train_frac, seed=42)["train"]
-        self.test_ua = Dataset.from_csv(path_ua)
-        self.test_uq = Dataset.from_csv(path_uq)
+        self.test = Dataset.from_csv(path_test)
         self.train, self.val = self.train.train_test_split(test_size=0.1, seed=8964).values()
     def get_encoding(self, tokenizer, enc_fn, *args, **kwargs):
         self.train = self.train.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
         self.val = self.val.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
-        self.test_ua = self.test_ua.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
-        self.test_uq = self.test_uq.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
+        self.test = self.test.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
     
     def merge_scores(self,score="low"):
         """
@@ -221,8 +232,7 @@ class BaseLoader:
             return example
         self.train = self.train.map(lambda x: _merge_scores(x))
         self.val = self.val.map(lambda x: _merge_scores(x))
-        self.test_ua = self.test_ua.map(lambda x: _merge_scores(x))
-        self.test_uq = self.test_uq.map(lambda x: _merge_scores(x))
+        self.test = self.test.map(lambda x: _merge_scores(x))
 
 
 class RubricRetrievalLoader(BaseLoader):
@@ -238,8 +248,8 @@ class RubricRetrievalLoader(BaseLoader):
         def _expand_dataset(dataset):
             expanded_data = []
             for example in dataset:
-                rubric = json.loads(example["rubric"])
-                for level, rb in rubric.items():
+                question_rubric = RUBRICS[example["question_id"]]
+                for level, rb in question_rubric.items():
                     new_example = example.copy()
                     new_example["rubric"] = rb
                     new_example["rubric_level"] = int(level)  
@@ -249,12 +259,24 @@ class RubricRetrievalLoader(BaseLoader):
             return expanded_data
         self.train = _expand_dataset(self.train)
         self.val = _expand_dataset(self.val)
-        self.test_ua = _expand_dataset(self.test_ua)
-        self.test_uq = _expand_dataset(self.test_uq)
+        self.test = _expand_dataset(self.test)
 
         
+
+
+
 if __name__ == "__main__":
-    from train_utils import get_tokenizer
-    loader = RubricRetrievalLoader(train_frac=0.1)
-    tokenizer = get_tokenizer("bert-base-uncased")
-    loader.get_encoding(tokenizer, encode_rubric_pair)
+    from torch.utils.data import DataLoader
+    from transformers import AutoTokenizer
+    from functools import partial
+    tok = get_tokenizer("xlm-roberta-base")
+    ds = RubricRetrievalLoader(train_frac=0.1)
+    ds.get_encoding(tok, encode_rubric_pair)
+    collate_fn = partial(xnet_collate_fn, pad_id=tok.pad_token_id, return_meta=False)
+    dl = DataLoader(ds.train, batch_size=5, collate_fn=collate_fn, shuffle=True)
+    for batch in dl:
+        tokens = []
+        for input_ids in batch['input_ids']:
+            tokens.append(tok.convert_ids_to_tokens(input_ids))
+        print(tokens)
+        break

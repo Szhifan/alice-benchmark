@@ -1,105 +1,111 @@
-import argparse
+import time 
 import os
-import numpy as np
 import wandb
+from dataclasses import dataclass, field
+from typing import List
 from train_utils import (
     AsagTrainer,
-    get_training_args,
-    add_training_args
+    AsagTrainingArguments,
+    get_tokenizer
 )
 from utils import (
     set_seed,
-    configure_logging,
     eval_report,
     save_report,
-    transform_for_inference
+    transform_for_inference,
+    get_wandb_tag,
+    
 )
 from inference import evaluate
 from data_prep import (
     RubricRetrievalLoader,
     encode_fields_special_tokens,
     encode_rubric_pair,
-    get_tokenizer
+    encode_with_fields_separate_rubric,
+    encode_rubric_separate
 )
+from modelling.modelling_utils import BackwardSupportedArguments
+from transformers import HfArgumentParser
+@dataclass
+class TaskArguments:
+    """Task/experiment related arguments dataclass"""
+    base_model: str = field(default='bert-base-uncased', metadata={"help": "base model to use"})
+    seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
+    n_labels: int = field(default=2, metadata={"help": "number of labels for classification"})
+    train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
+    input_fields: List[str] = field(default_factory=lambda: ['a', 'r'], 
+                                   metadata={"help": "fields to use as input for the model"})
+    model_class: str = field(default='xnet', metadata={"help": "model class to use"})
+    def __post_init__(self):
+        """Validation checks after initialization"""
+        assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
+        assert self.n_labels > 0, "n_labels must be positive"
+        assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
+        assert len(self.input_fields) > 0, "input_fields cannot be empty"
+def convert_field(fields_input_list):
+    map = {
+        "a": "answer",
+        "r": "rubric",
+        "q": "question",
+        "s": "sample_solution",
+    }
+    return [map[field] for field in fields_input_list if field in map]
 
-def add_experiment_args(parser):
-    """
-    add experiment related args 
-    """ 
-    parser.add_argument('--base-model', default='bert-base-uncased', type=str)
-    parser.add_argument('--seed', default=114514, type=int)
-    parser.add_argument('--n-labels', default=2, type=int)
-    parser.add_argument('--train-frac', default=1.0, type=float)
-    parser.add_argument('--model-type', default='asagxnet', type=str, 
-                        choices=['asagxnet', 'asagsnet'],
-                        help='type of model architecture to use')
-    parser.add_argument('--use-label-weights', action='store_true', help='use label weights for imbalanced dataset')
-    parser.add_argument('--input-fields', nargs='+', default=['answer', 'rubric'], 
-                        help='fields to use as input for the model, e.g. "answer rubric question"')
-
-def get_args():
-    """
-    Get combined experiment and training arguments
-    """
-    parser = argparse.ArgumentParser()
-    add_experiment_args(parser)
-    add_training_args(parser)
-    args = parser.parse_args()
-    return args
-
-def main(args):
-    set_seed(args.seed)
-    if not os.path.exists(args.save_dir):
-        os.makedirs(args.save_dir)
+def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_model_args: BackwardSupportedArguments):
+    set_seed(task_args.seed)
+    if not os.path.exists(train_args.save_dir):
+        os.makedirs(train_args.save_dir)
 
     wandb.login()
-    if args.log_wandb:
+    if train_args.log_wandb:
         wandb.init(
-            config=vars(args),
-            dir=args.save_dir,
+            config=vars(train_args) + vars(task_args),
+            dir=train_args.save_dir,
+            project="alice-benchmark",
+            tags=get_wandb_tag(task_args)
         )
     else:
         wandb.init(mode="disabled")
-    print("Training arguments: %s", args)
-    
+    print("Training arguments: %s", train_args)
     # Load the dataset
-    ds = RubricRetrievalLoader(train_frac=args.train_frac) 
-    tokenizer = get_tokenizer(args.base_model)
-    
-    
-    if args.input_fields:
+    ds = RubricRetrievalLoader(train_frac=task_args.train_frac)
+    tokenizer = get_tokenizer(task_args.base_model)
+
+    if task_args.input_fields:
+        input_fields = convert_field(task_args.input_fields)
         ds.get_encoding(
             tokenizer=tokenizer,
             enc_fn=encode_fields_special_tokens,
-            fields=args.input_fields,
+            fields=input_fields,
         )
     else:
         ds.get_encoding(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
+    trainer = AsagTrainer(train_args, task_args, ds.train, ds.val, custom_model_args=custom_model_args)
 
-
-    trainer = AsagTrainer(args, ds.train, ds.val)
-    
-    if not args.test_only:
+    if not train_args.test_only:
         print("***** Running training *****")
         print("Num examples = %d", len(ds.train))
-        print("  Num Epochs = %d", args.max_epoch)
-        print("  Instantaneous batch size per GPU = %d", args.batch_size)
+        print("  Num Epochs = %d", train_args.max_epoch)
+        print("  Instantaneous batch size per GPU = %d", train_args.batch_size)
         trainer.train()
         print("***** Training finished *****")
     
     # Evaluate on test dataset
-    test_model = trainer.model
+    test_model = trainer.load_model()
+    inference_speed = 0
     for test in ["test_ua", "test_uq"]:
         test_ds = getattr(ds, test)
         print(f"***** Running evaluation on {test} *****")
         print("  Num examples = %d", len(test_ds))
+        time_start = time.time()
         test_predictions, test_loss = evaluate(
             test_model,
             test_ds,
-            batch_size=args.batch_size,
+            batch_size=train_args.batch_size,
             collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
         )
-        pred_dir = os.path.join(args.save_dir, "predictions")
+        inf_time = time.time() - time_start
+        pred_dir = os.path.join(train_args.save_dir, "predictions")
         if not os.path.exists(pred_dir):
             os.makedirs(pred_dir)
         test_predictions.to_csv(os.path.join(pred_dir, f"{test}_raw_predictions.csv"), index=False)
@@ -107,14 +113,17 @@ def main(args):
         test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
         test_metrics = eval_report(test_predictions)
         save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
+        inference_speed += inf_time / test_predictions.shape[0]
         metrics_wandb = {test: test_metrics}
         wandb.log(metrics_wandb)
-    if args.no_save:
+    if train_args.no_save:
         print("No-save flag is set. Deleting checkpoint.")
-        checkpoint_dir = os.path.join(args.save_dir, "checkpoint")
+        checkpoint_dir = os.path.join(train_args.save_dir, "checkpoint")
         if os.path.exists(checkpoint_dir):
             os.remove(checkpoint_dir)
-     
+    inference_speed /= 2
+    wandb.log({"inference_speed_per_sample_sec": inference_speed})
 if __name__ == "__main__":
-    experiment_args = get_args()
-    main(experiment_args)
+    parser = HfArgumentParser((TaskArguments, AsagTrainingArguments, BackwardSupportedArguments))
+    task_args, train_args, custom_model_args = parser.parse_args_into_dataclasses()
+    main(task_args, train_args, custom_model_args)

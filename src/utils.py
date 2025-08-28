@@ -4,15 +4,10 @@ import logging
 import random
 import numpy as np
 import torch
-from torch.optim import AdamW
+
 import torch 
-from transformers import get_linear_schedule_with_warmup
-from sklearn.metrics import f1_score, accuracy_score,confusion_matrix
+from sklearn.metrics import f1_score, accuracy_score
 from sklearn.metrics import cohen_kappa_score
-
-
-
-
 
 
 def set_seed(seed=42):
@@ -133,6 +128,21 @@ def transform_for_inference(pred_df, other_filds=None):
     final_df = pred_df.loc[pred_df.groupby('id')['logit_label'].idxmax()][final_fields]
     final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'labels'})
     return final_df 
+def get_wandb_tag(task_args):
+    ignore = ["n_labels", "use_label_weights", "seed"]
+    tag = []
+    for key, value in task_args.items():
+        if key in ignore:
+            continue
+        if key == "base_model":
+            tag.append(value.split("/")[-1])
+        elif key == "input_fields" and value:
+            tag.append("+".join(value))
+        if isinstance(value, bool):
+            tag.append(f"{key}={value}")
+        else:
+            tag.append(value)
+    return tag 
 
 if __name__ == "__main__":
     import pandas as pd

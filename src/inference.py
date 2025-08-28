@@ -6,21 +6,22 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from utils import batch_to_device, mean_dequeue
-DEFAULT_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 @torch.no_grad() 
-def evaluate(model, dataset, batch_size, collate_fn=None): 
+def evaluate(model, dataset, batch_size, collate_fn=None,): 
     dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False) 
 
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0)
 
-    model.to(DEFAULT_DEVICE)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = model.to(device)
     model.eval()
     eval_loss = []
     acc_history = deque(maxlen=10)
     predictions = defaultdict(list)
     for step, (batch, meta) in enumerate(data_iterator):
-        batch = batch_to_device(batch, DEFAULT_DEVICE)
+        batch = batch_to_device(batch, device)
         model_output = model(**batch)
         loss = model_output.loss
         logits = model_output.logits.detach().cpu()
