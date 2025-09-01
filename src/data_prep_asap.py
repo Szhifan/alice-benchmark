@@ -271,7 +271,7 @@ if __name__ == "__main__":
     from functools import partial
     tok = get_tokenizer("xlm-roberta-base")
     ds = RubricRetrievalLoader(train_frac=0.1)
-    ds.get_encoding(tok, encode_rubric_pair)
+    ds.get_encoding(tok, enc_fn=encode_fields_special_tokens)
     collate_fn = partial(xnet_collate_fn, pad_id=tok.pad_token_id, return_meta=False)
     dl = DataLoader(ds.train, batch_size=5, collate_fn=collate_fn, shuffle=True)
     for batch in dl:

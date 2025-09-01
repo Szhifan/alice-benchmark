@@ -33,7 +33,7 @@ class TaskArguments:
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     n_labels: int = field(default=2, metadata={"help": "number of labels for classification"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
-    input_fields: List[str] = field(default_factory=lambda: ['a', 'r'], 
+    input_fields: List[str] = field(default=None, 
                                    metadata={"help": "fields to use as input for the model"})
     model_class: str = field(default='xnet', metadata={"help": "model class to use"})
     def __post_init__(self):
@@ -41,7 +41,7 @@ class TaskArguments:
         assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
         assert self.n_labels > 0, "n_labels must be positive"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
-        assert len(self.input_fields) > 0, "input_fields cannot be empty"
+        assert not self.input_fields or all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
 def convert_field(fields_input_list):
     map = {
         "a": "answer",

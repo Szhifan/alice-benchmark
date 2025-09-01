@@ -243,7 +243,7 @@ class RubricRetrievalLoader(BaseLoader):
                     new_example = example.copy()
                     new_example["rubric"] = rb
                     new_example["rubric_level"] = int(level)  
-                    new_example["labels"] = 1 if new_example["level"] == int(level) else 0
+                    new_example["labels"] = 1 if int(new_example["level"]) == int(level) else 0
                     expanded_data.append(new_example)
             expanded_data = Dataset.from_list(expanded_data)
             return expanded_data
@@ -256,5 +256,5 @@ class RubricRetrievalLoader(BaseLoader):
 if __name__ == "__main__":
     from train_utils import get_tokenizer
     loader = RubricRetrievalLoader(train_frac=0.1)
-    tokenizer = get_tokenizer("bert-base-uncased")
-    loader.get_encoding(tokenizer, encode_rubric_pair)
+    tokenizer = get_tokenizer("bert-base-multilingual-uncased")
+    print(loader.train[:4])

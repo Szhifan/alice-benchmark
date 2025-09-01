@@ -30,12 +30,12 @@ def compute_metrics(eval_pred):
 
 # encoding functions 
 def get_tokenizer(base_model: str) -> AutoTokenizer:
-    tok = AutoTokenizer.from_pretrained(base_model)
+    tokenizer = AutoTokenizer.from_pretrained(base_model)
     if "llama" in base_model.lower():
-        tok.padding_side = "right"  
-        tok.pad_token = tok.eos_token  # Ensure pad_token is set
-    tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
-    return tok
+        tokenizer.padding_side = "right"  
+        tokenizer.pad_token = tokenizer.eos_token  # Ensure pad_token is set
+    tokenizer.sep_token = tokenizer.sep_token or tokenizer.eos_token  # Ensure sep_token is set
+    return tokenizer
 
 @dataclass
 class AsagTrainingArguments:
@@ -166,7 +166,7 @@ class ModelLoader:
         model =  AutoPeftModelForSequenceClassification.from_pretrained(
             str(cp_path)+'/',
             torch_dtype=torch.float16,
-            device_map={"": "cuda:0"} if torch.cuda.is_available() else {"": "cpu"},# inference on one device
+            device_map=self.device_map,
             num_labels=self.task_args.n_labels,
         )
         model = model.merge_and_unload()
@@ -221,7 +221,7 @@ class AsagTrainer:
             device_map="auto"
         self.model_loader = ModelLoader(task_args, train_args, custom_model_args=custom_model_args, device_map=device_map)
         self.model  = self.model_loader.init_model()
-        self.tok = get_tokenizer(task_args.base_model)
+        self.tokenizer = get_tokenizer(task_args.base_model)
         self.collate_fn =  xnet_collate_fn if task_args.model_class == "xnet" else snet_collate_fn
         self.multi_gpu = multi_gpu
         self.is_llm = "llama" in task_args.base_model
@@ -266,11 +266,11 @@ class AsagTrainer:
             args=train_args,
             train_dataset=self.train_dataset,
             eval_dataset=self.validation_dataset,
-            data_collator=lambda batch: self.collate_fn(batch, self.tok.pad_token_id),
+            data_collator=lambda batch: self.collate_fn(batch, self.tokenizer.pad_token_id),
             compute_metrics=compute_metrics,
         )
         trainer.train()
         trainer.model.save_pretrained(self.train_args.save_dir)
-        trainer.tokenizer.save_pretrained(self.train_args.save_dir)
+        self.tokenizer.save_pretrained(self.train_args.save_dir)
 
 
