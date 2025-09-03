@@ -21,11 +21,15 @@ from data_prep import (
     RubricRetrievalLoader,
     encode_fields_special_tokens,
     encode_rubric_pair,
-    encode_with_fields_separate_rubric,
-    encode_rubric_separate
+    encode_dataset
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
+import torch.distributed as dist
+
+def is_main_process():
+    """Check if the current process is the main process (rank 0)."""
+    return not dist.is_available() or not dist.is_initialized() or dist.get_rank() == 0
 @dataclass
 class TaskArguments:
     """Task/experiment related arguments dataclass"""
@@ -38,7 +42,7 @@ class TaskArguments:
     model_class: str = field(default='xnet', metadata={"help": "model class to use"})
     def __post_init__(self):
         """Validation checks after initialization"""
-        assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
+        assert self.model_class in ['xnet', 'snet', 'gen'], f"model_class must be one of ['xnet', 'snet','gen'], got {self.model_class}"
         assert self.n_labels > 0, "n_labels must be positive"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
         assert not self.input_fields or all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
@@ -57,34 +61,33 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         os.makedirs(train_args.save_dir)
 
     wandb.login()
-    if train_args.log_wandb:
+    if train_args.log_wandb and is_main_process():
         wandb.init(
-            config=vars(train_args) + vars(task_args),
+            config={**vars(train_args), **vars(task_args)},
             dir=train_args.save_dir,
             project="alice-benchmark",
-            tags=get_wandb_tag(task_args)
         )
     else:
         wandb.init(mode="disabled")
     print("Training arguments: %s", train_args)
     # Load the dataset
-    ds = RubricRetrievalLoader(train_frac=task_args.train_frac)
+    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
     tokenizer = get_tokenizer(task_args.base_model)
 
     if task_args.input_fields:
         input_fields = convert_field(task_args.input_fields)
-        ds.get_encoding(
+        dts_loader.encode_all_splits(
             tokenizer=tokenizer,
             enc_fn=encode_fields_special_tokens,
             fields=input_fields,
         )
     else:
-        ds.get_encoding(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
-    trainer = AsagTrainer(train_args, task_args, ds.train, ds.val, custom_model_args=custom_model_args)
+        dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
+    trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args)
 
     if not train_args.test_only:
         print("***** Running training *****")
-        print("Num examples = %d", len(ds.train))
+        print("Num examples = %d", len(dts_loader.train))
         print("  Num Epochs = %d", train_args.max_epoch)
         print("  Instantaneous batch size per GPU = %d", train_args.batch_size)
         trainer.train()
@@ -94,7 +97,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     test_model = trainer.load_model()
     inference_speed = 0
     for test in ["test_ua", "test_uq"]:
-        test_ds = getattr(ds, test)
+        test_ds = getattr(dts_loader, test)
         print(f"***** Running evaluation on {test} *****")
         print("  Num examples = %d", len(test_ds))
         time_start = time.time()

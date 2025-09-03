@@ -3,8 +3,8 @@ from transformers import (
     AutoTokenizer, 
     BitsAndBytesConfig, 
     AutoModelForSequenceClassification,
+    AutoModelForCausalLM,
     AutoConfig,
-    LlamaConfig,
     Trainer,
     TrainingArguments
 )
@@ -12,7 +12,7 @@ from modelling.modelling_snet import AsagSNet
 import torch
 import os 
 from dataclasses import dataclass, field
-from data_prep import snet_collate_fn, xnet_collate_fn
+from data_prep import snet_collate_fn, xnet_collate_fn, collate_gen_fn
 from inference import evaluate
 from peft import LoraConfig, get_peft_model, AutoPeftModelForSequenceClassification
 import evaluate
@@ -40,7 +40,7 @@ def get_tokenizer(base_model: str) -> AutoTokenizer:
 @dataclass
 class AsagTrainingArguments:
     """Training arguments dataclass"""
-    batch_size: int = field(default=32, metadata={"help": "maximum number of sentences in a batch"})
+    batch_size: int = field(default=16, metadata={"help": "maximum number of sentences in a batch"})
     max_epoch: int = field(default=3, metadata={"help": "force stop training at specified epoch"})
     clip_norm: float = field(default=1.0, metadata={"help": "clip threshold of gradients"})
     lr: float = field(default=5e-5, metadata={"help": "learning rate"})
@@ -100,13 +100,13 @@ class ModelLoader:
         self.custom_model_args = custom_model_args
         self.device_map = device_map
         self.lora_config = LoraConfig(
-            r=8,
-            lora_alpha=8,
+            r=256,
+            lora_alpha=256,
             lora_dropout=0.1,
             bias='none',
             target_modules="all-linear",
-            modules_to_save=["classifier","score"],
-            task_type="SEQ_CLS",
+            modules_to_save=["classifier", "score", "lm_head"],
+            task_type="SEQ_CLS" if self.task_args.model_class != "gen" else "CAUSAL_LM",
         )
         self.bnb_config = BitsAndBytesConfig(
             load_in_4bit = True, # Activate 4-bit precision base model loading
@@ -115,7 +115,6 @@ class ModelLoader:
             bnb_4bit_compute_dtype = torch.bfloat16, # Compute data type for 4-bit base models
             )
         self.use_custom_model = "llama" in self.task_args.base_model
-        self.is_snet = self.task_args.model_class == "snet"
     def _update_with_custom_config(self, config, model_args):
         """
         Update autoconfig with backwardsarguments 
@@ -134,7 +133,7 @@ class ModelLoader:
             config = self._update_with_custom_config(config, self.model_args)
         self.train_args.use_bnb = (self.train_args.use_bnb and torch.cuda.is_available()) or self.use_custom_model
         self.train_args.use_lora = (self.train_args.use_lora and torch.cuda.is_available()) or self.use_custom_model
-        if self.is_snet:
+        if self.task_args.model_class == "snet":
             config.pool_type = self.custom_model_args.pool_type if self.custom_model_args else "avg"
             config.base_model_name_or_path = self.task_args.base_model
             model = AsagSNet(config,
@@ -142,7 +141,7 @@ class ModelLoader:
                              bnb_config=self.bnb_config if self.train_args.use_bnb else None)
             device = f"cuda:{PartialState().process_index}" if torch.cuda.is_available() else DEFAULT_DEVICE
             model = model.to(device)
-        else:
+        elif self.task_args.model_class == "xnet":
             print("Loading with AutoModelForSequenceClassification...")
             model = AutoModelForSequenceClassification.from_pretrained(
                 self.task_args.base_model,
@@ -150,7 +149,14 @@ class ModelLoader:
                 quantization_config=self.bnb_config if self.train_args.use_bnb else None,
                 device_map=self.device_map,
             )
-
+        elif self.task_args.model_class == "gen":
+            print("Loading with AutoModelForCausalLM...")
+            model = AutoModelForCausalLM.from_pretrained(
+                self.task_args.base_model,
+                config=config,  # Pass custom config if it's a Llama model
+                quantization_config=self.bnb_config if self.train_args.use_bnb else None,
+                device_map=self.device_map,
+            )
         config.num_labels = self.task_args.n_labels
         model = self._init_peft_model(model)
         return model
@@ -222,7 +228,8 @@ class AsagTrainer:
         self.model_loader = ModelLoader(task_args, train_args, custom_model_args=custom_model_args, device_map=device_map)
         self.model  = self.model_loader.init_model()
         self.tokenizer = get_tokenizer(task_args.base_model)
-        self.collate_fn =  xnet_collate_fn if task_args.model_class == "xnet" else snet_collate_fn
+        self.collate_fn = collate_gen_fn if task_args.model_class == "gen" else \
+                         xnet_collate_fn if task_args.model_class == "xnet" else snet_collate_fn
         self.multi_gpu = multi_gpu
         self.is_llm = "llama" in task_args.base_model
     def load_model(self):
@@ -252,14 +259,13 @@ class AsagTrainer:
             greater_is_better=True,
             save_only_model=True,
             load_best_model_at_end=True,
-            metric_for_best_model="eval_accuracy",
+            metric_for_best_model="eval_accuracy" if not self.task_args.model_class == "gen" else "eval_loss",
             logging_dir=os.path.join(self.train_args.save_dir, "logs"),
             logging_steps=100,
             save_strategy="best",
             eval_strategy="epoch",
             save_total_limit=2,
             output_dir=self.train_args.save_dir,
-            report_to="wandb" if self.train_args.log_wandb else "none"
         )
         trainer = Trainer(
             model=self.model,

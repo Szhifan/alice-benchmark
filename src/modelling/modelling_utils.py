@@ -88,10 +88,6 @@ class BackwardSupportedArguments:
         default=None, 
         metadata={"help": "Manually set specific layers to change to bidirectional attention."}
     )
-    res_connect: Optional[int] = field(
-        default=None,
-        metadata={"help": "Use ResConnect in Model."}
-    )
     freeze_type: Optional[str] = field(
         default=None,
         metadata={"help": "Options:\
@@ -101,134 +97,23 @@ class BackwardSupportedArguments:
             false\\none: no to freeze the model."
         }
     )
-    num_unfreeze_layers: int = field(
-        default=0,
-        metadata={"help": "Unfreeze layers starting from the last layer of the frozen layers."}
-    )
-    model_init: bool = field(
-        default=True,
-        metadata={"help": "Whether to initialize extended layers using forward params."}
-    )
-    num_classifier_layers: int = field(
-        default=1, metadata={"help": "Layers of classifiers."}
-    )
-    gguf_file: Optional[str] = field(
-        default=None, metadata={"help": "Whether to load model from a specific gguf file."}
-    )
-    peft_file: Optional[str] = field(
-        default=None, metadata={"help": "Peft file path"}
-    )
     pool_type: str = field(
         default="avg", 
         metadata={"help": "Pooling type for the model output. Options: avg, weightedavg, cls, last"}
     )
-    
-    # Quantization parameters
-    use_quantization: bool = field(
-        default=True, metadata={"help": "Whether to use 4-bit quantization"}
-    )
-    use_latent_attn: bool = field(
-        default=False, metadata={"help": "Whether to use late attention"}
-    )
-
     def __post_init__(self):
-        if self.unsink_layers is None or self.unsink_layers.lower() in ("none", "false", "f", "no", "n", "[]", "{}", "()"):
-            self.unsink_layers = []
-        else:
-            sep = "," if "," in self.unsink_layers else " "
-            self.unsink_layers = [int(item) for item in self.unsink_layers.strip("[]").strip("{}").strip("()").split(sep)]
-
-        if self.bidir_layers is None or self.bidir_layers.lower() in ("none", "false", "f", "no", "n", "[]", "{}", "()"):
-            self.bidir_layers = []
-        else:
-            sep = "," if "," in self.bidir_layers else " "
-            self.bidir_layers = [int(item) for item in self.bidir_layers.strip("[]").strip("{}").strip("()").split(sep)]
-
         self.architecture = self.architecture.upper()
         if self.architecture not in ARCHITECTURES:
             raise ValueError("Invalid Model Architecture. Options: " + ", ".join(ARCHITECTURES))
+
         self.mask_type = self.mask_type.upper()
-        
-        if self.architecture == "NONE" :
-            self.num_unsink_layers = 0
-            self.num_bidir_layers = 0
-            self.unsink_layers = []
-            self.bidir_layers = []
-            
-        if (self.num_unsink_layers or self.num_bidir_layers) and (self.unsink_layers or self.bidir_layers):
-            raise ValueError("Cannot set both unsink/bidir_layers and num_unsink/bidir_layers.")
-        if self.freeze_type is not None:
-            if self.freeze_type.lower() in ("none", "false", "f", "no", "n"):
-                self.freeze_type = False
-            elif self.freeze_type.lower() in ("true", "t", "yes", "y"):
-                self.freeze_type = "default"
         if self.pool_type not in ("avg", "weightedavg", "cls", "last"):
             self.pool_type = "avg"
             print(f"Invalid pool_type {self.pool_type}, using default 'avg' pooling.")
-        if self.gguf_file is not None and self.gguf_file.lower() in ("none", "false", "f", "no", "n"):
-            self.gguf_file = None
-
-        if self.peft_file is not None and self.peft_file.lower() in ("none", "false", "f", "no", "n"):
-            self.peft_file = None
-            
-        # Handle quantization parameters
-        if not torch.cuda.is_available():
-            self.use_quantization = False
 
     def to_dict(self):
         return asdict(self)
-    
-    def get_quantization_config(self):
-        """Create BitsAndBytesConfig from quantization parameters"""
-        if not self.use_quantization:
-            return None
-            
-        return BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.float16,
-        )
 
-    def get_suffix(self, training_args=None):
-        suffix = []
-
-        if self.gguf_file is not None:
-            match = re.search(r"(\w+).gguf", self.gguf_file)
-            if match:
-                suffix.append(match.group(1).lower())
-
-        suffix.append(self.architecture)
-
-        if self.architecture != "NONE":
-            if self.num_unsink_layers > 0:
-                suffix.append(f"{self.mask_type.lower()}_{self.num_unsink_layers}")
-            elif self.unsink_layers:
-                suffix.append(f"{self.mask_type.lower()}_{self.unsink_layers}")
-
-            if self.num_bidir_layers > 0:
-                suffix.append(f"bidir_{self.num_bidir_layers}")
-            elif self.bidir_layers:
-                suffix.append(f"bidir_{self.bidir_layers}")
-        
-            if self.model_init:
-                suffix.append("initialized")
-
-        if self.num_classifier_layers > 0:
-            suffix.append(f"classifier_{self.num_classifier_layers}")
-
-        if self.freeze_type:
-            freeze_type = "freeze_" + self.freeze_type
-            if self.num_unfreeze_layers > 0:
-                freeze_type += f"-{self.num_unfreeze_layers}"
-            suffix.append(freeze_type)
-
-        if training_args is not None:
-            suffix.append(f"_lr_{format(training_args.learning_rate, '.0e')}")
-
-            suffix = [s for s in suffix if s not in training_args.output_dir]
-
-        return "_".join([""] + suffix)
 
 def get_noncausal_attention_mask(self, attention_mask, input_shape, device=None, dtype=None):
     """

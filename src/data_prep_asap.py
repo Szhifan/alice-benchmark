@@ -143,7 +143,14 @@ def collate_fn(input_batch, pad_id=0, return_meta=False):
     if return_meta:
         return batch, meta
     return batch
-
+def gen_collate_fn(input_batch, pad_id=0, return_meta=False):
+    if return_meta:
+        batch, meta = collate_fn(input_batch, pad_id=pad_id, return_meta=return_meta)
+        batch.pop("labels")
+        return batch
+    batch = collate_fn(input_batch, pad_id=pad_id, return_meta=return_meta)
+    batch.pop("labels")
+    return batch
 
 def xnet_collate_fn(input_batch, pad_id=0, return_meta=False):
     """
@@ -260,9 +267,6 @@ class RubricRetrievalLoader(BaseLoader):
         self.train = _expand_dataset(self.train)
         self.val = _expand_dataset(self.val)
         self.test = _expand_dataset(self.test)
-
-        
-
 
 
 if __name__ == "__main__":

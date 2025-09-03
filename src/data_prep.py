@@ -13,7 +13,12 @@ enable_caching()
 path_train = "alice_lp/train.csv"
 path_ua = "alice_lp/test_ua.csv"
 path_uq = "alice_lp/test_uq.csv"
-
+FIELD_EN2DE = {
+    "answer": "Antwort",
+    "rubric": "Rubrik",
+    "question": "Frage",
+    "sample_solution": "Lösung"
+}
 def basic_encode(example, tokenizer):
     # encode answer only  
     output = tokenizer(example["answer"], max_length=512, truncation=True)
@@ -60,11 +65,11 @@ def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric
         if field not in example:
             raise ValueError(f"Field '{field}' not found in the example.")
         if format == "natural_lang":
-            text2encode += f"{field}: {example[field]}\n"
+            text2encode += f"{FIELD_EN2DE[field]}: {example[field]}\n"
         elif format == "structured":
-            text2encode += f"<{field}>{example[field]}</{field}>\n"
+            text2encode += f"<{FIELD_EN2DE[field]}>{example[field]}</{FIELD_EN2DE[field]}>\n"
     if add_instruction:
-        text2encode = "Determine if rubric is satisfied by the answer:\n" + text2encode
+        text2encode = "Bestimmen Sie, ob die Rubrik durch die Antwort erfüllt wird:\n" + text2encode
     output = tokenizer(text2encode, max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
@@ -95,19 +100,35 @@ def encode_with_fields_separate_rubric(
         if field not in example:
             raise ValueError(f"Field '{field}' not found in the example.")
         if format == "natural_lang":
-            query2encode += f"{field}: {example[field]}\n"
+            query2encode += f"{FIELD_EN2DE[field]}: {example[field]}\n"
         elif format == "structured":
-            query2encode += f"<{field}>{example[field]}</{field}>\n"
+            query2encode += f"<{FIELD_EN2DE[field]}>{example[field]}</{FIELD_EN2DE[field]}>\n"
     if add_instruction:
-        query2encode = "Determine if rubric is satisfied by the answer:\n" + query2encode
+        query2encode = "Bestimmen Sie, ob die Rubrik durch die Antwort erfüllt wird:\n" + query2encode
     query_output = tokenizer(query2encode, max_length=512, truncation=True)
     for field in query_output:
         example[field] = query_output[field]
     for field in rubric_encoded:
         example[f"rubric_{field}"] = rubric_encoded[field]
     return example
-# collate functions 
-def collate_fn(input_batch, pad_id=0, return_meta=False):
+
+def encode_generation(example, tokenizer, train=True):
+    """
+    Encode the generation fields of the example using the tokenizer.
+    """
+    rubric = json.loads(example["rubric"])
+    rubric_text = [f"Score: {key} Rubric: {value}" for key,value in rubric.items()]
+    text2encode = f"Welche der folgenden Rubriken erfüllen die Schülerantwort: {example['answer']}?" + "\n".join(rubric_text) + "\n"
+    if train:
+        response = f"Antwort: {example['level']}"
+        text2encode += response
+    output = tokenizer(text2encode, max_length=512, truncation=True)
+    for field in output:
+        example[field] = output[field]
+    return example
+
+# collate functions
+def collate_gen_fn(input_batch, pad_id=0, return_meta=False):
     """
     basic collate function for batching the input batch.
     Mode: controls whether to return meta information or not.
@@ -123,15 +144,14 @@ def collate_fn(input_batch, pad_id=0, return_meta=False):
         "input_ids": input_ids,
         "attention_mask": attention_mask,
         "token_type_ids": token_type_ids,
-        "labels": torch.tensor([x["labels"] for x in input_batch]),
     } 
     meta = {
-        "id": [x["sid"] for x in input_batch]
+        "id": [x["sid"] for x in input_batch],
+        "level": [x["level"] for x in input_batch]
     }
     if return_meta:
         return batch, meta
     return batch
-
 
 def xnet_collate_fn(input_batch, pad_id=0, return_meta=False):
     """
@@ -184,6 +204,10 @@ def snet_collate_fn(input_batch, pad_id=0, return_meta=False):
     return batch
 
 # Dataset loaders
+def encode_dataset(dataset, tokenizer, enc_fn, *args, **kwargs):
+    dataset = dataset.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
+    return dataset
+
 class BaseLoader:
     """
     Load the splits of Alice dataset.
@@ -196,33 +220,13 @@ class BaseLoader:
         self.test_ua = Dataset.from_csv(path_ua)
         self.test_uq = Dataset.from_csv(path_uq)
         self.train, self.val = self.train.train_test_split(test_size=0.1, seed=8964).values()
-    def get_encoding(self, tokenizer, enc_fn, *args, **kwargs):
-        self.train = self.train.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
-        self.val = self.val.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
-        self.test_ua = self.test_ua.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
-        self.test_uq = self.test_uq.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
+
     
-    def merge_scores(self,score="low"):
-        """
-        convert the selected level to 1 and the rest to 0. This is for binary clasification 
-        where the model learns to differentiate between the selected level and the rest.
-        """
-        def _merge_scores(example):
-            rubric = example["rubric"]
-            rubric = json.loads(rubric)
-            max_score = len(rubric) - 1
-            if score == "low":
-                target_score = 0
-            elif score == "high":
-                target_score = max_score
-            elif score == "mid":
-                target_score = max_score // 2
-            example["labels"] = 1 if example["level"] == target_score else 0
-            return example
-        self.train = self.train.map(lambda x: _merge_scores(x))
-        self.val = self.val.map(lambda x: _merge_scores(x))
-        self.test_ua = self.test_ua.map(lambda x: _merge_scores(x))
-        self.test_uq = self.test_uq.map(lambda x: _merge_scores(x))
+    def encode_all_splits(self,tokenizer,enc_fn, *args, **kwargs):
+        self.train = encode_dataset(self.train, tokenizer, enc_fn, *args, **kwargs)
+        self.val = encode_dataset(self.val, tokenizer, enc_fn, *args, **kwargs)
+        self.test_ua = encode_dataset(self.test_ua, tokenizer, enc_fn, *args, **kwargs)
+        self.test_uq = encode_dataset(self.test_uq, tokenizer, enc_fn, *args, **kwargs)
 
 
 class RubricRetrievalLoader(BaseLoader):
@@ -252,9 +256,11 @@ class RubricRetrievalLoader(BaseLoader):
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
 
-        
+
 if __name__ == "__main__":
     from train_utils import get_tokenizer
-    loader = RubricRetrievalLoader(train_frac=0.1)
+    loader = BaseLoader(train_frac=0.01)
     tokenizer = get_tokenizer("bert-base-multilingual-uncased")
-    print(loader.train[:4])
+    loader.train = encode_dataset(loader.train, tokenizer, encode_generation, train=True)
+    for input_ids in loader.train["input_ids"][:3]:
+        print(tokenizer.convert_ids_to_tokens(input_ids))
