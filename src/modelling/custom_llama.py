@@ -27,7 +27,6 @@ from transformers.masking_utils import create_causal_mask
 from transformers.utils.generic import check_model_inputs
 
 logger = logging.get_logger(__name__)
-@auto_docstring
 class LlamaModel(LlamaPreTrainedModel):
     def __init__(self, config):
         print("Using custom LlamaModel with extended architecture")
@@ -49,9 +48,10 @@ class LlamaModel(LlamaPreTrainedModel):
         self.mask_type = getattr(config, 'mask_type', "MASK0")
         self.num_unsink_layers = getattr(config, 'num_unsink_layers', 0)
         self.num_bidir_layers = getattr(config, 'num_bidir_layers', 0)
-        self.unsink_layers = set(getattr(config, 'unsink_layers', set()))
-        self.bidir_layers = set(getattr(config, 'bidir_layers', set()))
-        self.connect_layers = getattr(config, 'res_connect', None)
+        unsink_layers = getattr(config, 'unsink_layers', None)
+        self.unsink_layers = set(unsink_layers if unsink_layers is not None else [])
+        bidir_layers = getattr(config, 'bidir_layers', None)
+        self.bidir_layers = set(bidir_layers if bidir_layers is not None else [])
         self.num_hidden_layers = config.num_hidden_layers # the total number of converted backbone layers
         num_converted_layers = self.num_unsink_layers + self.num_bidir_layers
         _is_mask0 = self.mask_type == "MASK0"

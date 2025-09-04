@@ -82,7 +82,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         add_instruction=task_args.add_instruction
     )
 
-    trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args)
+    trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args,multi_gpu=True)
 
     if not train_args.test_only:
         print("***** Running training *****")
