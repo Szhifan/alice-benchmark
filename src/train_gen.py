@@ -32,11 +32,9 @@ class TaskArguments:
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     n_labels: int = field(default=2, metadata={"help": "number of labels for classification"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
-    input_fields: List[str] = field(default=["a","r"], 
+    input_fields: List[str] = field(default=None, 
                                    metadata={"help": "fields to use as input for the model"})
-    model_class: str = field(default='xnet', metadata={"help": "model class to use"})
-    input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
-    add_instruction: bool = field(default=False,metadata={"help":"whether to add instruction to the LLM input"})
+    model_class: str = field(default='gen', metadata={"help": "model class to use"})
     def __post_init__(self):
         """Validation checks after initialization"""
         assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
@@ -61,7 +59,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     wandb.login()
     if train_args.log_wandb:
         wandb.init(
-            config=vars(train_args) + vars(task_args),
+            config={**vars(train_args), **vars(task_args)},
             dir=train_args.save_dir,
             project="alice-benchmark",
             tags=get_wandb_tag(task_args)
@@ -79,7 +77,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         dts_loader.train,
         tokenizer=tokenizer,
         enc_fn=encode_generation,
-        fields=input_fields
+        additional_fields=input_fields
     )
 
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args)
@@ -101,7 +99,8 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
             test_ds,
             tokenizer=tokenizer,
             enc_fn=encode_generation,
-            train=False
+            train=False,
+            additional_fields=input_fields
         )
         print(f"***** Running evaluation on {test} *****")
         print("  Num examples = %d", len(test_ds))

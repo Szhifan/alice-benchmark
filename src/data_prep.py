@@ -112,13 +112,21 @@ def encode_with_fields_separate_rubric(
         example[f"rubric_{field}"] = rubric_encoded[field]
     return example
 
-def encode_generation(example, tokenizer, train=True):
+def encode_generation(example, tokenizer, train=True, additional_fields=None):
     """
-    Encode the generation fields of the example using the tokenizer.
+    Encode text for generation task 
     """
     rubric = json.loads(example["rubric"])
-    rubric_text = [f"Score: {key} Rubric: {value}" for key,value in rubric.items()]
-    text2encode = f"Welche der folgenden Rubriken erfüllen die Schülerantwort: {example['answer']}?" + "\n".join(rubric_text) + "\n"
+    addition_input_text = ""
+    if additional_fields is not None:
+        
+        for field in additional_fields:
+            if field not in example:
+                raise ValueError(f"Field '{field}' not found in the example.")
+            addition_input_text += f"{FIELD_EN2DE[field]}: {example[field]}\n"
+    rubric_text = [f"Score: {key} Rubric: {value}" for key, value in rubric.items()]
+    text2encode = f"Welche der folgenden Rubriken erfüllen die Schülerantwort: {example['answer']}?" + "\n".join(rubric_text) + "\n" \
+    + addition_input_text
     if train:
         response = f"Antwort: {example['level']}"
         text2encode += response
@@ -128,7 +136,7 @@ def encode_generation(example, tokenizer, train=True):
     return example
 
 # collate functions
-def collate_gen_fn(input_batch, pad_id=0, return_meta=False):
+def gen_collate_fn(input_batch, pad_id=0, return_meta=False):
     """
     basic collate function for batching the input batch.
     Mode: controls whether to return meta information or not.
@@ -255,12 +263,10 @@ class RubricRetrievalLoader(BaseLoader):
         self.val = _expand_dataset(self.val)
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
-
-
 if __name__ == "__main__":
     from train_utils import get_tokenizer
     loader = BaseLoader(train_frac=0.01)
     tokenizer = get_tokenizer("bert-base-multilingual-uncased")
-    loader.train = encode_dataset(loader.train, tokenizer, encode_generation, train=True)
+    loader.train = encode_dataset(loader.train, tokenizer, encode_generation, train=True, additional_fields=["question"])
     for input_ids in loader.train["input_ids"][:3]:
         print(tokenizer.convert_ids_to_tokens(input_ids))

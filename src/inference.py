@@ -11,9 +11,7 @@ from utils import batch_to_device, mean_dequeue
 @torch.no_grad() 
 def evaluate(model, dataset, batch_size, collate_fn=None,): 
     dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False) 
-
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0)
-
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = model.to(device)
     model.eval()
@@ -59,3 +57,5 @@ def evaluate_gen(model, dataset, batch_size, tokenizer, collate_fn=None):
     for step, (batch, meta) in enumerate(data_iterator):
         batch = batch_to_device(batch, device)
         model_output = model.generate(**batch, max_length=10)
+        llm_output_text = tokenizer.decode(model_output, skip_special_tokens=True)
+        predictions["pred_text"].extend(llm_output_text)

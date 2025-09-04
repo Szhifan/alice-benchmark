@@ -13,17 +13,21 @@ from utils import (
     eval_report,
     save_report,
     transform_for_inference,
-    get_wandb_tag,
     
 )
 from inference import evaluate
 from data_prep import (
     RubricRetrievalLoader,
-    encode_with_fields
+    encode_rubric_separate,
+    encode_with_fields_separate_rubric
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
-import shutil
+import torch.distributed as dist
+
+def is_main_process():
+    """Check if the current process is the main process (rank 0)."""
+    return not dist.is_available() or not dist.is_initialized() or dist.get_rank() == 0
 @dataclass
 class TaskArguments:
     """Task/experiment related arguments dataclass"""
@@ -31,18 +35,13 @@ class TaskArguments:
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     n_labels: int = field(default=2, metadata={"help": "number of labels for classification"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
-    input_fields: List[str] = field(default=None, 
-                                   metadata={"help": "fields to use as input for the model"})
     model_class: str = field(default='xnet', metadata={"help": "model class to use"})
-    input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
-    add_instruction: bool = field(default=False,metadata={"help":"whether to add instruction to the LLM input"})
     def __post_init__(self):
         """Validation checks after initialization"""
-        assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
+        assert self.model_class in ['xnet', 'snet', 'gen'], f"model_class must be one of ['xnet', 'snet','gen'], got {self.model_class}"
         assert self.n_labels > 0, "n_labels must be positive"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
-        assert all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
-        assert self.input_format in ['structured', 'natural_language'], "input_format must be one of ['structured', 'natural_language']"
+        assert not self.input_fields or all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
 def convert_field(fields_input_list):
     map = {
         "a": "answer",
@@ -58,12 +57,11 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         os.makedirs(train_args.save_dir)
 
     wandb.login()
-    if train_args.log_wandb:
+    if train_args.log_wandb and is_main_process():
         wandb.init(
-            config={**vars(train_args), **vars(task_args), **vars(custom_model_args)},
+            config={**vars(train_args), **vars(task_args)},
             dir=train_args.save_dir,
             project="alice-benchmark",
-            tags=get_wandb_tag(task_args)
         )
     else:
         wandb.init(mode="disabled")
@@ -72,16 +70,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
     tokenizer = get_tokenizer(task_args.base_model)
 
-
-    input_fields = convert_field(task_args.input_fields)
-    dts_loader.encode_all_splits(
-        tokenizer=tokenizer,
-        enc_fn=encode_with_fields,
-        fields=input_fields,
-        format=task_args.input_format,
-        add_instruction=task_args.add_instruction
-    )
-
+    dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_rubric_separate)
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args)
 
     if not train_args.test_only:
@@ -120,19 +109,12 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         wandb.log(metrics_wandb)
     if train_args.no_save:
         print("No-save flag is set. Deleting checkpoint.")
-        for root, dirs, files in os.walk(train_args.save_dir):
-            for dir in dirs:
-                if "checkpoint" in dir:
-                    shutil.rmtree(os.path.join(root, dir))
-            for file in files:
-                if "safetensor" in file:
-                    os.remove(os.path.join(root, file))
+        checkpoint_dir = os.path.join(train_args.save_dir, "checkpoint")
+        if os.path.exists(checkpoint_dir):
+            os.remove(checkpoint_dir)
     inference_speed /= 2
     wandb.log({"inference_speed_per_sample_sec": inference_speed})
 if __name__ == "__main__":
     parser = HfArgumentParser((TaskArguments, AsagTrainingArguments, BackwardSupportedArguments))
     task_args, train_args, custom_model_args = parser.parse_args_into_dataclasses()
-    train_args.use_lora = True
-    train_args.use_bnb = True
-    train_args.use_fp16 = True
     main(task_args, train_args, custom_model_args)

@@ -12,7 +12,7 @@ from modelling.modelling_snet import AsagSNet
 import torch
 import os 
 from dataclasses import dataclass, field
-from data_prep import snet_collate_fn, xnet_collate_fn, collate_gen_fn
+from data_prep import snet_collate_fn, xnet_collate_fn, gen_collate_fn
 from inference import evaluate
 from peft import LoraConfig, get_peft_model, AutoPeftModelForSequenceClassification
 import evaluate
@@ -228,7 +228,7 @@ class AsagTrainer:
         self.model_loader = ModelLoader(task_args, train_args, custom_model_args=custom_model_args, device_map=device_map)
         self.model  = self.model_loader.init_model()
         self.tokenizer = get_tokenizer(task_args.base_model)
-        self.collate_fn = collate_gen_fn if task_args.model_class == "gen" else \
+        self.collate_fn = gen_collate_fn if task_args.model_class == "gen" else \
                          xnet_collate_fn if task_args.model_class == "xnet" else snet_collate_fn
         self.multi_gpu = multi_gpu
         self.is_llm = "llama" in task_args.base_model
