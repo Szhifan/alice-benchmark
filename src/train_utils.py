@@ -139,7 +139,7 @@ class ModelLoader:
             model = AsagSNet(config,
                              lora_config=self.lora_config if self.train_args.use_lora else None,
                              bnb_config=self.bnb_config if self.train_args.use_bnb else None)
-            device = f"cuda:{PartialState().process_index}" if torch.cuda.is_available() else DEFAULT_DEVICE
+            device = device = "cuda:0" if isinstance(self.device_map, dict) and not self.device_map.get('', 0) else f"cuda:{PartialState().process_index}"
             model = model.to(device)
         elif self.task_args.model_class == "xnet":
             print("Loading with AutoModelForSequenceClassification...")
@@ -162,7 +162,7 @@ class ModelLoader:
         return model
     def _init_peft_model(self, model):
         """Wrap the model with LoRA."""
-        if self.is_snet and self.train_args.use_lora:
+        if self.task_args.model_class == "snet" and self.train_args.use_lora:
             model = model.init_peft()
         elif self.train_args.use_lora:
             model = get_peft_model(model, self.lora_config)
@@ -184,7 +184,7 @@ class ModelLoader:
         :param use_lora: Whether to load the model with LoRA (PEFT).
         :return: Loaded model.
         """
-        if self.is_snet:
+        if self.task_args.model_class == "snet":
             print(f"Loading SNet model from checkpoint: {cp_path}")
             model = AsagSNet.from_pretrained(
                 cp_path,
@@ -224,7 +224,7 @@ class AsagTrainer:
             device_string = PartialState().process_index
             device_map={'':device_string}
         else:   
-            device_map="auto"
+            device_map={'':0} if torch.cuda.is_available() else {'': 'cpu'}
         self.model_loader = ModelLoader(task_args, train_args, custom_model_args=custom_model_args, device_map=device_map)
         self.model  = self.model_loader.init_model()
         self.tokenizer = get_tokenizer(task_args.base_model)

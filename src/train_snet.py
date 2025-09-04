@@ -41,7 +41,6 @@ class TaskArguments:
         assert self.model_class in ['xnet', 'snet', 'gen'], f"model_class must be one of ['xnet', 'snet','gen'], got {self.model_class}"
         assert self.n_labels > 0, "n_labels must be positive"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
-        assert not self.input_fields or all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
 def convert_field(fields_input_list):
     map = {
         "a": "answer",
