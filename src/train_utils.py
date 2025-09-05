@@ -54,7 +54,7 @@ class AsagTrainingArguments:
     cp_dir: str = field(default=None, metadata={"help": "path to the model checkpoint to load"})
     dropout: float = field(default=0.1, metadata={"help": "dropout probability"})
     test_only: bool = field(default=False, metadata={"help": "test model only"})
-    fp16: bool = field(default=False, metadata={"help": "use 16-bit float precision instead of 32-bit"})
+    bf16: bool = field(default=False, metadata={"help": "use 16-bit float precision instead of 32-bit"})
     log_wandb: bool = field(default=False, metadata={"help": "log experiment to wandb"})
     use_lora: bool = field(default=False, metadata={"help": "use LoRA for training"})
     use_bnb: bool = field(default=False, metadata={"help": "use 4-bit quantization for training"})
@@ -130,7 +130,7 @@ class ModelLoader:
         config = AutoConfig.from_pretrained(self.task_args.base_model)
         if self.use_custom_model:
             print("Detected Llama model - preparing custom configuration...")
-            config = self._update_with_custom_config(config, self.model_args)
+            config = self._update_with_custom_config(config, self.custom_model_args)
         self.train_args.use_bnb = (self.train_args.use_bnb and torch.cuda.is_available()) or self.use_custom_model
         self.train_args.use_lora = (self.train_args.use_lora and torch.cuda.is_available()) or self.use_custom_model
         if self.task_args.model_class == "snet":
@@ -220,9 +220,9 @@ class AsagTrainer:
         self.train_dataset = train_dataset
         self.validation_dataset = validation_dataset
         if multi_gpu:
-            device_map="DDP" # for DDP and running with `accelerate launch test_sft.py`
-            device_string = PartialState().process_index
-            device_map={'':device_string}
+            local_rank = int(os.environ.get("LOCAL_RANK", 0))
+            torch.cuda.set_device(local_rank) 
+            device_map = {"": local_rank}
         else:   
             device_map={'':0} if torch.cuda.is_available() else {'': 'cpu'}
         self.model_loader = ModelLoader(task_args, train_args, custom_model_args=custom_model_args, device_map=device_map)
@@ -248,7 +248,7 @@ class AsagTrainer:
             weight_decay=self.train_args.weight_decay,
             max_grad_norm=self.train_args.clip_norm,
             warmup_ratio=self.train_args.warmup_ratio,
-            fp16=self.is_llm,
+            bf16=self.train_args.bf16,
             lr_scheduler_type="cosine",
             optim="paged_adamw_32bit" if self.is_llm else "adamw_torch",
             remove_unused_columns=False,
@@ -264,7 +264,7 @@ class AsagTrainer:
             logging_steps=100,
             save_strategy="best",
             eval_strategy="epoch",
-            save_total_limit=2,
+            save_total_limit=1,
             output_dir=self.train_args.save_dir,
         )
         trainer = Trainer(

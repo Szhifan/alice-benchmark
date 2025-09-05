@@ -134,5 +134,5 @@ if __name__ == "__main__":
     task_args, train_args, custom_model_args = parser.parse_args_into_dataclasses()
     train_args.use_lora = True
     train_args.use_bnb = True
-    train_args.use_fp16 = True
+    train_args.use_bf16 = True
     main(task_args, train_args, custom_model_args)
