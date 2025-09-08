@@ -24,6 +24,10 @@ from data_prep import (
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
 import shutil
+import torch.distributed as dist
+def is_main_process():
+    """Check if the current process is the main process (rank 0)."""
+    return not dist.is_available() or not dist.is_initialized() or dist.get_rank() == 0
 @dataclass
 class TaskArguments:
     """Task/experiment related arguments dataclass"""
@@ -58,12 +62,11 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         os.makedirs(train_args.save_dir)
 
     wandb.login()
-    if train_args.log_wandb:
+    if train_args.log_wandb and is_main_process():
         wandb.init(
             config={**vars(train_args), **vars(task_args), **vars(custom_model_args)},
             dir=train_args.save_dir,
             project="alice-benchmark",
-            tags=get_wandb_tag(task_args)
         )
     else:
         wandb.init(mode="disabled")

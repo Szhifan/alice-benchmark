@@ -220,13 +220,12 @@ class AsagTrainer:
         self.train_dataset = train_dataset
         self.validation_dataset = validation_dataset
         if multi_gpu:
-            local_rank = int(os.environ.get("LOCAL_RANK", 0))
-            torch.cuda.set_device(local_rank) 
-            device_map = {"": local_rank}
-        else:   
-            device_map={'':0} if torch.cuda.is_available() else {'': 'cpu'}
+            device_string = PartialState().process_index
+            device_map = {'': device_string}
+        else:
+            device_map = {'': 0} if torch.cuda.is_available() else {'': 'cpu'}
         self.model_loader = ModelLoader(task_args, train_args, custom_model_args=custom_model_args, device_map=device_map)
-        self.model  = self.model_loader.init_model()
+        self.model = self.model_loader.init_model()
         self.tokenizer = get_tokenizer(task_args.base_model)
         self.collate_fn = gen_collate_fn if task_args.model_class == "gen" else \
                          xnet_collate_fn if task_args.model_class == "xnet" else snet_collate_fn
@@ -261,7 +260,7 @@ class AsagTrainer:
             load_best_model_at_end=True,
             metric_for_best_model="eval_accuracy" if not self.task_args.model_class == "gen" else "eval_loss",
             logging_dir=os.path.join(self.train_args.save_dir, "logs"),
-            logging_steps=100,
+            logging_steps=50,
             save_strategy="best",
             eval_strategy="epoch",
             save_total_limit=1,

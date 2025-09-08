@@ -98,7 +98,7 @@ class BackwardSupportedArguments:
         }
     )
     pool_type: str = field(
-        default="avg", 
+        default="last", 
         metadata={"help": "Pooling type for the model output. Options: avg, weightedavg, cls, last"}
     )
     def __post_init__(self):
