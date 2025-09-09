@@ -58,7 +58,8 @@ class AsagTrainingArguments:
     log_wandb: bool = field(default=False, metadata={"help": "log experiment to wandb"})
     use_lora: bool = field(default=False, metadata={"help": "use LoRA for training"})
     use_bnb: bool = field(default=False, metadata={"help": "use 4-bit quantization for training"})
-
+    lora_rank: int = field(default=32, metadata={"help": "LoRA rank"})
+    lora_alpha: int = field(default=64, metadata={"help": "LoRA alpha"})
     def __post_init__(self):
         """Validation checks after initialization"""
         assert self.batch_size > 0, "batch_size must be positive"
@@ -100,8 +101,8 @@ class ModelLoader:
         self.custom_model_args = custom_model_args
         self.device_map = device_map
         self.lora_config = LoraConfig(
-            r=256,
-            lora_alpha=256,
+            r=self.train_args.lora_rank,
+            lora_alpha=self.train_args.lora_alpha,
             lora_dropout=0.1,
             bias='none',
             target_modules="all-linear",
@@ -112,7 +113,7 @@ class ModelLoader:
             load_in_4bit = True, # Activate 4-bit precision base model loading
             bnb_4bit_use_double_quant = True, # Activate nested quantization for 4-bit base models (double quantization)
             bnb_4bit_quant_type = "nf4",# Quantization type (fp4 or nf4)
-            bnb_4bit_compute_dtype = torch.bfloat16, # Compute data type for 4-bit base models
+            bnb_4bit_compute_dtype = torch.float32 if self.train_args.bf16 else torch.bfloat16, 
             )
         self.use_custom_model = "llama" in self.task_args.base_model
     def _update_with_custom_config(self, config, model_args):

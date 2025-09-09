@@ -35,7 +35,7 @@ class TaskArguments:
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     n_labels: int = field(default=2, metadata={"help": "number of labels for classification"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
-    input_fields: List[str] = field(default=None, 
+    input_fields: List[str] = field(default_factory=lambda: ['a', 'r'],
                                    metadata={"help": "fields to use as input for the model"})
     model_class: str = field(default='xnet', metadata={"help": "model class to use"})
     input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
@@ -137,5 +137,4 @@ if __name__ == "__main__":
     task_args, train_args, custom_model_args = parser.parse_args_into_dataclasses()
     train_args.use_lora = True
     train_args.use_bnb = True
-    train_args.use_bf16 = True
     main(task_args, train_args, custom_model_args)
