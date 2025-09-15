@@ -257,7 +257,7 @@ class BaseLoader:
             entry["sample_solution"] = meta_info.get("solution", "")
             rubric = meta_info.get("learning_performance", {})
             entry["rubric"] = {k: v['rule'] for k, v in rubric.items()}
-            entry["level"] = str(next(iter(entry["learning_performance"].values())))
+            entry["level"] = int(next(iter(entry["learning_performance"].values())))
             new_entry = {k: entry[k] for k in entry if k in fields_to_keep}
             return new_entry
         elif self.task_type == "ke":
@@ -274,7 +274,7 @@ class BaseLoader:
                 ke_rubric = {k: f"{ke}: {v['description']}" for k, v in ke_rubric.items()}
                 new_entry["rubric"] = ke_rubric
                 new_entry["knowledge_element"] = ke
-                new_entry["level"] = str(entry["knowledge_elements"][ke])
+                new_entry["level"] = int(entry["knowledge_elements"][ke])
                 new_entry["id"] = f"{entry['id']}_ke{i}"
                 new_entry = {k: new_entry[k] for k in new_entry if k in fields_to_keep}
                 expending_entries.append(new_entry)
@@ -293,7 +293,7 @@ class BaseLoader:
                 sk_rubric = {k: f"{sk}: {v['description']}" for k, v in sk_rubric.items()}
                 new_entry["rubric"] = sk_rubric
                 new_entry["skills"] = sk
-                new_entry["level"] = str(entry["skills"][sk])
+                new_entry["level"] = int(entry["skills"][sk])
                 new_entry["id"] = f"{entry['id']}_sk{i}"
                 new_entry = {k: new_entry[k] for k in new_entry if k in fields_to_keep}
                 expending_entries.append(new_entry)
@@ -335,12 +335,12 @@ class BaseLoader:
                 for new_entry in self.retrieve_metadata(entry):
                     new_test_uq.append(new_entry)
         test_uq_data = new_test_uq
-        train_dataset = Dataset.from_list(train_data)
-        if self.train_frac < 1:
-            train_dataset = train_dataset.shuffle(seed=42).select(range(int(len(train_dataset)*self.train_frac)))
-        val_dataset = train_dataset.train_test_split(test_size=0.1, seed=42)["test"]
-        self.train = train_dataset
-        self.val = val_dataset
+        self.train = Dataset.from_list(train_data)
+        # if self.train_frac < 1:
+        #     train_dataset = train_dataset.shuffle(seed=42).select(range(int(len(train_dataset)*self.train_frac)))
+        # val_dataset = train_dataset.train_test_split(test_size=0.1, seed=42)["test"]
+        # self.train = train_dataset
+        # self.val = val_dataset
         self.test_ua = Dataset.from_list(test_ua_data)
         self.test_uq = Dataset.from_list(test_uq_data)
 
@@ -380,5 +380,9 @@ class RubricRetrievalLoader(BaseLoader):
         self.test_uq = _expand_dataset(self.test_uq)
 if __name__ == "__main__":
     from train_utils import get_tokenizer
-    loader = RubricRetrievalLoader(train_frac=1, task_type="lp")
-    print(loader.train[:3])
+    import pandas as pd
+    loader = BaseLoader(task_type="lp")
+    train_original_path = "alice_data/test_uq.csv"
+    train_df = pd.read_csv(train_original_path)
+    for index, row in train_df.iterrows():
+        assert row["id"] == loader.test_uq[index]["id"], f"ID mismatch between {row['id']} and {loader.test_uq[index]['id']}"
