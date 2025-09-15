@@ -335,12 +335,15 @@ class BaseLoader:
                 for new_entry in self.retrieve_metadata(entry):
                     new_test_uq.append(new_entry)
         test_uq_data = new_test_uq
-        train_dataset = Dataset.from_list(train_data)
-        if self.train_frac < 1:
-            train_dataset = train_dataset.shuffle(seed=42).select(range(int(len(train_dataset)*self.train_frac)))
-        val_dataset = train_dataset.train_test_split(test_size=0.1, seed=42)["test"]
-        self.train = train_dataset
-        self.val = val_dataset
+        # train_dataset = Dataset.from_list(train_data)
+        # if self.train_frac < 1:
+        #     train_dataset = train_dataset.shuffle(seed=42).select(range(int(len(train_dataset)*self.train_frac)))
+        # split = train_dataset.train_test_split(test_size=0.1, seed=42)
+        # train_dataset = split["train"]
+        # val_dataset = split["test"]
+        # self.train = train_dataset
+        # self.val = val_dataset
+        self.train = Dataset.from_list(train_data)
         self.test_ua = Dataset.from_list(test_ua_data)
         self.test_uq = Dataset.from_list(test_uq_data)
 

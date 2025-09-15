@@ -58,7 +58,7 @@ class AsagTrainingArguments:
     log_wandb: bool = field(default=False, metadata={"help": "log experiment to wandb"})
     use_lora: bool = field(default=False, metadata={"help": "use LoRA for training"})
     use_bnb: bool = field(default=False, metadata={"help": "use 4-bit quantization for training"})
-    lora_rank: int = field(default=32, metadata={"help": "LoRA rank"})
+    lora_rank: int = field(default=64, metadata={"help": "LoRA rank"})
     lora_alpha: int = field(default=64, metadata={"help": "LoRA alpha"})
     def __post_init__(self):
         """Validation checks after initialization"""
