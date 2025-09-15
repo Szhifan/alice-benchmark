@@ -247,7 +247,10 @@ class BaseLoader:
             meta = meta_physik
         elif "math" in entry["id"]:
             meta = meta_mathe
-        meta_info = meta.get(entry["question_id"], {})
+        else:
+            raise ValueError(f"Unknown subject in id {entry['id']}")
+        meta_info = meta[entry["question_id"]]
+
         if self.task_type == "lp":
             fields_to_keep = ["id","question_id","question","answer","sample_solution","rubric","level"]
             entry["question"] = meta_info.get("prompt", "")
@@ -377,5 +380,5 @@ class RubricRetrievalLoader(BaseLoader):
         self.test_uq = _expand_dataset(self.test_uq)
 if __name__ == "__main__":
     from train_utils import get_tokenizer
-    loader = RubricRetrievalLoader(train_frac=1, task_type="ke")
+    loader = RubricRetrievalLoader(train_frac=1, task_type="lp")
     print(loader.train[:3])

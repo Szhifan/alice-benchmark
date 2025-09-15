@@ -1298,5 +1298,54 @@
                 }
             }
         }
+    },
+    "ea8_1208": {
+    "solution": "Die Aussage ist wahr, da die Messzeitpunkte immer weiter minimal gewählt werden können und immer kleiner gemacht werden können, dabei kann man aber immer weiter heranzoomen. Das Ergebnis wird sich allerdings immer langsamer verändern, sodass sich ein Grenzwert bildet.",
+    "prompt": "Erläutere, warum du mit \"Wahr\" oder \"Falsch\" geantwortet hast.",
+    "learning_performance": {
+        "0": {
+            "rule": "Die SuS beschreiben weder, was passiert, wenn die Messzeitpunkte immer weiter minimal gewählt werden, noch schließen sie daraus, dass das Ergebnis immer langsamer verändert, sodass sich ein Grenzwert bildet.",
+            "description": "nan"
+        },
+        "1": {
+            "rule": "Die SuS beschreiben entweder, was passiert, wenn die Messzeitpunkte immer weiter minimal gewählt werden, oder sie stellen fest, dass das Ergebnis immer langsamer bei Verringerung der Messabstände verändert, sodass sich ein Grenzwert bildet.",
+            "description": "nan"
+        },
+        "2": {
+            "rule": "Die SuS beschreiben, was passiert, wenn die Messzeitpunkte immer weiter minimal gewählt werden, und stellen fest, dass das Ergebnis immer langsamer verändert, sodass sich ein Grenzwert bildet.",
+            "description": "nan"
+        }
+    },
+    "knowledge_elements": {
+        "Durchschnittliche Änderungsrate, Grenzwert": {
+            "0": {
+                "rule": "Keine Nennung",
+                "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+            },
+            "1": {
+                "rule": "nicht zielgerichtete Verwendung",
+                "description": "Nutzen durchschnittliche Änderungsrate und Grenzwert, um etwas anderes zu beschreiben als die Veränderung bei steigender Annäherung der Messpunkte"
+            },
+            "2": {
+                "rule": "zielgerichtete Verwendung",
+                "description": "Nutzen durchschnittliche Änderungsrate, um die Veränderung bei steigender Annäherung der Messpunkte zu beschreiben und daraus den Grenzwert abzuleiten"
+            },
+            "?": {
+                "rule": "Inhaltsleere Wortnutzung",
+                "description": "Nutzen durchschnittliche Änderungsrate und Grenzwert ohne einen sinnvollen Zusammenhang zur Aufgabe."
+            }
+        }
+    },
+    "skills": {
+        "Bewerten der Daten": {
+            "0": {
+                "rule": "nicht vorhanden",
+                "description": "Nutzen den Grenzwert nicht, um die Situation im Sachkontext zu bewerten"
+            },
+            "2": {
+                "rule": "vorhanden",
+                "description": "Nutzen den Grenzwert, um die Situation im Sachkontext zu bewerten"
+            }
+        }
     }
-}
+}} 
