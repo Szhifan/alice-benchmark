@@ -5,4 +5,5 @@ asap-sas-data/rubrics/*pdf
 move.sh
 __pycache__/
 *.DS_Store
- 
+wandb*
+test*

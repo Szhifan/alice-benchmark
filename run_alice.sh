@@ -17,7 +17,7 @@ export WANDB_NOTES=""
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
 accelerate launch src/train_xnet.py --save-dir "${EXP_ROOT}" \
-    --base-model "bert-base-uncased" \
+    --base-model "deepset/gbert-base" \
     --batch-size 16 \
     --train-frac 1 \
     --lr 3e-5 \

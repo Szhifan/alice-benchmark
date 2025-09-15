@@ -5,20 +5,32 @@ import torch
 from transformers import AutoTokenizer
 """
 Dataprep pipeline: 
-1. Load the Alice dataset from csv files.
+1. Load the Alice dataset from json files.
 2. Encode the dataset using the provided encoding functions for different model settings.
 3. Provide collate functions for batching the dataset.
 """
 enable_caching()
-path_train = "alice_lp/train.csv"
-path_ua = "alice_lp/test_ua.csv"
-path_uq = "alice_lp/test_uq.csv"
+path_train = "alice_data/train.json"
+path_ua = "alice_data/test_ua.json"
+path_uq = "alice_data/test_uq.json"
 FIELD_EN2DE = {
     "answer": "Antwort",
     "rubric": "Rubrik",
     "question": "Frage",
     "sample_solution": "Lösung"
 }
+path_meta_bio = "question_meta/bio.json"
+path_meta_chemie = "question_meta/chemie.json"
+path_meta_physik = "question_meta/physik.json"
+path_meta_mathe = "question_meta/mathe.json"
+with open(path_meta_bio, "r") as f:
+    meta_bio = json.load(f)
+with open(path_meta_chemie, "r") as f:
+    meta_chemie = json.load(f)
+with open(path_meta_physik, "r") as f:
+    meta_physik = json.load(f)
+with open(path_meta_mathe, "r") as f:
+    meta_mathe = json.load(f)
 def basic_encode(example, tokenizer):
     # encode answer only  
     output = tokenizer(example["answer"], max_length=512, truncation=True)
@@ -154,7 +166,7 @@ def gen_collate_fn(input_batch, pad_id=0, return_meta=False):
         "token_type_ids": token_type_ids,
     } 
     meta = {
-        "id": [x["sid"] for x in input_batch],
+        "id": [x["id"] for x in input_batch],
         "level": [x["level"] for x in input_batch]
     }
     if return_meta:
@@ -220,14 +232,114 @@ class BaseLoader:
     """
     Load the splits of Alice dataset.
     """
-    def __init__(self, train_frac=1):
+    def __init__(self, train_frac=1, task_type="lp"):
         assert train_frac <= 1 and train_frac > 0, "train_frac must be in (0, 1]"
-        self.train = Dataset.from_csv(path_train)
-        if train_frac < 1:
-            self.train = self.train.train_test_split(test_size=1-train_frac, seed=42)["train"]
-        self.test_ua = Dataset.from_csv(path_ua)
-        self.test_uq = Dataset.from_csv(path_uq)
-        self.train, self.val = self.train.train_test_split(test_size=0.1, seed=8964).values()
+        assert task_type in ["lp","ke","sk"] , "task_type must be one of ['lp','ke','sk']"
+        self.task_type = task_type
+        self.train_frac = train_frac
+        self.format_dataset()
+    def retrieve_metadata(self,entry:dict):
+        if "bio" in entry["id"]:
+            meta = meta_bio
+        elif "chemie" in entry["id"]:
+            meta = meta_chemie
+        elif "physik" in entry["id"]:
+            meta = meta_physik
+        elif "math" in entry["id"]:
+            meta = meta_mathe
+        meta_info = meta.get(entry["question_id"], {})
+        if self.task_type == "lp":
+            fields_to_keep = ["id","question_id","question","answer","sample_solution","rubric","level"]
+            entry["question"] = meta_info.get("prompt", "")
+            entry["sample_solution"] = meta_info.get("solution", "")
+            rubric = meta_info.get("learning_performance", {})
+            entry["rubric"] = {k: v['rule'] for k, v in rubric.items()}
+            entry["level"] = str(next(iter(entry["learning_performance"].values())))
+            new_entry = {k: entry[k] for k in entry if k in fields_to_keep}
+            return new_entry
+        elif self.task_type == "ke":
+            expending_entries = []
+            if not entry.get("knowledge_elements"):
+                return []
+            for i, ke in enumerate(entry['knowledge_elements']):
+                fields_to_keep = ["id","question_id","question","answer","sample_solution","rubric","knowledge_element","level"]
+                new_entry = entry.copy()
+                new_entry["question"] = meta_info.get("prompt", "")
+                new_entry["sample_solution"] = meta_info.get("solution", "")
+                new_entry["knowledge_element"] = ke
+                ke_rubric  = meta_info.get("knowledge_elements", {}).get(ke, {})
+                ke_rubric = {k: f"{ke}: {v['description']}" for k, v in ke_rubric.items()}
+                new_entry["rubric"] = ke_rubric
+                new_entry["knowledge_element"] = ke
+                new_entry["level"] = str(entry["knowledge_elements"][ke])
+                new_entry["id"] = f"{entry['id']}_ke{i}"
+                new_entry = {k: new_entry[k] for k in new_entry if k in fields_to_keep}
+                expending_entries.append(new_entry)
+            return expending_entries
+        elif self.task_type == "sk":
+            if not entry.get("skills"):
+                return []
+            expending_entries = []
+            for i, sk in enumerate(entry['skills']):
+                fields_to_keep = ["id","question_id","question","answer","sample_solution","rubric","skill_element","level"]
+                new_entry = entry.copy()
+                new_entry["question"] = meta_info.get("prompt", "")
+                new_entry["sample_solution"] = meta_info.get("solution", "")
+                new_entry["skills"] = sk
+                sk_rubric  = meta_info.get("skills", {}).get(sk, {})
+                sk_rubric = {k: f"{sk}: {v['description']}" for k, v in sk_rubric.items()}
+                new_entry["rubric"] = sk_rubric
+                new_entry["skills"] = sk
+                new_entry["level"] = str(entry["skills"][sk])
+                new_entry["id"] = f"{entry['id']}_sk{i}"
+                new_entry = {k: new_entry[k] for k in new_entry if k in fields_to_keep}
+                expending_entries.append(new_entry)
+            return expending_entries
+
+                
+
+    def format_dataset(self):
+        with open(path_train, "r") as f:
+            train_data = json.load(f)
+        with open(path_ua, "r") as f:
+            test_ua_data = json.load(f)
+        with open(path_uq, "r") as f:
+            test_uq_data = json.load(f)
+        new_train = []
+        for entry in train_data:
+            if self.task_type == "lp":
+                new_entry = self.retrieve_metadata(entry)
+                new_train.append(new_entry)
+            else:
+                for new_entry in self.retrieve_metadata(entry):
+                    new_train.append(new_entry)
+        train_data = new_train
+        new_test_ua = []
+        for entry in test_ua_data:
+            if self.task_type == "lp":
+                new_entry = self.retrieve_metadata(entry)
+                new_test_ua.append(new_entry)
+            else:
+                for new_entry in self.retrieve_metadata(entry):
+                    new_test_ua.append(new_entry)
+        test_ua_data = new_test_ua
+        new_test_uq = []
+        for entry in test_uq_data:
+            if self.task_type == "lp":
+                new_entry = self.retrieve_metadata(entry)
+                new_test_uq.append(new_entry)
+            else:
+                for new_entry in self.retrieve_metadata(entry):
+                    new_test_uq.append(new_entry)
+        test_uq_data = new_test_uq
+        train_dataset = Dataset.from_list(train_data)
+        if self.train_frac < 1:
+            train_dataset = train_dataset.shuffle(seed=42).select(range(int(len(train_dataset)*self.train_frac)))
+        val_dataset = train_dataset.train_test_split(test_size=0.1, seed=42)["test"]
+        self.train = train_dataset
+        self.val = val_dataset
+        self.test_ua = Dataset.from_list(test_ua_data)
+        self.test_uq = Dataset.from_list(test_uq_data)
 
     
     def encode_all_splits(self,tokenizer,enc_fn, *args, **kwargs):
@@ -238,19 +350,19 @@ class BaseLoader:
 
 
 class RubricRetrievalLoader(BaseLoader):
-    def __init__(self, train_frac=1):
+    def __init__(self, train_frac=1, task_type="ke"):
         """
         Alice dataset for snet and xnet pair-wise ranking. 
         Each entry is expended to include all rubric levels.
         The labels is 1 if the level matches the rubric level, otherwise 0.
         """
-        super().__init__(train_frac=train_frac)
+        super().__init__(train_frac=train_frac, task_type=task_type)
         self.expand_with_rubric()
     def expand_with_rubric(self):
         def _expand_dataset(dataset):
             expanded_data = []
             for example in dataset:
-                rubric = json.loads(example["rubric"])
+                rubric = example["rubric"]
                 for level, rb in rubric.items():
                     new_example = example.copy()
                     new_example["rubric"] = rb
@@ -265,8 +377,5 @@ class RubricRetrievalLoader(BaseLoader):
         self.test_uq = _expand_dataset(self.test_uq)
 if __name__ == "__main__":
     from train_utils import get_tokenizer
-    loader = BaseLoader(train_frac=0.01)
-    tokenizer = get_tokenizer("bert-base-multilingual-uncased")
-    loader.train = encode_dataset(loader.train, tokenizer, encode_generation, train=True, additional_fields=["question"])
-    for input_ids in loader.train["input_ids"][:3]:
-        print(tokenizer.convert_ids_to_tokens(input_ids))
+    loader = RubricRetrievalLoader(train_frac=0.01, task_type="ke")
+    print(loader.train[:3])

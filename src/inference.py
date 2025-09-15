@@ -44,6 +44,9 @@ def evaluate(model, dataset, batch_size, collate_fn=None,):
     return pred_df, eval_loss 
 
 def evaluate_gen(model, dataset, batch_size, tokenizer, collate_fn=None):
+    def extract_ans(pred_text:str):
+        import re 
+
     dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
 
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0)
@@ -51,11 +54,13 @@ def evaluate_gen(model, dataset, batch_size, tokenizer, collate_fn=None):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = model.to(device)
     model.eval()
-    eval_loss = []
-    acc_history = deque(maxlen=10)
     predictions = defaultdict(list)
     for step, (batch, meta) in enumerate(data_iterator):
         batch = batch_to_device(batch, device)
         model_output = model.generate(**batch, max_length=10)
-        llm_output_text = tokenizer.decode(model_output, skip_special_tokens=True)
-        predictions["pred_text"].extend(llm_output_text)
+        llm_output_text = tokenizer.batch_decode(model_output, skip_special_tokens=True)
+        predictions["pred_text"].extend(llm_output_text) 
+        for key, value in meta.items():
+            predictions[key].extend(value)
+    pred_df = pd.DataFrame(predictions)
+    return pred_df

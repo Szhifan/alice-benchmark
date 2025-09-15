@@ -28,7 +28,7 @@ import shutil
 @dataclass
 class TaskArguments:
     """Task/experiment related arguments dataclass"""
-    base_model: str = field(default='bert-base-uncased', metadata={"help": "base model to use"})
+    base_model: str = field(default='meta-llama/Llama-3.1-8B', metadata={"help": "base model to use"})
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     n_labels: int = field(default=2, metadata={"help": "number of labels for classification"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
@@ -37,7 +37,6 @@ class TaskArguments:
     model_class: str = field(default='gen', metadata={"help": "model class to use"})
     def __post_init__(self):
         """Validation checks after initialization"""
-        assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
         assert self.n_labels > 0, "n_labels must be positive"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
         assert all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
@@ -116,14 +115,12 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         pred_dir = os.path.join(train_args.save_dir, "predictions")
         if not os.path.exists(pred_dir):
             os.makedirs(pred_dir)
-        test_predictions.to_csv(os.path.join(pred_dir, f"{test}_raw_predictions.csv"), index=False)
-        test_predictions = transform_for_inference(test_predictions)
         test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
-        test_metrics = eval_report(test_predictions)
-        save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
+        # test_metrics = eval_report(test_predictions)
+        # save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
         inference_speed += inf_time / test_predictions.shape[0]
-        metrics_wandb = {test: test_metrics}
-        wandb.log(metrics_wandb)
+        # metrics_wandb = {test: test_metrics}
+        # wandb.log(metrics_wandb)
     if train_args.no_save:
         print("No-save flag is set. Deleting checkpoint.")
         for root, dirs, files in os.walk(train_args.save_dir):

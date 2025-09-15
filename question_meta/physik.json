@@ -1,0 +1,3586 @@
+{
+    "3.11.2": {
+        "solution": "ηPV = Wel / Wsolar = 200 kWh / 1000 kWh = 0,20 = 20%",
+        "prompt": "In Deutschland scheint die Sonne mit einer durchschnittlichen Strahlungsenergie von 1000 kWh/m² auf die Erdoberfläche.\nEine PV-Zelle, der Größe 1 m², wandelt die Strahlungsenergie in 200 kWh Elektrische Energie um.\nBerechne den Wirkungsgrad der PV-Zelle.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS geben kein korrektes Ergebnis an.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS geben das korrekte Ergebnis an.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine falsche Formel, um den Wirkungsgrad zu berechnen/ Schreiben nur das Ergebnis auf"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel, um den Wirkungsgrad zu berechnen."
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Führen keine physikalische Berechnung durch."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Führen eine physikalische Berechnung durch."
+                }
+            }
+        }
+    },
+    "3.x.3.4": {
+        "solution": "Vorteile:• somit kann die mit der Photovoltaikanlage nutzbar gemachte Energie auch später genutzt werden• Ein Batteriespeicher reduziert den Strombezug aus dem öffentlichen Netz noch mehr als die Photovoltaikanlage allein• die Unabhängigkeit vom Stromversorger erhöht sich deutlich• persönlicher Beitrag zur EnergiewendeNachteile:• eine saisonale Speicherung von Strom lässt sich mit einem Batteriespeicher nicht umsetzen• ein Batteriespeicher verschlechtert in den meisten Fällen die Wirtschaftlichkeit der Photovoltaikanlage eher",
+        "prompt": "Lies dir die Abschnitte:\"Was macht ein Batteriespeicher?\"; \"Bringt ein Batteriespeicher Unabhängigkeit?\", \"Kann ich meinen Strom für mehrere Wochen oder Monate speichern?\", \"Steigert ein Batteriespeicher die Wirtschaftlichkeit meiner Solaranlage?\"In diesem Text durch und nenne die wichtigsten Vor- und Nachteile eines Batteriespeichers. ",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS nennen weder Vorteile noch Nachteile eines Batteriespeichers.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS nennen entweder Vorteile oder Nachteile eines Batteriespeichers, insgesamt mindestens zwei.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS nennen Vorteile und Nachteile eines Batteriespeichers, insgesamt mindestens drei.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte, um etwas anderes als Vor- und Nachteile von Batteriespeichern zu nennen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte, um Vor- und Nachteile von Batteriespeichern zu nennen."
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen keine Daten aus den gegebenen Materialien."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen Daten aus den gegebenen Materialien,"
+                }
+            }
+        }
+    },
+    "2.5.2": {
+        "solution": "Energiesparlampe: Pel = U x I = 230 V x 0,12 A = 27,6 WGlühlampe: Pel = U x I = 230 V x 0,35 A = 80,5 WLED: Pel = U x I = 230 V x 0,04 A = 9,2 W",
+        "prompt": "In 2.2 Untersuchung der Lampen 4 habt ihr die Formel zur Berechnung der elektrischen Leistung genannt.Berechnet mit Hilfe der Formel die elektrischen Leistungen der einzelnen Lampen.",
+        "learning_performance": {
+            "0": {
+                "rule": "Berechnen keine Strahlungsleistung korrekt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Berechnen eine Strahlungsleistung korrekt",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Berechnen mindestens zwei Strahlungsleistungen korrekt",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt oder falsches Ergebnis der Elektrischen Leistung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Richtiges Ergebnis für die Elektrische Leistung"
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Führen keine physikalische Berechnung durch."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Führen eine physikalische Berechnung durch."
+                }
+            }
+        }
+    },
+    "1.6.3": {
+        "solution": null,
+        "prompt": "Berechne aus den Tarifen des örtlichen Energieversorgers die aktuellen Kosten für die Energieversorgung mit elektrischer und thermischer Energie.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS berechnen weder die korrekten Kosten der elektrischen noch thermischen Energie.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS berechnen entweder die korrekten Kosten von elektrischer oder thermischer Energie.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS berechnen die korrekten Kosten von elektrischer und thermischer Energie.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriffe, Zahlenwerte oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen nicht den richtigen Strompreis- Angabe der Kosten ohne Rechnung oder mit falscher Formel"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen den richtigen Strompreis- Amgabe der Kosten mit Rechnung und richtiger Formel"
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriffe, Zahlenwerte oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen nicht den richtigen Preis für Thermische Energie- Angabe der Kosten ohne Rechnung oder mit falscher Formel"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen den richtigen Preis für Thermische Energie- Angabe der Kosten mit Rechnung und richtiger Formel"
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "keine korrekte Rechnung vorhanden"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "korrekte Rechnung vorhanden"
+                }
+            }
+        }
+    },
+    "5.1.1": {
+        "solution": "In den Dampfkessel wird über die Wasserzufuhr Wasser eingeleitet. Der Dampfkessel wird über eine Gas-angetriebene Wärmequelle erhitzt und das Wasser verdampft. Durch den erhöhten Druck strömt das Gas durch die Dampfdüse aus und treibt eine Dampfturbine an. Diese wandelt Kinetische Energie in Elektrische Energie um.",
+        "prompt": "In dem Video siehst du die abstrakte Funktionsweise eines klassischen Gaskraftwerks.\nBeschreibe die Funktionsweise in eigenen Worten.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben die Funktionsweise nicht korrekt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben nur einen Teil, entweder den Verbrennungs-/ Verdampfungsprozess oder den Antrieb der Dampfturbine.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die Funktionsweise eines Dampfkraftwerks korrekt: es muss deutlich werden, dass Wasser verdampft wird und dieser Wasserdampf zum Antrieb der Dampfturbine genutzt wird.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Chemische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Gas/ chemische Energie, um ein Gaskraftwerk zu beschreiben (muss in Verbindung mit der Verbrennung gesetzt werden)"
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden thermische Energie, um etwas anderes als das Erwärmen/Verdampfen des Wassers zu beschreiben "
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden thermische Energie zur Beschreibung eines Gaskraftwerks (Erwärmen/Verdampfen des Wassers)"
+                }
+            },
+            "Kinetische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Bewegungsenergie, um etwas anderes als ein Gaskraftwerk zu beschreiben (wird nicht dafür genutzt, dass der Wasserdampf die Turbine antreibt)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Bewegungsenergie um zu beschreiben, dass der Wasserdampf die Turbine antreibt."
+                }
+            },
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Elektrische Energie wird nicht im Zusammenhang mit der Endenergieform genannt"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Elektrische Energie zur Beschreibung eines Gaskraftwerks (Als Endenergieform)"
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Energieumwandlungskonzepte, um etwas anderes als ein Gaskraftwerk zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Energieuwmandlungskonzepte zur Beschreibung eines Gaskraftwerks."
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS beschreiben die Funktionsweise nicht aus dem vorliegenden Video."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS beschreiben die Funktionsweise aus dem vorliegenden Video."
+                }
+            }
+        }
+    },
+    "5.5.5": {
+        "solution": null,
+        "prompt": "Ein m³ Erdgas speichert 11 kWh chemische Energie.\nBerechne für jedes Kraftwerk das benötigte Volumen an Erdgas, das verbrannt werden muss, um die benötigte Elektrische Energie zu liefern.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS berechnen kein Gasvolumen korrekt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS berechnen ein Gasvolumen korrekt.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS berechnen mindestens zwei Gasvolumen korrekt.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Chemische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Falsches Ergebnis"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Richtiges Ergebnis"
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Falsches Ergebnis"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Richtiges Ergebnis"
+                }
+            }
+        }
+    },
+    "4.10.3": {
+        "solution": " Nachrechnen mit Excel Tabelle \"Aufgabe 4 Berechnung\"",
+        "prompt": "Berechne danach die Wirkungsgrade für die unterschiedlichen Windräder und Windgeschwindigkeiten. ",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS berechnen kein korrektes Ergebnis.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS berechnen das korrekte Ergebnis. Nur eine Zeile mit Werten/ eine Tabelle muss ausgefüllt sein, da Gruppenarbeit",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Kinetische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine andere, physikalisch korrekte, Formel."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel zur Berechnung des Wirkungsgrades."
+                }
+            },
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine andere, physikalisch korrekte, Formel."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel zur Berechnung des Wirkungsgrades."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine andere Formel oder vertauschen z.B. die Energien"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel zur Berechnung des Wirkungsgrades."
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Berechnen nicht den Wirkungsgrad."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Berechnen den Wirkungsgrad."
+                }
+            }
+        }
+    },
+    "2.3.8": {
+        "solution": "Der Wirkungsgrad beschreibt, welcher Anteil der zugeführten, elektrischen Energie, in die gewünschte Energieform, Strahlungsenergie, umgewandelt wird. Ein hoher Wirkungsgrad bedeutet, dass viel Elektrische Energie in Strahlungsenergie umgewandelt wird. Ein niedriger Wirkungsgrad bedeutet, dass viel Elektrische Energie in thermische Energie umgewandelt wird, die nicht mehr zur Beleuchtung genutzt werden kann. ",
+        "prompt": "Beschreibe die Bedeutung des Wirkungsgrades für Energieumwandlungen.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS nutzen weder zugeführte Energie noch nutzbare Energie bei der Erklärung des Wirkungsgrades.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS nutzen entweder zugeführte Energie oder nutzbare Energie bei der Erklärung des Wirkungsgrades. oder- Die SuS nutzen Effizienz zur Beschreibung (nennen aber nur, beschreiben nicht exakt)",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS nutzen zugeführte Energie und nutzbare Energie bei der Erklärung des Wirkungsgrades. oder- Die SuS nutzen die Effizienz zur Beschreibung (dabei muss aber genau beschrieben werden)",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben den Wirkungsgrad als etwas anderes als den Anteil nutzbarer Energie nach einer Umwandlung oder als Effizienz."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben den Wirkungsgrad als Anteil nutzbarer Energie nach einer Umwandlung oder als Effizienz."
+                }
+            }
+        },
+        "skills": {
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Schreiben keine richtige Erklärung"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Schreiben eine richtige Erklärung"
+                }
+            }
+        }
+    },
+    "4.10.2": {
+        "solution": " Nachrechnen mit Excel Tabelle \"Aufgabe 4 Berechnung\"",
+        "prompt": "Unter dem Link 4.8 Beobachtungen und Messwerte könnt ihr euch nochmal eure Messwerte anschauen. (Öffnet den Link am besten in einem zweiten Tab) Berechne die kinetische Leistung des Windes und die elektrische Leistung, die das Windrad umgewandelt hat.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS berechnen kein korrektes Ergebnis.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS berechnen das korrekte Ergebnis. Nur eine Zeile mit Werten/ eine Tabelle muss ausgefüllt sein, da Gruppenarbeit",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Kinetische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine andere, physikalisch korrekte, Formel."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel zur Berechnung der Leistung."
+                }
+            },
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine andere, physikalisch korrekte, Formel."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel zur Berechnung der Leistung."
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Berechnen weder die kinetische noch die elektrische Leistung."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Berechnen entweder die kinetische und/ oder die elektrische Leistung. Nur eine Zeile mit Werten/ eine Tabelle muss ausgefüllt sein, da Gruppenarbeit"
+                }
+            }
+        }
+    },
+    "5.5.4": {
+        "solution": null,
+        "prompt": "In der untenstehenden Tabelle findest du die unterschiedlichen Kraftwerksarten. Übertrage dein Ergebnis für die Elektrische Energie in die passende Spalte und berechne die fehlenden Werte.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS berechnen keine fehlenden Werte in der Tabelle korrekt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS berechnen zwei bis vier fehlende Werte in der Tabelle korrekt.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS berechnen mindestens fünf fehlende Werte in der Tabelle korrekt.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Chemische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Falsches Ergebnis"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Richtiges Ergebnis"
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Falsches Ergebnis"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Richtiges Ergebnis"
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Kein richtiges Ergebnis"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Richtiges Ergebnis "
+                }
+            }
+        }
+    },
+    "4.1.1": {
+        "solution": "Im ersten Bild ist eine Offshore Windanlage zu sehen. Diese ist vom Aufbau aber der dritten und vierten Anlage nachempfunden und stellt das moderne Windrad dar. In Bild zwei ist ein älteres Windrad, ein sogenanntes Western-Windrad oder amerikanische Windmühle, zu sehen. Diese wurden in der zweiten Hälfte des 19. Jahrhunderts zur Wasserförderung, Bewässerung und später auch zur Stromerzeugung genutzt. Markant sind vor allem deutlich mehr Flügel, als bei den modernen Windkraftanlagen und es besitzt eine Fahne zur Windrichtungsnachführung, ändert also je nach aktueller Windrichtung seine Ausrichtung. In Bild drei ist ebenfalls eine moderne Anlage zu sehen, der Standort lässt sich nicht bestimmen und es scheint windstill zu sein, da die Flügel nicht in Bewegung sind. In Bild vier scheint ein regelmäßig starker Wind zu wehen, da die Rotoren in Bewegung sind.",
+        "prompt": "Sieh dir die Bilder an. Nenne Unterschiede und Gemeinsamkeiten der Windenergieanlagen.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS nennen keinen Aspekt (Windgeschwindigkeit, Flügelzahl, Ort)",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS nennen einen Aspekt (Windgeschwindigkeit, Flügelzahl, Ort)",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS nennen mindestens zwei Aspekte (Windgeschwindigkeit, Flügelzahl, Ort)",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Kinetische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nennen Gemeinsamkeiten oder Unterschiede, die keinen Einfluss auf den Ertrag haben"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nennen Faktoren wie Größe,Flügelzahl oder Standort für die Energieumwandlung in einem Windrad."
+                }
+            }
+        },
+        "skills": {}
+    },
+    "2.5.3": {
+        "solution": "Das Verhältnis von Strahlungsleistung zu elektrischer Leistung kannst du mit folgender Formel berechnen:η = Psl/Pel; η = WirkungsgradEnergiesparlampe: ηEsl = Psl/Pel = 4 W / 27,6 W = 0,145 = 14,5%,Glühlampe: ηGL = Psl/Pel = 4 W / 80,5 W = 0,050 = 5%,LED: ηLED = Psl/Pel = 4 W / 9,2 W = 0,435 = 43,5%",
+        "prompt": "Berechne das Verhältnis von Strahlungsleistung zu elektrischer Leistung. Wie viel Prozent der Eingangsleistung wird zur Strahlung genutzt?",
+        "learning_performance": {
+            "0": {
+                "rule": "Berechnen keinen Wirkungsgrad korrekt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Berechnen einen Wirkungsgrad korrekt.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Berechnen mindestens zwei Wirkungsgrade korrekt.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt oder falsches Ergebnis des Wirkungsgrades."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Richtiges Ergebnis für den Wirkungsgrad"
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Führen keine physikalische Berechnung durch."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Führen eine physikalische Berechnung durch."
+                }
+            }
+        }
+    },
+    "3.x.3.5": {
+        "solution": "Ein großer Unterschied ist, dass die Hauptlast in Schulgebäuden, die Beleuchtung, vor allem während des Tages direkt genutzt wird und nicht im Batteriespeicher zwischengespeichert werden muss. Die vorteilhaftere saisonale Speicherung ist wie bereits genannt nicht möglich. Da Schulgebäude meist in der Hand von Kommunen, Gemeinden oder Städten liegen, werden auch eventuell infrage kommende Solaranlagen vorab geprüft. Hierbei steht zumeist die Wirtschaftlichkeit im Vordergrund, das heißt, dass die Anlage groß genug sein muss, um einen merklichen Aspekt in der Stromversorgung zu leisten. Da die Batteriespeicher für den Einsatzzweck in der Schule eher unrentabel sind und die Anlagenwirtschaftlichkeit verschlechtern, werden diese zumeist weggelassen.",
+        "prompt": "Im Text der Verbraucherzentrale handelt es sich um einen Batteriespeicher für private Haushalte.Nenne die wichtigsten Unterschiede zur Schule.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS nennen keine Unterschiede zwischen privater und schulischer Nutzung.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS nennen einen Unterschied zwischen privater und schulischer Nutzung.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS nennen mehr als einen Unterschied zwischen privater und schulischer Nutzung.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte, um etwas anderes als Unterschiede zu nennen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte, um Unterschiede zwischen privater und schulischer Nutzung von Batteriespeichern zu nennen."
+                }
+            }
+        },
+        "skills": {
+            "Formulieren erste Zusammenhänge, Muster und Strukturen in den Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Formulieren keine Zusammenhänge aus den Daten."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Formulieren Zusammenhänge aus den Daten."
+                }
+            }
+        }
+    },
+    "3.11.3": {
+        "solution": "Wir wollen die Fläche A ermitteln:\n",
+        "prompt": "Berechne mit Hilfe des Wirkungsgrades und der Strahlungsenergie pro m² die Fläche die zur Deckung des elektrischen Energiebedarfs installiert werden muss.\nEin durchschnittliches Klassenzimmer benötigt im Jahr 400 kWh Elektrische Energie.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS geben kein korrektes Ergebnis an.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS geben das korrekte Ergebnis an.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine falsche Formel/ nutzen die Strahlungsenergie falsch."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel, die Strahlungsenergie an den richtigen Stellen der Formel, um den Wirkungsgrad zu berechnen."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine falsche Formel, um den Wirkungsgrad zu berechnen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel, um den Wirkungsgrad zu berechnen."
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Führen keine physikalische Berechnung durch."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Führen eine physikalische Berechnung nur teilweise durch."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Führen eine physikalische Berechnung durch."
+                }
+            }
+        }
+    },
+    "6.5.1": {
+        "solution": "/ -",
+        "prompt": "Stellt nun eure Präsentation vor der Klasse vor.Im Textfeld unten könnt ihr euch Notizen zu den Vorträgen machen.",
+        "learning_performance": {},
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS notieren Informationen zu elektrischer Energie, in einem anderen Zusammenhang als Energieversorgung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS notieren Informationen zu elektrischer Energie im Zusammenhang mit der Energieversorgung."
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS notieren Informationen zu thermischer Energie, in einem anderen Zusammenhang als Energieversorgung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS notieren Informationen zu thermischer Energie im Zusammenhang mit der Energieversorgung."
+                }
+            },
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS notieren Informationen zu gesellschaftlichen Aspekten, in einem anderen Zusammenhang als Energieversorgung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS notieren Informationen zu gesellschaftlichen Aspekten im Zusammenhang mit der Energieversorgung."
+                }
+            },
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS notieren Informationen zu ökologischen Aspekten, in einem anderen Zusammenhang als Energieversorgung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS notieren Informationen zu ökologischen Aspekten im Zusammenhang mit der Energieversorgung."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS notieren Informationen zu Energieumwandlungen, in einem anderen Zusammenhang als Energieversorgung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS notieren Informationen zu Energieumwandlung im Zusammenhang mit der Energieversorgung."
+                }
+            }
+        },
+        "skills": {}
+    },
+    "3.1.1": {
+        "solution": "Die Solaranlagen befinden sich an unterschiedlichen Standorten. Auf dem ersten Bild befinden sie sich auf dem Dach eines Hauses, im zweiten an einer Böschung und auf dem dritten Bild in einer Wüste. Die Solarzellen auf den Bildern unterscheiden sich in der Fläche: Auf dem Dach sind nur wenige angebaut, an der Böschung bereits mehr und in der Wüste sind es sehr viele. Alle Solarzellen sind zur Sonne geneigt, also schräg. Zudem sind sie so aufgebaut, dass möglichst nichts einen Schatten auf sie wirft.",
+        "prompt": "Sieh dir die Bilder an. Nenne Gemeinsamkeiten und Unterschiede zwischen den Solaranlagen.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS nennen keinen Aspekt (Ausrichtung, Fläche, Verschattung)",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS nennen einen Aspekt (Ausrichtung, Fläche, Verschattung)",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS nennen mindestens zwei Aspekte (Ausrichtung, Fläche, Verschattung)",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nennen Ausrichtung, Verschattung, Fläche oder Standort ohne einen Zusammenhang zur Energieumwandlung in einer Solarzelle."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nennen Ausrichtung, Verschattung oder Fläche für die Energieumwandlung in einer Solarzelle."
+                }
+            }
+        },
+        "skills": {}
+    },
+    "5.5.3": {
+        "solution": null,
+        "prompt": "Zunächst wollen wir die Energie berechnen, die ein Klassenzimmer über ein Schuljahr benötigt, um alle elektrischen Geräte zu betreiben. Zur Vereinfachung nehmen wir an, dass das Klassenzimmer ein großes elektrisches Gerät ist. Es benötigt eine Spannung von 230 V und eine Stromstärke von 1,5 A. Genutzt wird es an 190 Tagen im Jahr für ca. 6 h Unterricht täglich. \nBerechne die benötigte Elektrische Energie über ein Schuljahr.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS berechnen nicht den Energiebedarf eines Klassenzimmers über eine Schuljahr.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS geben die korrekte Formel an, berechnen aber nicht den korrekten Energiebedarf eines Klassenzimmers.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS berechnen den Energiebedarf eines Klassenzimmers über ein Schuljahr.",
+                "description": "kJ\n- 397,6 kWh"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine falsche Formel, um die Elektrische Energie zu berechnen (oder geben keine Rechnung an, nur Ergebnis)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel, um die Elektrische Energie zu berechnen."
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Führen keine physikalische Berechnung durch."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Führen eine physikalische Berechnung durch."
+                }
+            }
+        }
+    },
+    "1.6.4": {
+        "solution": null,
+        "prompt": "Berechne den bei der \"Energieerzeugung\" entstandenen CO2-Ausstoß (auch Emission genannt), nutze den durchschnittlichen deutschen Energiemix und die Angaben für den CO2-Ausstoß pro kWh. (Zur Vereinfachung nehmen wir an, dass bei der Wärmeversorgung die gleiche Menge CO2 ausgestoßen wird)",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS berechnen weder die korrekten CO2 Emissionen von elektrischer noch thermischer Energie.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS berechnen entweder die korrekten CO2 Emissionen von elektrischer oder thermischer Energie.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS berechnen die korrekten CO2 Emissionen von elektrischer und thermischer Energie.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriffe, Zahlenwerte oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen nicht den richtigen CO2 Ausstoß-Wert- Angabe des CO2-Ausstoßes ohne Rechnung oder mit falscher Formel"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen den richtigen CO2 Ausstoß-Wert- Angabe des CO2-Ausstoßes mit Rechnung und mit richtiger Formel"
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriffe, Zahlenwerte oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen nicht den richtigen CO2 Ausstoß-Wert- Angabe des CO2-Ausstoßes ohne Rechnung oder mit falscher Formel"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen den richtigen CO2 Ausstoß-Wert- Angabe des CO2-Ausstoßes mit Rechnung und mit richtiger Formel"
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "keine korrekte Rechnung vorhanden"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "korrekte Rechnung vorhanden"
+                }
+            }
+        }
+    },
+    "3.7.7": {
+        "solution": "Man soll darauf achten, dass die PV-Zellen einerseits zur Sonne ausgerichtet sind, das heißt, sie sollte am besten Richtung Süden zeigen und geneigt sein. Andererseits sollten die PV-Zellen durch nichts verschattet werden.",
+        "prompt": "Erläutert, auf Grundlage eurer Messwerte und den \"Je - desto\" Aussagen, auf welche Kriterien geachtet werden muss, wenn die Schule mit Strahlungsenergie versorgt werden soll.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS begründen ihre Auswahl weder mit der Vermeidung von Verschattung noch mit der Optimierung des Winkels.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS begründen ihre Auswahl entweder mit der Vermeidung von Verschattung oder mit der Optimierung des Winkels.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS begründen ihre Auswahl mit der Vermeidung von Verschattung und mit der Optimierung des Winkels.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen die Spannung, um etwas anderes als die Energieumwandlung zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen die Spannung, um Aussagen über die Energieumwandlung zu machen."
+                }
+            },
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Winkel oder Verschattung, um etwas anderes als die Energieumwandlung zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Winkel oder Verschattung, um Aussagen über die Energieumwandlung zu machen."
+                }
+            }
+        },
+        "skills": {
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen nicht die Versuchsergebnise oder Je-Desto-Sätze, um eine Behauptung zu stützen oder zu widerlegen."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen die Versuchsergebnise oder Je-Desto-Sätze, um eine Behauptung zu stützen oder zu widerlegen."
+                }
+            }
+        }
+    },
+    "3.11.4": {
+        "solution": null,
+        "prompt": "Berechne mit Hilfe des Wirkungsgrades und der Strahlungsenergie pro m² die Fläche, die zur Deckung des thermischen Energiebedarfs installiert werden muss.\n(Zur Vereinfachung nehmen wir an, dass wir die gesamte thermische Energie mit Hilfe von PV-Strom decken können.)\nEin durchschnittliches Klassenzimmer benötigt im Jahr 15.000 kWh thermischer Energie.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS geben kein korrektes Ergebnis an.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS geben das korrekte Ergebnis an.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine falsche Formel/ nutzen die Strahlungsenergie falsch."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel, die Strahlungsenergie an den richtigen Stellen der Formel, um den Wirkungsgrad zu berechnen."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen eine falsche Formel, um den Wirkungsgrad zu berechnen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel, um den Wirkungsgrad zu berechnen."
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Führen keine physikalische Berechnung durch."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Führen eine physikalische Berechnung durch."
+                }
+            }
+        }
+    },
+    "2.5.4": {
+        "solution": "Die restliche Energie wurde nicht in Strahlungsenergie umgewandelt, sondern in thermische Energie. Das kann man daran merken, dass die Lampen warm werden.",
+        "prompt": "Es wird jeweils nur ein Teil der Eingangsleistung als Strahlungsleistung genutzt. Erläutere, was mit der restlichen Energie geschehen ist.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben die Umwandlung (in thermische Energie/Wärme) nicht.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS nutzen Umwandlung, ohne auf die thermische Energie einzugehen, oder nennen thermische Energie im Zusammenhang mit Verlust von Energie",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben, dass die restliche Energie zu thermischer Energie/ Wärme umgewandelt wurde",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass die Energie umgewandelt wurde, aber in falschem Zusammenhang"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass die Elektrische Energie umgewandelt wurde (in was ist irrelevant)."
+                }
+            },
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben Elektrische Energie nicht als Energieform vor der Umwandlung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben Elektrische Energie als Energieform vor der Umwandlung."
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen thermische Energie ohne Zusammenhang zur Umwandlung"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben thermische Energie als Energieform nach der Umwandlung."
+                }
+            }
+        },
+        "skills": {
+            "Fassen Erkenntnisse der Modellierung zusammen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Idee der Umwandlung wird nicht gezeigt"
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Idee der Umwandlung wird teilweise gezeigt"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Idee der Umwandlung wird richtig gezeigt"
+                }
+            }
+        }
+    },
+    "4.12.2": {
+        "solution": null,
+        "prompt": "Ermittle mit den folgenden Informationen und den Daten aus dem vorherigen Versuch den Steckbrief zur Windenergieanlage:",
+        "learning_performance": {
+            "0": {
+                "rule": "nicht vorhanden",
+                "description": "Die SuS füllen den Steckbrief nicht aus."
+            },
+            "1": {
+                "rule": "Die SuS füllen den Steckbrief teilweise aus, 2 - 3 von 5 Felder."
+            },
+            "2": {
+                "rule": "Die SuS füllen den Steckbrief vollständig aus, mindestens 4 von 5 Feldern."
+            }
+        },
+        "knowledge_elements": {},
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS nutzen nicht die gegeben Daten, um den Steckbrief zu füllen."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS nutzen die gegebenen Daten, um den Steckbrief zu füllen."
+                }
+            }
+        }
+    },
+    "6.2.1": {
+        "solution": "(Beispiel) Die Vorteile von Energie aus Gaskraftwerken ist unter anderem die stetige Versorgung durch alle Jahreszeiten hindurch, wohingegen Solar- und Windenergie einen bleibenden positiven Beitrag zur Energiewende darstellen. Die Wirkungsgrade der drei Energieversorgungen sind annähernd äquivalent.Für eine zukunftsorientierte Schule sollte eine Kombination aus erneuerbaren Energien und herkömmlichen Verfahren zur Versorgung gewählt werden, so kann die stetige Energiezufuhr gewährleistet werden und die CO2-Emissionen minimal gehalten werden. Der Einbezug von Speichermöglichkeiten kann die fluktuierende Versorgung durch erneuerbare Energien abmildern.",
+        "prompt": "Vergleiche die Versorgungsmöglichkeiten und erläutere deine Vorstellung einer optimalen Energieversorgung der Schule.",
+        "learning_performance": {
+            "0": {
+                "rule": "SuS beschreiben weder verschiedene Versorgungsmöglichkeiten noch geben sie eine begründete, favorisierte Energieversorgung an.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "SuS beschreiben entweder verschiedene Versorgungsmöglichkeiten oder geben eine begründete, favorisierte Energieversorgung an.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "SuS beschreiben verschiedene Versorgungsmöglichkeiten und geben eine begründete, favorisierte Energieversorgung an.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht-zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen Elektrische Energie nicht im Zusammenhang einer Versorgungssicherheit"
+                },
+                "3": {
+                    "rule": "zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen Elektrische Energie im Zusammenhang von Versorgungssicherheit und Umwandlungsketten"
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht-zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen thermische Energie nicht im Zusammenhang einer Versorgungssicherheit"
+                },
+                "3": {
+                    "rule": "zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen thermische Energie im Zusammenhang von Versorgungssicherheit und Umwandlungsketten"
+                }
+            },
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht-zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen gesellschaftliche Aspekte, für etwas anderes als ihre Argumente zu stützen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen gesellschaftliche Aspekte, um ihre Argumente zu stützen."
+                }
+            },
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht-zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen ökologische Aspekte wie CO2-Äquivalent, Belastung für die Umwelt, etc. nicht korrekt in der Argumentation"
+                },
+                "3": {
+                    "rule": "zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen ökologische Aspekte, um ihre Argumente zu stützen."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht-zielgerichtete Wortnutzung",
+                    "description": "Bei der Energieumwandlung im \"Kraftwerk XY\"wird Elektrische Energie erzeugt."
+                },
+                "3": {
+                    "rule": "zielgerichtete Wortnutzung",
+                    "description": "Kraftwerk XY\" ist gut, da es eine Energieform besonders effizient/ CO2 neutral/… in Elektrische Energie umwandelt"
+                }
+            }
+
+        },
+        "skills": {
+            "Claim": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beantworten nicht die Frage nach der besten Energieversorgung"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Benennen eine Energieversorgung für die Schule"
+                }
+            },
+            "Identifizieren relevante Daten für die Erklärung/ Argumentation": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Greifen nicht auf die Steckbriefe zurück"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Belegen ihre Auswahl der besten Energieversorgung mit Daten aus den Steckbriefen."
+                }
+            },
+            "Fassen die Daten zusammen, um die Frage zu beantworten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Geben keine Zusammenfassung an"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Geben eine abschließende Zusammenfassung, um ihre Wahl zu begründen."
+                }
+            },
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen keine Daten aus den Steckbriefen zur Beantwortung."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen Daten aus den Steckbriefen zur Beantwortung."
+                }
+            }
+        }
+    },
+    "3.6.2": {
+        "solution": "Je senkrechter die PV-Zelle zur Strahlungsquelle ausgerichtet ist, desto höher ist die Elektrische Energie. Je mehr Licht die PV-Zelle erreicht (je geringer die PV-Zelle verschattet ist), desto höher ist die Elektrische Energie.",
+        "prompt": "Leitet auf Grundlage der Muster und der Messwerte zwei \"Je - desto\" Aussagen für die Ausrichtung der PV-Zelle ab.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS formulieren keine je-desto-Aussagen zum Einstrahlungswinkel und beschienenen Fläche. ",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS formulieren eine je-desto-Aussagen zu Einstrahlungswinkel oder beschienenen Fläche. ",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS formulieren zwei je-desto-Aussagen zu Einstrahlungswinkel und beschienenen Fläche. ",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen die Spannung, um etwas anderes als die Energieumwandlung zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen die Spannung, um Aussagen über die Energieumwandlung zu machen."
+                }
+            },
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Winkel oder Verschattung, um etwas anderes als die Energieumwandlung zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Winkel oder Verschattung, um Aussagen über die Energieumwandlung zu machen."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Umwandlungsideen, um etwas anderes als die Umwandlung von Strahlungs-  in Elektrische Energie zu erklären.\n- Die SuS nutzen Umwandlungsideen nicht im Kontext von Verschattung oder Winkel"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS geben an, dass in der Solarzelle Strahlungs- in Elektrische Energie umgewandelt wird.\n- Die SuS nutzen Umwandlungsideen im Kontext von Verschattung oder Winkel"
+                }
+            }
+        },
+        "skills": {
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Erklären nicht oder ohne die Hilfe von Versuchsergebnissen o.Ä."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Erklären Muster mit Hilfe von Versuchsergebnissen o.Ä.\n\nSchreiben mindestens einen Je-Desto-Satz auf"
+                }
+            }
+        }
+    },
+    "4.6.1": {
+        "solution": "Wichtige Schritte:\nVeränderung des Winkels, der Windgeschwindigkeit und der Anzahl der Rotorblätter",
+        "prompt": "Beschreibe den Experimentieraufbau und nenne die wichtigsten Schritte des Experimentiervorgehens in eigenen Worten.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben keinen Versuchsaufbau.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben nur einen Teil (Winkel, Windgeschwindigkeit oder Anzahl Flügel) des Versuchsaufbaus.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben mindestens zwei Teile (Winkel, Windgeschwindigkeit oder Anzahl Flügel) des Versuchsaufbaus.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Kinetische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Kinetische Energie, um etwas anderes als die Energieumwandlung oder den Experimentieraufbau zu beschreiben\n- Nutzen Kinetische Energie als etwas anderes als den Input "
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Kinetische Energie, um den Experimentieraufbau oder die gemessenen Variablen zu beschreiben.\n- Nutzen die Kinetische Energie als Input"
+                }
+            },
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Elektrische Energie, um etwas anderes als die Energieumwandlung oder den Experimentieraufbau zu beschreiben\n- Nutzen Elektrische Energie nicht als den Output"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Elektrische Energie um den Experimentieraufbau oder die gemessenen Variablen zu beschreiben\n- Nutzen Elektrische Energie als den Output."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Energiewandler nicht für die Versuchsksizze sondern in einem anderen Aufgabenkontext."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Umwandlungsideen für die Experimentierskizze.\n- Beschreiben, dass im Windrad Energie umgewandelt wird"
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben den Experimentieraufbau": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beschreiben keinen Experimentieraufbau."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beschreiben einen Experimentieraufbau, eine Messung reicht (Anzahl Flügel, Winkel oder Windgeschwindigkeit)"
+                }
+            }
+        }
+    },
+    "6.7.1": {
+        "solution": "/ -",
+        "prompt": "Stellt das Ergebnis, eurer Diskussion über die beste Versorgung der Schule, in einer Argumentation vor.",
+        "learning_performance": {
+            "0": {
+                "rule": "SuS beschreiben weder verschiedene Versorgungsmöglichkeiten noch geben sie eine begründete, favorisierte Energieversorgung an.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "SuS beschreiben entweder verschiedene Versorgungsmöglichkeiten oder geben eine begründete, favorisierte Energieversorgung an.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "SuS beschreiben verschiedene Versorgungsmöglichkeiten und geben eine begründete, favorisierte Energieversorgung an.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht -zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen Elektrische Energie nicht im Zusammenhang einer Energieversorgung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen Elektrische Energie, um eine Energieversorgung zu beschreiben."
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht -zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen thermische Energie nicht im Zusammenhang einer Energieversorgung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen thermische Energie, um eine Energieversorgung zu beschreiben."
+                }
+            },
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht -zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen gesellschaftliche Aspekte nicht im Zusammenhang mit Energieversorgung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen gesellschaftliche Aspekte, um eine Energieversorgung zu beschreiben."
+                }
+            },
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht -zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen ökologische Aspekte nicht im Zusammenhang einer Energieversorgung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen ökologische Aspekte, um eine Energieversorgung zu beschreiben."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht -zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen Energieumwandlung nicht im Zusammenhang mit Energieversorgung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Wortnutzung",
+                    "description": "SuS nutzen Energieumwandlung, um eine Energieversorgung zu beschreiben."
+                }
+            }
+        },
+        "skills": {
+            "Claim": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Formulieren keine Antwort auf die Frage nach der besten Energieversorgung."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Formulieren eine Antwort auf die Frage nach der besten Energieversorgung."
+                }
+            },
+            "Identifizieren relevante Daten für die Erklärung/ Argumentation": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen keine Belege für ihre Argumentation."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen Belege für ihre Argumentation."
+                }
+            },
+            "Fassen die Daten zusammen, um die Frage zu beantworten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen andere Aspekte/ Begründungen als in der Einheit behandelt."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen die Daten aus der Einheit, um die Frage zu beantworten."
+                }
+            },
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen Daten ohne diese mit der Behauptung zu verknüpfen."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen Daten, um ihre Behauptung zu stützen."
+                }
+            }
+        }
+    },
+    "4.7.1": {
+        "solution": "Vorteile:\n• Windkraft bietet hohe Energieerträge\n• Umweltfreundlich und ein positiver Beitrag zu Klimawandel\n• Verkauf bietet Möglichkeiten Gegenstände für die Schule zu kaufen/renovieren\nNachteile:\n• Wetterabhängig und Speichermedien zumeist nicht langfristig genug\n• Offshore-Anlagen mit hoher Leistung problematisch wegen dem Transportweg\n• Schädlich für bestimmte Vogelarten (meistens Raubvögel)\n• Gesundheitsschädlich (Geräuschentwicklung und Schattenwurf)",
+        "prompt": "Eine Möglichkeit Windenergie selber zu erzeugen habt ihr eben im Video gesehen.\nHier ist noch weitere Artikel: Klick! und Klick!\nNenne die möglichen Vor- und Nachteile in Verbindung zur Leitfrage: \"Was ist die beste Energieversorgung für unsere Schule?\"",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS nennen nur einen Vor- oder Nachteil.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS nennen insgesamt drei Vor- oder Nachteile.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS nennen insgesamt mindestens vier Vor- oder Nachteile.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen gesellschaftliche Aspekte, um etwas anderes als Vor- und/ oder Nachteile zu nennen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen gesellschaftliche Aspekte um Vor- und/ oder Nachteile zu nennen."
+                }
+            },
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen ökologische Aspekte, um etwas anderes als Vor- und/ oder Nachteile zu nennen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen ökologische Aspekte um Vor- und/ oder Nachteile zu nennen."
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS nennen keine Vor- und/ oder Nachteile."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS nennen Vor- und/ oder Nachteile."
+                }
+            }
+        }
+    },
+    "3.6.1": {
+        "solution": "War der Winkel zur Strahlungsquelle 90°, so war die Spannung am höchsten. Umso größer der Winkel von 90° abgewichen ist, desto kleiner war auch der Spannungswert. Je mehr wir die Solarzelle verschattet haben, desto geringer war die Spannung.",
+        "prompt": "Beschreibt Muster, die euch in den Messwerten auffallen.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder den Winkel noch die Fläche als Kriterien für die Umwandlung von Strahlungsenergie in Elektrische Energie.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder den Winkel oder die Fläche als Kriterien für die Umwandlung von Strahlungsenergie in Elektrische Energie.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben den Winkel und die Fläche als Kriterien für die Umwandlung von Strahlungsenergie in Elektrische Energie.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen die Spannung, um etwas anderes als Aussagen über die Energieumwandlung zu machen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen die Spannung, um Aussagen über die Energieumwandlung zu machen."
+                }
+            },
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Winkel oder Verschattung, um etwas anderes als Aussagen über die Energieumwandlung zu machen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Winkel oder Verschattung, um Aussagen über die Energieumwandlung zu machen."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Energieumwandlung, um etwas anderes als die Umwandlung von Strahlungsenergie zu elektrischer Energie zu beschreiben.- Nutzen Umwandlungsideen nicht im Kontext der Verschattung oder dem Winkel"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS geben an, dass in der Solarzelle Strahlungs- in Elektrische Energie umgewandelt wird. - Nutzen Umwandlungsideen, wenn sie über die Verschattung oder den Winkel sprechen"
+                }
+            }
+        },
+        "skills": {
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Erklären nicht oder ohne die Hilfe von Versuchsergebnissen o.Ä."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Erklären Muster mit Hilfe von Versuchsergebnissen o.Ä."
+                }
+            }
+        }
+    },
+    "2.3.1": {
+        "solution": "Es sind drei Lampen zu sehen: eine Energiesparlampe, eine Glühlampe und eine LED. Außerdem haben wir ein Strahlungsleistungsmessgerät zur Verfügung. Nun schalten wir die Lampen nacheinander einzeln an. Alle Lampen leuchten gleich hell und das Strahlungsleistungsmessgerät zeigt die jeweilige Strahlungsleistung der Lampe an. Alle Lampen haben dieselbe Strahlungsleistung, nämlich PL = 4 W.",
+        "prompt": "Beschreibe den Versuch in eigenen Worten und notiere die Ergebnisse der Strahlungsleistungsmessung.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die Strahlungsleistung auf Grundlage der Versuchsbeobachtungen noch schließen sie daraus, dass die Strahlungsleistung und damit die Helligkeit für alle Lampen gleich ist.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die Strahlungsleistung auf Grundlage der Versuchsbeobachtungen oder sie stellen fest, dass die Strahlungsleistung und damit die Helligkeit für alle Lampen gleich ist.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die Strahlungsleistung auf Grundlage der Versuchsbeobachtungen und stellen fest, dass die Strahlungsleistung und damit die Helligkeit für alle Lampen gleich ist.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Strahlungs- oder Lichtleistung, um etwas anderes als die Helligkeit der Lampen zu vergleichen.- nennen 4 Watt ohne auf die Helligkeit einzugehen- nennen gleiche Helligkeit ohne gleiche Strahlungsleistungswerte (4W) zu nennen"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Strahlungs- oder Lichtleistung, um die Helligkeit der Lampen zu vergleichen.- Sagen, dass alle Lampen eine Strahlungsleistung von 4 Watt haben und damit gleich hell sind."
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nennen nicht die Strahlungsleistungen der einzelnen Lampen."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nennen die Strahlungsleistung der Lampen."
+                }
+            },
+            "Formulieren erste Zusammenhänge, Muster und Strukturen in den Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beschreiben keine Zusammenhänge zwischen Strahlungsleistung und Helligkeit."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beschreiben Zusammenhänge zwischen Strahlungsleistung und Helligkeit."
+                }
+            },
+            "Beschreiben den Experimentieraufbau": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beschreiben das Experiment nicht"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beschreiben das Experiment (Nennen, dass sie 3 Lampen anmachen und von diesen die Strahlungsleistung messen)"
+                }
+            }
+        }
+    },
+    "5.6.4": {
+        "solution": "Bei der Installation von Photovoltaik und Windkraftanlagen fallen Treibhausgasemissionen an, auch wenn der eigentliche Umwandlungsvorgang keine Abgase produziert. Die Photovoltaik ist aufgrund der Herstellung besonders energieintensiv. Auch die Produktion der Einzelteile und der Produktionsstandort tragen zu den Emissionen bei.",
+        "prompt": "Erkläre die Treibhausgasemissionen der erneuerbaren Energien: Photovoltaik und Windenergie.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS erklären nicht, warum erneuerbare Energieformen Treibhausgase emittieren.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS erklären einen Grund für die Emission von erneuerbaren Energien.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS erklären zwei Gründe für die Emission von erneuerbaren Energien.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS erklären die Treibhausgasemissionen von erneuerbaren Energieformen, ohne dabei ökologische Gesichtspunkte zu betrachten oder erkennen nicht die Herstellung als hauptsächlichen Treiber der CO2-Emission."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS erklären die Treibhausgasemissionen von erneuerbaren Energieformen im Hinblick ökologische Aspekten und nennen die Herstellung als hauptsächlichen Treiber für die CO2-Emission."
+                }
+            }
+        },
+        "skills": {
+            "Beziehen die relevanten Aspekte / Werte auf die vorhandenen Informationen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen nicht die vorhanden Informationen zur Erklärung."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen die vorhandenen Informationen zur Erklärung."
+                }
+            }
+        }
+    },
+    "4.7.2": {
+        "solution": null,
+        "prompt": "Eine ganze Windenergieanlage für eine Schule ist etwas zu groß dimensioniert, zu dem kostet es ca. 3,2 Millionen € eine zu bauen.\nMit einem 6 MW Windrad können im Jahr 3.500 Haushalte mit elektrischer Energie versorgt werden, eine durchschnittliche Schule entspricht im Verbrauch ca. 20 Haushalten.\nBerechne, wie viele Schulen sich eine Windenergieanlage teilen können und wie teuer es pro Schule ist.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS berechnen nicht das korrekte Ergebnis.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS berechnen entweder Anzahl Schulen oder Kosten\n- Die SuS runden zu grob (z.B. 18 T €) ",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS berechnen Anzahl Schulen und Kosten",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen gesellschaftliche Aspekte, um etwas anderes als die Anzahl Schulen oder die Kosten pro Schule zu berechnen.\n- geben nur das Ergebnis an (ein Ergebnis reicht)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die richtige Formel, um die Anzahl Schulen oder die Kosten pro Schule zu berechnen."
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS berechnen nicht korrekt."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS berechnen physikalisch korrekt und geben die richtige Formel an."
+                }
+            }
+        }
+    },
+    "4.9.1": {
+        "solution": "ausgefüllte Tabellen",
+        "prompt": "Protokolliere deine Beobachtungen im Textfeld und die Messwerte in der Tabelle.",
+        "learning_performance": {
+            "0": {
+                "rule": "nicht vorhanden",
+                "description": "Die SuS notieren keine Beobachtungen oder Messwerte."
+            },
+            "2": {
+                "rule": "vorhanden",
+                "description": "Die SuS notieren Beobachtungen und Messwerte in (eine Tabelle ausreichend, da Gruppenarbeit))."
+            }
+        },
+        "knowledge_elements": {},
+        "skills": {
+            "Beobachten und Messen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS notieren keine Beobachtungen oder Messwerte."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS notieren Beobachtungen und Messwerte in (eine Tabelle ausreichend, da Gruppenarbeit))."
+                }
+            }
+        }
+    },
+    "3.10.3": {
+        "solution": "Die Schwankungen in der Strahlung über das Jahr führen zu einem höheren Strahlungswert im Sommer und damit zu einer vermehrten Umwandlung in den Solarzellen. In den Wintermonaten nimmt die Strahlung je m² bis auf den Tiefstwert ab, wodurch weniger Strahlungsenergie in den Photovoltaik-Zellen in Elektrische Energie umgewandelt wird. Im Winter, wenn also grundsätzlich mehr Elektrische Energie für Heizen und Licht notwendig ist, wandeln die Solarzellen aufgrund geringerer Einstrahlung weniger Energie um.",
+        "prompt": "Erläutere die Auswirkungen der jahreszeitabhängigen Strahlungsenergie auf die Gewinnung von elektrischer Energie durch Photovoltaik.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS erklären nicht, dass dadurch die Möglichkeit der Umwandlung in Elektrische Energie jahreszeitabhängig ist.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS erklären, dass durch die unterschiedlichen Strahlungsenergien im Jahresverlauf die Möglichkeit der Umwandlung in Elektrische Energie jahreszeitabhängig ist.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS erklären, dass durch die unterschiedlichen Strahlungsenergien im Jahresverlauf die Möglichkeit der Umwandlung in Elektrische Energie jahreszeitabhängig ist und erklären, dass besonders im Winter wenn Energie zum Heizen und Beleuchten benötigt wird, weniger umgewandelt werden kann.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Elektrische Energie, als etwas anderes als Argument für eine unterschiedliche Energieversorgung im Jahresverlauf."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Elektrische Energie, als Argument für eine unterschiedliche Energieversorgung im Jahresverlauf."
+                }
+            },
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Strahlungsenergie, um etwas anderes als die Schwankungen im Jahresverlauf zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Strahlungsenergie, um die Schwankungen im Jahresverlauf zu erklären."
+                }
+            },
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte, um etwas anderes als die Auswirkungen der Schwankungen im Jahresverlauf zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte, um die Auswirkungen der Schwankungen im Jahresverlauf zu erklären."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Energieumwandlung, um etwas anderes als die Schwankungen von bereitgestellter elektrischer Energie im Jahresverlauf zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Energieumwandlung, um die Schwankungen von bereitgestellter elektrischer Energie im Jahresverlauf zu erklären."
+                }
+            }
+        },
+        "skills": {
+            "Formulieren erste Zusammenhänge, Muster und Strukturen in den Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Formulieren keine Zusammenhänge aus den Daten."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Formulieren Zusammenhänge aus den Daten."
+                }
+            }
+        }
+    },
+    "5.7.1": {
+        "solution": "Vorteile:\n• Bau von Erdgaskraftwerken recht schnell und kostengünstig\n• Hohe Leistung und Wirkungsgrade\n• Flexible Stromerzeugung und unterstützt Schwankungen im Stromnetz auszugleichen\nNachteile:\n• Hohe Umweltbelastung durch CO2-Emissionen und weiteren gesundheitsgefährdenden Stoffen\n• Begrenzte Verfügbarkeit der Gasvorräte und Abhängigkeit von wenigen Ländern mit Gasvorkommen \nDeutschland bezieht sein Erdgas zu 38,2 % aus Russland, 34,8 % aus Norwegen, 22,4 % aus den Niederlanden und zu 4,6 % aus sonstigen Quellen.\nSpeziell Kiel speichert seine Gasvorräte in Kavernen-Speichern in Kiel-Rönne. Dies ist ein unterirdischer Salzstock in Tiefen zwischen 650 und 1800m unter der Erdoberfläche. Dort werden 35 Millionen m³ komprimiertes Erdgas zwischengespeichert.",
+        "prompt": "Erstelle mit den erarbeiteten Informationen den Steckbrief für das Gaskraftwerk.\nRecherchiert zudem im Internet woher Deutschland sein Gas bezieht und wie es in Deutschland gespeichert wird.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS füllen den Steckbrief nicht aus."
+            },
+            "1": {
+                "rule": "Die SuS füllen den Steckbrief teilweise aus, 2 - 3 von 5 Felder.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS füllen den Steckbrief vollständig aus, mindestens 4 von 5 Feldern."
+            }
+        },
+        "knowledge_elements": {},
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS nutzen nicht die gegeben Daten, um den Steckbrief zu füllen."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS nutzen die gegebenen Daten, um den Steckbrief zu füllen."
+                }
+            }
+        }
+    },
+    "3.9.3": {
+        "solution": "Scheint die Sonne stark genug, sodass mehr Strahlungsenergie transferiert wird bzw. wenig Energie genutzt wird, kann die übrige Elektrische Energie zum Batteriespeicher transferiert werden. Im Batteriespeicher wird die Elektrische Energie in chemische Energie umgewandelt. So kann der Batteriespeicher an sonnigen Tagen vollständig geladen werden. In der Nacht oder wenn es bewölkt ist, können die elektrischen Geräte im Haus aus dem vollen Batteriespeicher betrieben werden. Dazu wird die chemische Energie im Batteriespeicher wieder in Elektrische Energie umgewandelt und zu den elektrischen Geräten transferiert. Der Batteriespeicher kann die Strahlungsenergie der Sonne durch mehrere Umwandlungsschritte speichern und das Haus bei Bedarf eine gewisse Zeit langversorgen.",
+        "prompt": "Wir müssen also die Elektrische Energie speichern. Eine Möglichkeit ist der Batteriespeicher.Sieh dir das Video an und beschreibe kurz die Funktionsweise eines Batteriespeichers.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die Funktionsweise eines Batteriespeichers noch, dass dieser zum Zwischenspeichern von Energie genutzt werden kann.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die Funktionsweise eines Batteriespeichers oder dass dieser zum Zwischenspeichern von Energie genutzt werden kann.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die Funktionsweise eines Batteriespeichers und dass dieser zum Zwischenspeichern von Energie genutzt werden kann.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Elektrische Energie für etwas anderes als die Beschreibung der Funktionweise des Batteriespeichers."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Elektrische Energie korrekt bei der Beschreibung der Funktionweise des Batteriespeichers."
+                }
+            },
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Strahlungsenergie als etwas anderes als die Beschreibung der Funktionsweise des Batteriespeichers."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Strahlungsenergie korrekt bei der Beschreibung der Funktionsweise des Batteriespeichers (Strahlungsenergie als Eingangsenergie)"
+                }
+            },
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte als etwas anderes als die Beschreibung der Funktionweise des Batteriespeichers."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte korrekt bei der Beschreibung der Funktionweise des Batteriespeichers."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Energieumwandlung für etwas anderes als die Beschreibung der Funktionweise des Batteriespeichers/ beschreiben die Umwandlung fehlerhaft"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Energieumwandlung korrekt bei der Beschreibung der Funktionweise des Batteriespeichers."
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Formulieren keine Zusammenhänge aus den Daten."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Teile fehlen, z.B \"Energie kann später/nachts genutzt werden\" oder Umwandlung nicht detailliert genug beschrieben"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Formulieren Zusammenhänge aus den Daten vollständig"
+                }
+            }
+        }
+    },
+    "3.11.7": {
+        "solution": "Ein Teil der Strahlungsenergie wird von den PV-Zellen reflektiert (bleibt Strahlungsenergie) und ein Teil wird in thermische Energie umgewandelt.",
+        "prompt": "Erläutere, was mit der Energie geschehen ist, die nicht in Elektrische Energie umgewandelt wurde.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS erkennen nicht, dass nicht die vollständige Energie in Elektrische Energie umgewandelt wurde.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS erklären, dass Energie unter anderem in thermische Energie umgewandelt oder als Strahlungsenergie reflektiert wurde.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS erklären, dass Energie unter anderem in thermische Energie umgewandelt und als Strahlungsenergie reflektiert wurde.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen thermische Energie, um etwas anderes als die restliche Energie zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS gehen in ihrer Antwort korrekt auf thermische Energie und/oder Wärme ein."
+                }
+            },
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Strahlungsenergie, um etwas anderes als die restliche Energie zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS gehen in ihrer Antwort korrekt auf reflektierte Strahlungsenergie ein."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Energieumwandlungen, um etwas anderes als die restliche Energie zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS geben an, dass bei der Umwandlung von Lichtenergie in Solarzellen auch Wärme / thermsiche Energie entsteht."
+                }
+            }
+        },
+        "skills": {
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Schreiben keine Behauptung auf Grundlage der vorherigen Auswertung."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Schreiben eine Behauptung auf Grundlage der vorherigen Auswertung."
+                }
+            }
+        }
+    },
+    "2.5.7": {
+        "solution": "Auf Grundlage des Verhältnisses von Strahlungsleistung zu elektrischer Leistung ist die LED-Lampe am effektivsten, weil der Wirkungsgrad mit 43,5% am höchsten ist. Sie benötigt die geringste elektrische Leistung und entwertet somit am wenigsten Elektrische Energie in thermische Energie.",
+        "prompt": "Erläutere, auf Grundlage der Messdaten, welche Lampe die bessere ist.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS nutzen den Wirkungsgrad nicht, um das beste Leuchtmittel auszuwählen.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS nutzen den Wirkungsgrad, um das beste Leuchtmittel auszuwählen.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Elektrische Energie für etwas anderes als eine Erklärung für das beste Leuchtmittel."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen die eingehende Elektrische Energie für eine Erklärung für das beste Leuchtmittel."
+                }
+            },
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Strahlungsenergie für etwas anderes als eine Erklärung für das beste Leuchtmittel."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Strahlungsenergie für eine Erklärung für das beste Leuchtmittel."
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen thermische Energie für etwas anderes als eine Erklärung für das beste Leuchtmittel."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen thermische Energie für eine Erklärung für das beste Leuchtmittel."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Umwandlung für etwas anderes als eine Erklärung für das beste Leuchtmittel."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Umwandlung für eine Erklärung für das beste Leuchtmittel."
+                }
+            }
+        },
+        "skills": {
+            "Erläutern Rückschlüsse zu den Implikation ihrer Ergebnisse": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen nicht den Wirkungsgrad und/ oder die Energieformen, um zu erläutern."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen den Wirkungsgrad und/ oder die Energieformen, um zu erläutern."
+                }
+            }
+        }
+    },
+    "3.10.2": {
+        "solution": "In der Referenzperiode 1961-1990 wurde der Jahresverlauf der Strahlungswerte in Deutschland dargestellt. Grundsätzlich lässt sich bis zum Monat April ein Nord-Südgefälle erkennen, wobei den Norden weniger Strahlung erreicht, als den Süden. Ab Juni zeigt sich außerdem eine verstärkte Insellage Westdeutschlands, wo bis zum August tendenziell weniger Strahlung detektiert wird als in anderen Teilen Deutschlands. Ab September stellt sich dann wieder ein Nord-Südgefälle ein, bei welchem der Norden weniger Strahlung empfängt, diese aber auch im Mittel weiter abnimmt bis sie den Tiefstwert in den Monaten Dezember und Januar wieder erreicht. Über das Jahr gesehen schwankt die Strahlungsleistung erheblich, besonders im Vergleich Winter und Hochsommer.",
+        "prompt": "Beschreibe den Verlauf der Strahlungsenergie eines Jahres für die Referenzperiode von 1960-1990.",
+        "learning_performance": {
+            "0": {
+                "rule": "nicht vorhanden",
+                "description": "Die SuS beschreiben nicht den jahreszeitlichen Verlauf der Strahlungsenergie."
+            },
+            "2": {
+                "rule": "vorhanden",
+                "description": "Die SuS beschreiben den jahreszeitlichen Verlauf der Strahlungsenergie."
+            }
+        },
+        "knowledge_elements": {},
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS beschreiben nicht den jahreszeitlichen Verlauf der Strahlungsenergie."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS beschreiben den jahreszeitlichen Verlauf der Strahlungsenergie."
+                }
+            }
+        }
+    },
+    "2.1.3": {
+        "solution": "Auch hier gibt es kein richtig oder falsch, es soll gezeigt werden, dass wir eineUntersuchung zur Beantwortung der Frage benötigen.",
+        "prompt": "Erkläre, in eigenen Worten, warum du dich für diese Lampe entschieden hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS formulieren keine Begründung für ihre Wahl.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS formulieren eine Begründung basierend auf physikalischen Prinzipien oder gesellschaftlichen/ ökologischen Beweggründen.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS formulieren eine Begründung basierend auf physikalischen Prinzipien und gesellschaftlichen/ ökologischen Beweggründen.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Elektrische Energie, um etwas anderes als ihre Wahl zu erklären- Nutzen Begriff \"Energie\" ohne Spezifikation auf Elektrische Energie"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Begriff \"Elektrische Energie\"/ \"Strom\", um ihre Wahl zu erklären."
+                }
+            },
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Strahlungsenergie, um etwas anderes als ihre Wahl zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Strahlungsenergie, um ihre Wahl zu erklären."
+                }
+            },
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen gesellschaftliche Kriterien, um etwas anderes als ihre Wahl zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen gesellschaftliche Kriterien, um ihre Wahl zu erklären."
+                }
+            },
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen ökologische Kriterien, um etwas anderes als ihre Wahl zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen ökologische Kriterien, um ihre Wahl zu erklären."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Energieumwandlung, um etwas anderes als ihre Wahl zu erklären."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Energieumwandlung, um ihre Wahl zu erklären."
+                }
+            }
+        },
+        "skills": {
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Schreiben keine Erklärung."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Schreiben eine Erklärung."
+                }
+            }
+        }
+    },
+    "5.6.5": {
+        "solution": "Die Aussage und Einstufung über die Klimafreundlichkeit von Gas- und Atomenergie wurde von der EU-Kommission getätigt, um den Ausstieg aus der Kohleenergie zu vereinfachen. Tatsächlich handelt es sich um eine Verschiebung der Prioritäten. Im Gegensatz zu der erneuerbaren Energie entstehen bei der Gas- und Atomenergie Abfallprodukte und Emissionen, zwar weniger Emissionen als bei der Kohleverbrennung, aber gerade die radioaktiven Abfälle sind als problematisch wegen ihrer langen Verweildauer und komplexen Endlagerung anzusehen. Windenergie und Photovoltaik hingegen produzieren bei der Energieumwandlung keine Abfallprodukte oder –Emissionen, die Emissionen beziehen sich auf die Herstellung und Wartung der Anlagen.",
+        "prompt": "Beantworte begründet die Eingangsfrage mithilfe der Informationen, die du nun über Gaskraftwerke gesammelt hast. \"Wenn Gas- und Atomenergie klimafreundlich sind, benötigen wir dann überhaupt noch eine Energiewende?\"",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS argumentieren nicht mit den Treibhausgasemissionen von Gaskraftwerken.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS erläutern ein oder zwei Vor- und/ oder Nachteile von Gaskraftwerken.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS argumentieren mit den Treibhausgasemissionen von Gaskraftwerken.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte nicht im Sinne der Aufgabe"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte im Sinne der Aufgabe"
+                }
+            },
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen ökologische Aspekte nicht im Sinne der Aufgabe"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen ökologische Aspekte im Sinne der Aufgabe"
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Umwandlungskonzepte nicht im SInne der Aufgabe"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS geben an, dass bei der Umwandlung von Gas in Gaskraftwerken Treibhausgase entstehen."
+                }
+            }
+        },
+        "skills": {
+            "Erläutern Rückschlüsse zu den Implikation ihrer Ergebnisse": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beziehen sich nicht auf ihre Ergebnisse."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beziehen sich auf ihre Ergebnisse."
+                }
+            }
+        }
+    },
+    "4.10.6": {
+        "solution": "Die nicht nutzbare Energie wird durch Reibung in den mechanischen Teilen zu großen Teilen in thermische umgewandelt.",
+        "prompt": "Erläutere was mit der Energie geschehen ist, die nicht in Elektrische Energie umgewandelt wurde.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS erklären die fehlende Energie als verbraucht oder verloren.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS erklären, dass die fehlende Energie in andere Energieformen umgewandelt wurde.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Reibung/ thermische Energie in einem anderen Kontext als zu Erklärung der 'fehlenden' Energie."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Reibung/ thermische Energie zur Erklärung der 'fehlenden' Energie."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Energieumwandlung in einem anderen Kontext als zu Erklärung der 'fehlenden' Energie."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen Energieumwandlung zur Erklärung der 'fehlenden' Energie."
+                }
+            }
+        },
+        "skills": {
+            "Erläutern Rückschlüsse zu den Implikation ihrer Ergebnisse": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen nicht ihre vorherigen Ergebnisse für Rückschlüsse."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen ihre vorherigen Ergebnisse für Rückschlüsse.\nDie SuS benennen, dass die fehlende Energie in eine andere Energieform umgewandelt worden ist"
+                }
+            }
+        }
+    },
+    "5.4.0": {
+        "solution": "Ein Gas- und Dampfkombikraftwerk ist in vier Abschnitte aufgeteilt, in welchen unterschiedliche Energieumwandlungsprozesse stattfinden. In der Gasturbine (im Bild u.L.) wird ein Gas-Luft-Gemisch zusammengeführt und verbrannt, wodurch ein Generator angetrieben wird und die chemische Energie des Gases über Kinetische Energie in Elektrische Energie umgewandelt wird. Im Abhitzekessel (im Bild u.R) werden das Wasser aus dem Kondensator und die Abgase der Gasturbine genutzt, um heißen Wasserdampf zu produzieren, welcher dann wiederum in die Dampfturbine umgeleitet wird. Die thermische Energie wird in Kinetische Energie und zum Schluss in Elektrische Energie umgewandelt. Im Kondensator (im Bild o.R.) wird der Dampf aus der Dampfturbine durch einenKühlkreislauf geleitet und abgekühlt, sodass es wieder kondensiert und zu flüssigem Wasser wird. Dieses Wasser wird in den Abhitzekessel gepumpt. In der Dampfturbine (im Bild o.L.) strömt heißer Dampf vom Abhitzekessel in die Turbine und bewegt dort die Schaufelräder, die wiederum einen Generator antreiben. Dieser wandelt die thermische Energie des Dampfes in Elektrische Energie um. Der Dampf strömt danach weiter in den Kondensator. ",
+        "prompt": "Beschreibe die Funktionsweise eines Gas- und Dampfkombikraftwerks.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben die Funktionsweise eines Kombikraftwerks nicht korrekt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben die Funktionsweise nur teilweise, zwei der vier Punkte der H5P Animation, korrekt.",
+                "description": "Gasturbine, Abhitzekessel, Dampfturbine, Kondensator"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die Funktionsweise eines Gas- und Dampfkraftwerks korrekt (ab drei der vier Punkte).",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Chemische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Gas/ chemische Energie ohne auf den Verbrennungsprozess einzugehen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Gas/ chemische Energie zur Beschreibung eines Verbrennungsprozesses im Kombikraftwerk"
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden thermische Energie, um etwas anderes als das Kombikraftwerk zu beschreiben/ thermische Energie wird nicht genutzt, um das erwärmen/ verdampfen des Wassers zu beschreiben"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden thermische Energie, um das Kombikraftwerk zu beschreiben (erwärmen/verdampfen des Wassers)"
+                }
+            },
+            "Kinetische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Bewegungsenergie, um etwas anderes als das Kombikraftwerk zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Bewegungsenergie, um das Kombikraftwerk zu beschreiben (Kinetische Energie wird dafür genutzt, dass der Luftsstrom die Turbine antreibt)"
+                }
+            },
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Elektrische Energie, um etwas anderes als das Kombikraftwerk zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Elektrische Energie m Zusammenhang mit der Endenergieform"
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Es werden keine Umwandlungskonzepte genutzt"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Energieumwandlungskonzepte, um das Kombikraftwerk zu beschreiben."
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beschreiben das Kombikraftwerk nicht auf Basis der H5P Animation."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beschreiben das Kombikraftwerk auf Basis der H5P Animation."
+                }
+            }
+        }
+    },
+    "1.0.1": {
+        "solution": "Gas wird z. B. zur Stromversorgung für Heizung und Licht verwendet. Wenn Gas knapp wird, könnte es sein, dass die Schule nicht mehr geheizt werden kann oder die Lichter ausgehen.",
+        "prompt": "Benenne Konsequenzen, die die Gasknappheit für Deutschland und deine Schule bedeuten könnte.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS stellen keinen Zusammenhang zwischen einem Gaslieferstopp und der Versorgung von Strom- und/ oder Wärme her.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS stellen einen Zusammenhang zwischen einem Gaslieferstopp und der Versorgung von Strom- und/ oder Wärme her.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS stellen mindestens zwei Zusammenhänge zwischen einem Gaslieferstopp und der Versorgung von Strom- und/ oder Wärme her.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Chemische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Gas/ chemische Energie oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nennung des Energieträgers (Gas/Wasserstoff) ohne Zusammenhang von Speicherung oder Freisetzung (Verbrennung etc.) von Energie"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nennung des Energieträgers (Gas/Wasserstoff) im Zusammenhang mit Speicherung oder Freisetzung (Verbrennung etc.) von Energie"
+                }
+            },
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nennen gesellschaftliche Aspekte, ohne auf einen Gasstopp oder Ähnliches einzugehen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nennen gesellschaftliche Konsequenzen bei einem Gasstopp"
+                }
+            }
+        },
+        "skills": {}
+    },
+    "2.7.1": {
+        "solution": "Andere mögliche Kriterien sind Verfügbarkeit, Kosten, Umwelteinflüsse und Transport/Speicherung.",
+        "prompt": "Wir wollen in den nächsten Stunden Energiewandler miteinander vergleichen.\nHierfür kann uns der Wirkungsgrad als ein Kriterium dienen.\nNenne, zunächst alleine, andere Kriterien, die für einen Vergleich von Energiewandlern wichtig sein könnten.\n(Besonders im Hinblick auf die Versorgung unserer Schule)",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS formulieren weder Umwelt- noch gesellschaftliche Faktoren zum Vergleich von Energiewandlern.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS formulieren Umwelt- oder gesellschaftliche Faktoren zum Vergleich von Energiewandlern.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS formulieren Umwelt- und gesellschaftliche Faktoren zum Vergleich von Energiewandlern.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen gesellschaftliche Aspekte für etwas anderes als Kriterien für den Vergleich von Energiewandlern, oder nutzen unsinnvolle Aspekte"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen sinnvolle gesellschaftliche Aspekte für Kriterien für den Vergleich von Energiewandlern"
+                }
+            },
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen ökologische Aspekte für etwas anderes als Kriterien für den Vergleich von Energiewandlern, oder nutzen unsinnvolle Aspekte"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen sinnvolle ökologische Aspekte für Kriterien für den Vergleich von Energiewandlern"
+                }
+            }
+        },
+        "skills": {
+            "Forschungsfragen stellen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Formulieren keine Fragestellung"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Formulieren eine Fragestellung"
+                }
+            }
+        }
+    },
+    "5.5.7": {
+        "solution": "Die angesprochene Abwärme von Gasturbinen bietet thermische Energie zur Weiternutzung in einer Dampfturbine. Daher muss nur zum Start der Gasturbine chemische Energie zugeführt werden. Die Abwärme dieser startet den Umwandlungsprozess in der Dampfturbine.\nSomit ergibt sich zweimal die Möglichkeit über Generatoren Elektrische Energie im Prozess umzuwandeln.",
+        "prompt": "Begründe die mittlerweile vermehrte Verwendung von Kombikraftwerken anstelle von Dampfkraftwerken.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS erklären die vermehrte Verbreitung von Kombikraftwerken weder mit dem besseren Wirkungsgrad noch dem geringeren Gasverbrauch.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS erklären die vermehrte Verbreitung von Kombikraftwerken entweder mit dem besseren Wirkungsgrad oder dem geringeren Gasverbrauch.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS erklären die vermehrte Verbreitung von Kombikraftwerken mit dem besseren Wirkungsgrad und dem geringeren Gasverbrauch.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen die nutzbare thermische Energie für etwas anderes als eine Argumentation für Kombikraftwerke."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen die nutzbare thermische Energie in ihrer Argumentation für Kombikraftwerke."
+                }
+            },
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen ökologische Aspekte für etwas anderes als eine Argumentation für Kombikraftwerke."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen ökologische Aspekte in ihrer Argumentation für Kombikraftwerke."
+                }
+            },
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte für etwas anderes als eine Argumentation für Kombikraftwerke."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte in ihrer Argumentation für Kombikraftwerke."
+                }
+            }
+        },
+        "skills": {
+            "Erläutern Rückschlüsse zu den Implikation ihrer Ergebnisse": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beziehen sich nicht auf ihre Ergebnisse, ihrer erarbeiteten Vor- und Nachteile aus den vorherigen Aufgaben."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beziehen sich auf ihre Ergebnisse, ihre erarbeiteten Vor- und Nachteile aus den vorherigen Aufgaben."
+                }
+            }
+        }
+    },
+    "5.6.2": {
+        "solution": "CO2-Äquivalente sind eine Maßeinheit zur Vereinheitlichung der Klimawirkung der unterschiedlichen Treibhausgase. Dabei wird die Klimawirkung der anderen Treibhausgase (Methan etc.) auf die Klimawirkung von CO2 umgerechnet. Somit werden alle Treibhausgasemissionen unter dem Oberbegriff CO2-Äquivalent zusammengefasst.",
+        "prompt": "Erkläre den Begriff CO2- Äquivalent kurz in eigenen Worten.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS erklären den Begriff CO2-Äquvalent nicht.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS erklären den Begriff CO2-Äquvalent entweder als Vereinheitlichung unterschiedlicher Treibhausgase oder die Umrechnung auf die Wirkung von CO2.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS erklären den Begriff CO2-Äquvalent als Vereinheitlichung unterschiedlicher Treibhausgase und die Umrechnung auf die Wirkung von CO2.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS erklären den Begriff CO2 Äquivalent, nicht als vereinheitlichte Maßeineheit für die Klimawirkung von Treibhausgasen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS erklären den Begriff CO2 Äquivalent als vereinheitlichte Maßeineheit für die Klimawirkung von Treibhausgasen."
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen nicht die gegebenen Informationen für die Erklärung des CO2 Äquivalents."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen die gegebenen Informationen für die Erklärung des CO2 Äquivalents."
+                }
+            }
+        }
+    },
+    "3.12.2": {
+        "solution": null,
+        "prompt": "Ermittel mithilfe der folgenden Informationen und den Daten aus dem vorherigen Versuch den Steckbrief zu Photovoltaik:",
+        "learning_performance": {
+            "0": {
+                "rule": "nicht vorhanden",
+                "description": "Die SuS nutzen nicht die gegeben Daten, um den Steckbrief zu füllen."
+            },
+            "1": {
+                "rule": "Die SuS füllen den Steckbrief teilweise aus, 2 - 3 von 5 Felder.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "vorhanden",
+                "description": "Die SuS nutzen die gegebenen Daten, um den Steckbrief zu füllen."
+            }
+        },
+        "knowledge_elements": {},
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS nutzen nicht die gegeben Daten, um den Steckbrief zu füllen."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS nutzen die gegebenen Daten, um den Steckbrief zu füllen."
+                }
+            }
+        }
+    },
+    "4.7.6": {
+        "solution": "Im Power-to-Gas-Verfahren (P2G) wird elektrischer Strom, zumeist aus erneuerbaren Energien, für die Umwandlung in Gas (Elektrolyse) genutzt. Das Gas wird in Gasspeichern zwischengelagert und kann andernorts in Gaskraftwerken wieder in Elektrische Energie umgewandelt werden. Der Prozess ist in der Hinsicht wirtschaftlich von Vorteil, da vor allem die überschüssige Elektrische Energie von erneuerbaren Anlagen genutzt wird.",
+        "prompt": "Beschreibe das Power-to-Gas Verfahren in eigenen Worten.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS formulieren keine korrekte Energieumwandlungskette.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS formulieren eine teils korrekte Energieumwandlungskette (mindestens die Hälfte)",
+                "description": "elektr. Energie -> Elektrolyseur -> chem. Energie"
+            },
+            "2": {
+                "rule": "Die SuS formulieren die vollständige Energieumwandlungskette.",
+                "description": "Umwandlung wie bei einem Punkt + Teil davor (Wind) oder danach (Verstromung)"
+            }
+        },
+        "knowledge_elements": {
+            "Kinetische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Bewegungsenergie, um etwas anderes als das P2G Verfahren zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Bewegungsenergie, um das P2G Verfahren zu beschreiben."
+                }
+            },
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Elektrische Energie, um etwas anderes als das P2G Verfahren zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Elektrische Energie, um das P2G Verfahren zu beschreiben."
+                }
+            },
+            "Chemische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Wasserstoff/ chemische Energie, um etwas anderes als das P2G Verfahren zu beschreiben/ ohne Zusammenhang zur Elektrolyse oder Wiederverstromung."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Wasserstoff/ chemische Energie, um das P2G Verfahren zu beschreiben/ stellen Zusammenhang zwischen Wasserstoff Elektrolyse und/ oder Wiederverstromung her."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Umwandlungskonzepte, um etwas anderes als das P2G Verfahren zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Umwandlungskonzepte, um das P2G Verfahren zu beschreiben."
+                }
+            }
+        },
+        "skills": {
+            "Wechseln die Darstellung der Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beschreiben das P2G Verfahren nicht korrekt aus der H5P Graphik."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beschreiben das P2G Verfahren korrekt aus der H5P Graphik."
+                }
+            }
+        }
+    },
+    "4.7.7": {
+        "solution": "Vorteile:\n• Nutzung von überschüssiger Energie, welche sonst nicht genutzt wurde\n• Saisonale Speicherung der Energie in Gasform bis zu Monaten\n• Bietet die Möglichkeit CO2 auch aus industriellen Prozessen zu binden\nNachteile:\n• Durch die Umwandlung in Gas erniedrigt sich der Gesamtwirkungsgrad\n• hohe Kosten für die Technologie",
+        "prompt": "Nenne und Vor- und Nachteile einer Power-to-Gas Anlage.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS nennen nur einen Vor- oder Nachteil.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS nennen insgesamt drei Vor- oder Nachteile.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS nennen insgesamt mindestens vier Vor- oder Nachteile.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen gesellschaftliche Aspekte, um etwas anderes als Vor- und/ oder Nachteile vom P2G Verfahren zu nennen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen gesellschaftliche Aspekte um Vor- und/ oder Nachteile des P2G Verfahren zu nennen."
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS nennen keine Vor- und/ oder Nachteile."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS nennen Vor- und/ oder Nachteile."
+                }
+            }
+        }
+    },
+    "1.2.1": {
+        "solution": null,
+        "prompt": "Nenne, zunächste alleine, Geräte, Gegenstände und Abläufe die an unserer Schule Energie benötigen. Ordne den Geräten und Gegenstände die passende Energieform zu.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS nennen weder Geräte noch Energien, die im Kontext Schule passen.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS nennen entweder Geräte oder Energien, die im Kontext Schule passen. Oder sie nutzen nur elektrische/ thermische Energie und Geräte die dazu passen, nicht beide Formen.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS nennen Geräte und Energien, die im Kontext Schule passen. Dabei werden elektrische und thermische Energie mit passenden Geräten genutzt.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Nutzen Energieform nicht."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Energieform nicht im Kontext der Aufgabe:-  richtiges Gerät aber falsche Energieform: \"Warmwasser - Elektrische Energie\"Gerät taucht nicht im Kontext Schule auf \"Elektrische Zahnbürste\", \"Föhn\""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Energieform korrekt und ordnen dieser passende Geräte zu."
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Nutzen Energieform nicht."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Energieform nicht im Kontext der Aufgabe:-  richtiges Gerät aber falsche Energieform: \"Heizung - Chemische Energie\"Gerät taucht nicht im Kontext Schule auf"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Energieform korrekt und ordnen dieser passende Geräte zu.z.B. Heizung, Herd, Wasserkocher(Mikrowelle zählt nicht)"
+                }
+            }
+        },
+        "skills": {}
+    },
+    "3.9.1": {
+        "solution": "Ausgefüllte Tabellen",
+        "prompt": "Protokolliere deine Beobachtungen im Textfeld und die Messwerte in der Tabelle.",
+        "learning_performance": {
+            "0": {
+                "rule": "nicht vorhanden",
+                "description": "Notieren keine Messwerte oder Beobachtungen."
+            },
+            "2": {
+                "rule": "vorhanden",
+                "description": "Notieren Messwerte und/ oder Beobachtungen."
+            }
+        },
+        "knowledge_elements": {},
+        "skills": {
+            "Beobachten und Messen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Notieren keine Messwerte oder Beobachtungen."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Notieren Messwerte und/ oder Beobachtungen."
+                }
+            }
+        }
+    },
+    "4.7.5": {
+        "solution": "Windräder müssen zu bestimmten Zeiten vom Stromnetz genommen werden, da sonst eine Überlastung des Stromnetzes bei weiterer Einspeisung resultieren kann. Eine Möglichkeit diese „überschüssige“ Energie doch zu nutzen, liegt in der Betreibung von Elektrolyseuren, in denen der Stromüberschuss in Wasserstoff umgewandelt wird und so länger gespeichert werden kann. Wasserstoff speichert chemische Energie.",
+        "prompt": "Das sind für eine Schule, bzw. das Land Schleswig-Holstein, eigentlich keine großen Kosten.\nDoch wandelt ein Windrad, ähnlich wie eine Photovoltaik Anlage, nicht zuverlässig Bewegungsenergie in Elektrische Energie um. Im Artikel steht im letzten Absatz eine weitere Möglichkeit, wie Elektrische Energie gespeichert werden könnte.\nNenne die Möglichkeit, die Elektrische Energie zu speichern und die Energieform in welcher dies geschieht.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS nennen keine Möglichkeit die elektrsiche Energie zu speichern.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS nennen P2G als eine Möglichkeit, ohne die Energieformen und/ oder die Umwandlung zu benennen.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS nennen P2G als eine Möglichkeit die Elektrische Energie in chemischer Energie zu speichern.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Chemische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nennen Wasserstoff/ chemische Energie, ohne auf die Energiespeicherung bei P2G einzugehen."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nennen Wasserstoff/ chemische Energie und gehen mit dem Begriff auf die P2G Speicherung ein."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nennen Energieumwandlung um etwas anderes als die Herstellung von Wasserstoff bei P2G zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nennen Energieumwandlung bei der Herstellung von Wasserstoff bei P2G."
+                }
+            },
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen gesellschaftliche Aspekte, um etwas anderes als die gesicherte Energieversorgung/ Speicherung von Energie zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen gesellschaftliche Aspekte, um die gesicherte Energieversorgung/ Speicherung von Energie zu beschreiben."
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS nutzen nicht die gegebenen Daten für ihre Beschreibung."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS nutzen die gegebenen Daten für ihre Beschreibung."
+                }
+            }
+        }
+    },
+    "5.6.3": {
+        "solution": "PV: 121 g/kWhWind: 36 g/kWhGas: 605 g/kWh",
+        "prompt": "Berechne die Emission, in Gramm CO2 - Äquivalenten, für die betrachteten Energieformen Photovoltaik, Windenergie und Gaskraftwerk.Nehmt als Energiebedarf weiterhin die ca. 400 kWh Elektrische Energie an. (Übertragt die Werte, aus der Grafik von der Website, in die anderen Steckbriefe unter 3.9 Steckbrief PV-Zelle und 4.8 Steckbrief Windrad)",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS berechnen keine Emissionen von Kraftwerken.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS berechnen die Emissionen für ein Kraftwerk korrekt.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS berechnen die Emissionen für mindestens zwei Kraftwerke korrekt.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Energieversorgung (Ökologie)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Richtiges Ergebnis für CO2 Äquivalent"
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "kein richtiges Ergebnis"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Richtiges Ergebnis (mindestens eins)"
+                }
+            }
+        }
+    },
+    "5.5.6": {
+        "solution": "Die nicht in Elektrische Energie umgewandelte, zugeführte Energie wird zum Großteil in thermische Energie umgewandelt.",
+        "prompt": "Erläutere was mit der Energie geschehen ist, die nicht in Elektrische Energie umgewandelt wurde.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS erklären nicht, dass nicht in Elektrische Energie umgewandelte Energie in andere Energieformen umgewandelt wurde.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS erklären, dass nicht in Elektrische Energie umgewandelte Energie in andere Energieformen (thermische Energie) umgewandelt wurde.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen thermische Energie für etwas anderes als zur Erklärung der fehlenden Energie."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen thermische Energie, um die 'fehlende' Energie zu erläutern."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Energieumwandlungskonzepte für etwas anderes als zur Erklärung der fehlenden Energie."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Umwandlungskonzepte, um die 'fehlende' Energie zu erläutern."
+                }
+            }
+        },
+        "skills": {
+            "Erläutern Rückschlüsse zu den Implikation ihrer Ergebnisse": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "gleiche Punktzahl wie LP"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "gleiche Punktzahl wie LP"
+                }
+            }
+        }
+    },
+    "2.5.1": {
+        "solution": "Es sind drei Lampen zu sehen: eine Energiesparlampe, eine Glühlampe und eine LED. Zudem können wir jeweils die Spannung (U) in V und die Stromstärke (I) in A messen. Nun schalten wir die Lampen nacheinander einzeln an. Alle Lampen leuchten gleich hell und es ergeben sich folgende Messwerte:Energiesparlampe 230 V; 0,12 AGlühlampe 230 V; 0,35 ALED 230 V; 0,04 ADie Spannungswerte sind bei allen Lampen gleich, jedoch unterscheiden sich die Stromstärken der Lampen.",
+        "prompt": "Beschreibe den Versuch in eigenen Worten.",
+        "learning_performance": {
+            "0": {
+                "rule": "nicht vorhanden",
+                "description": "Beschreiben nicht die unterschiedlichen Lampen."
+            },
+            "1": {
+                "rule": "Beschreiben entweder, dass die Spannung für alle Lampen gleich ist oder dass die Stromstärke variiert.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "vorhanden",
+                "description": "Beschreiben die unterschiedlichen Lampen (mit Messwerten für Spannung und Stromstärke)"
+            }
+        },
+        "knowledge_elements": {},
+        "skills": {
+            "Beschreiben die vorliegenden Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beschreiben nicht die unterschiedlichen Lampen."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beschreiben die unterschiedlichen Lampen (mit Messwerten für Spannung und Stromstärke)"
+                }
+            }
+        }
+    },
+    "5.4.1": {
+        "solution": "Im Dampfkombikraftwerk wird im Gegensatz zum Dampfkraftwerk die Gasturbine mit der Dampfturbine kombiniert und erhöht so den Wirkungsgrad und vermindert gleichzeitig die Emissionen.\nDas Dampfkraftwerk agiert nur mit einer Dampfturbine.",
+        "prompt": "Beschreibe die Unterschiede zwischen dem Dampfkombikraftwerk und dem Dampfkraftwerk.\nNenne Vorteile des Kombikraftwerks.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die Unterschiede noch nennen sie den höheren Wirkungsgrad.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben mindestens einen Unterschied oder nennen den höheren Wirkungsgrad.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die Unterschiede und nennen den höheren Wirkungsgrad.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Chemische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden chemische Energie, um etwas anderes als den Verbrennungsprozess zu beschreiben"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden chemische Energie, um den Verbrennungsprozess zu beschreiben"
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden thermische Energie, um etwas anderes als das Kombikraftwerk oder Unterschiede zu beschreiben. Thermische Energie wird nicht genutzt, um das erwärmen/ verdampfen des Wassers zu beschreiben"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden thermische Energie, um das Kombikraftwerk oder Unterschiede zu beschreiben."
+                }
+            },
+            "Kinetische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Bewegungsenergie, um etwas anderes als das Kombikraftwerk oder Unterschiede zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Bewegungsenergie, um das Kombikraftwerk oder Unterschiede zu beschreiben. Kinetische Energie wird dafür genutzt, dass der Luftsstrom die Turbine antreibt"
+                }
+            },
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Elektrische Energie, um etwas anderes als das Kombikraftwerk oder Unterschiede zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Elektrische Energie, um das Kombikraftwerk oder Unterschiede zu beschreiben. Elektrische Energie wird im Zusammenhang mit der Endenergieform genannt."
+                }
+            },
+            "Umwandlung (Wirkungsgrad)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nennen den Wirkungsgrad, um etwas anderes als das Kombikraftwerk oder Unterschiede zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nennen den höheren Wirkungsgrad des Gas- und Dampfkraftwerks."
+                }
+            },
+            "Energieversorgung (Gesellschaft)": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nennen gesellschaftliche Aspekte, um etwas anderes als das Kombikraftwerk oder Unterschiede zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nutzen gesellschaftliche Aspekte (geringerer Verbrauch, etc.),um die Kraftwerke zu vergleichen."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Energieumwandlungskonzepte, um etwas anderes als das Kombikraftwerk oder Unterschiede zu beschreiben."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS verwenden Energieumwandlungskonzepte, um das Kombikraftwerk oder Unterschiede zu beschreiben."
+                }
+            }
+        },
+        "skills": {
+            "Formulieren erste Zusammenhänge, Muster und Strukturen in den Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Formulieren keine Unterschiede auf Grundlage der Daten "
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Formulieren Unterschiede auf Grundlage der Daten "
+                }
+            }
+        }
+    },
+    "1.6.2": {
+        "solution": null,
+        "prompt": "1. Berechne den Gesamtenergiebedarf, pro Schuljahr, aufgeschlüsselt nach elektrischer und thermischer Energie aus einem gegebenen Diagramm.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS berechnen weder den korrekten Energiebedarf von elektrischer noch thermischer Energie.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS berechnen entweder den korrekten Energiebedarf von elektrischer oder thermischer Energie.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS berechnen den korrekten Energiebedarf von elektrischer und thermischer Energie.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriffe, Zahlenwerte oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen nicht die Werte für \"Belüftung\" und \"Beleuchtung\"Angabe des Bedarfs ohne Rechnung oder mit falscher Formel"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Werte für \"Belüftung\" und \"Beleuchtung\"Angabe des Bedarfs mit Rechnung und richtiger Formel."
+                }
+            },
+            "Thermische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriffe, Zahlenwerte oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen nicht die Werte für \"Heizung\" und \"Trinkwarmwasser\" - Angabe des Bedarfs ohne Rechnung oder mit falscher Formel"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Werte für \"Heizung\" und \"Trinkwarmwasser\" - Angabe des Bedarfs mit Rechnung und richtiger Formel."
+                }
+            }
+        },
+        "skills": {
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "keine physikalische Rechnung durchgeführt"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "physikalische Rechnung durchgeführt"
+                }
+            }
+        }
+    },
+    "3.3.1": {
+        "solution": "/ -",
+        "prompt": "Beschreibe den Experimentieraufbau und nenne die wichtigsten Schritte des Experimentiervorgehens in eigenen Worten.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben keinen Versuchsaufbau.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben nur einen Teil (Winkel oder Verschattung) des Versuchsaufbaus.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben beide Teile (Winkel und Verschattung) des Versuchsaufbaus.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Elektrische Energie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Elektrische Energie nicht für die Versuchsksizze/ als etwas anderes als das Outcome der PV-Zelle"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Beschreiben Spannung (Spannungsmessung) als einen Indikator für Elektrische Energie."
+                }
+            },
+            "Strahlungsenergie": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Strahlungsenergie nicht für die Versuchsksizze/ als etwas anderes als den Input in die PV-Zelle"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Beschreiben Helligkeit (Verschattung und/ oder Variation des Winkelts) als einen Indikator für Strahlungsenergie."
+                }
+            },
+            "Umwandlung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Umwandlungsideen nicht für die Versuchsksizze"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Umwandlungsideen für die Versuchsskizze."
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben den Experimentieraufbau": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS beschreiben keinen Versuchsaufbau."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die SuS beschreiben nur einen Teil (Winkel oder Verschattung) des Versuchsaufbaus."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS beschreiben beide Teile (Winkel und Verschattung) des Versuchsaufbaus."
+                }
+            }
+        }
+    }
+}

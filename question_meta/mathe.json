@@ -1,0 +1,1302 @@
+{
+    "ea7_1105": {
+        "solution": "Die Aussage ist falsch, da die Funktion keinen gleichmäßigen Anstieg besitzt, wird die durchschnittliche Steigung ungenauer auf einem größeren Intervall.",
+        "prompt": "Erläutere, warum du \"Wahr\" oder \"Falsch\" angekreuzt hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder den Verlauf der Sekante bei Vergrößerung des Δx noch schließen sie daraus, dass die durchschnittliche Steigung auf größerem Intervall ungenauer wird.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder den Verlauf der Sekante bei Vergrößerung des Δx oder sie stellen fest, dass die durchschnittliche Steigung auf größerem Intervall ungenauer wird.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben den Verlauf der Sekante bei Vergrößerung des Δx und stellen fest, dass die durchschnittliche Steigung auf größerem Intervall ungenauer wird.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Durchschnittliche Änderungsrate, Sekante": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate und Sekante, um etwas anderes zu beschreiben als die Genauigkeit der durchschnittlichen Steigung."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate und Sekante, um die Genauigkeit der durchschnittlichen Steigung zu beschreiben."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Änderungsrate und Sekante ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Bauen das Experiment": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen das Geogebra-Applet nicht, um Schlussfolgerungen für die Genauigkeit zu erhalten"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen das Geogebra-Applet, um Schlussfolgerungen für die Genauigkeit zu erhalten"
+                }
+            }
+        }
+    },
+    "ea1_0106": {
+        "solution": "Ich habe mich für wahr entschieden, weil die Steigung des Graphen als Geschwindigkeit interpretiert werden kann. Damit ergibt sich, dass bei höherer Laufgeschwindigkeit der Person innerhalb eines Streckenabschnittes der Anstieg steiler wird.",
+        "prompt": "Erkläre kurz, warum du dich für wahr oder falsch entschieden hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die Steigung des Graphen als Geschwindigkeit noch schließen sie daraus, dass die höhere Laufgeschwindigkeiten einen steileren Anstieg haben.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die Steigung des Graphen als Geschwindigkeit oder sie stellen fest, dass eine höhere Laufgeschwindigkeit einen steileren Anstieg bedeutet.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die Steigung des Graphen als Geschwindigkeit und stellen fest, dass bei höherer Geschwindigkeit der Anstieg steiler wird.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "PK-Steigung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Steigung, um etwas anderes als die Geschwindigkeit zu beschreiben."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Steigung, um die Geschwindigkeit zu beschreiben."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Steigung ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Zu untersuchende Fragen identifizieren": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nennen keine Frage die sich auf die Steigung und Geschwindigkeit beziegt"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nennen eine Frage die sich auf die Steigung und Geschwindigkeit bezieht"
+                }
+            }
+        }
+    },
+    "ea6_1003": {
+        "solution": "Der Differenzenquotient funktioniert, da das Licht eine gewisse Zeit braucht, um die Strecke hin und zurück zulegen. Für den Abstand von einem Kilometer, wird der Nenner des Differenzenquotienten 1. ",
+        "prompt": "Erläutere, warum du \"Wahr\" oder \"Falsch\" angekreuzt hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder, dass das Licht eine gewisse Zeit braucht, um die Strecke zurück zulegen, noch schließen sie daraus, der Differenzenquotient funktioniert, um die angenäherte momentane Geschwindigkeit zu berechnen.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder, dass das Licht eine gewisse Zeit braucht, um die Strecke zurück zulegen, oder sie stellen fest, dass der Differenzenquotient funktioniert, um die angenäherte momentane Geschwindigkeit zu berechnen.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben, dass das Licht eine gewisse Zeit braucht, um die Strecke zurück zulegen, und stellen fest, der Differenzenquotient funktioniert, um die angenäherte momentane Geschwindigkeit zu berechnen.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Durchschnittliche Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um etwas anderes zu beschreiben als die angenäherte momentane Geschwindigkeit."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um die angenäherte momentane Geschwindigkeit zu beschreiben."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "innen erstellen ein Modell, um Fragen und Probleme beantworten zu können.": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Erstellen kein Modell, um Probleme in Bezug auf die Geschwindigkeitsmessung zu lösen"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Erstellen ein Modell, um Probleme in Bezug auf die Geschwindigkeitsmessung zu lösen"
+                }
+            }
+        }
+    },
+    "ea14_1907": {
+        "solution": "Die Werte sind für f'(2)= 0, f'(4)=8 und f'(8)=12. Es fällt auf, dass die Zahlen für zunehmendes x linear steigen. ",
+        "prompt": "Erstelle einen Kurzbericht über das Steigungsverhalten der COVID-19-Neuerkrankungen in der Welle zwischen Dezember 2020 bis April 2021, indem du den Verlauf der Punkte x=2, x=4 und x=8 beschreibst. Was bedeutet das für den Verlauf der COVID-19-Neuerkrankungen?",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder das Steigungsverhalten der Covid-19-Neuerkrankungen durch die berechneten Werte noch schließen sie daraus, dass die Zahlen für zunehmendes x ansteigen.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder das Steigungsverhalten der Covid-19-Neuerkrankungen durch die berechneten Werte oder sie stellen fest, dass die Zahlen für zunehmendes x ansteigen.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben das Steigungsverhalten der Covid-19-Neuerkrankungen durch die berechneten Werte und stellen fest, dass die Zahlen für zunehmendes x ansteigen.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Situationsbeschreibung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen momentane Änderungsrate, um etwas anderes zu beschreiben als den Anstieg der Covid-19-Neuerkrankungen."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen momentane Änderungsrate, um die Anstieg der Neuerkrankungen zu beschreiben und Schlussfolgerungen für den Verlauf zu schließen."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen momentane Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "innen beurteilen ihr Modell durch das Vergleichen mit anderen Modellen,.": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beurteilen die momentane Änderungsrate nicht zur Beschreibung des Verlaufs der Covid-19-Neuerkrankungen"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beurteilen die momentane Änderungsrate zur Beschreibung des Verlaufs der Covid-19-Neuerkrankungen"
+                }
+            }
+        }
+    },
+    "ea17_2205": {
+        "solution": "Da der Anstieg unabhängig von der Ausrichtung entlang der y-Achse ist, kommt es beim Zeichnen der ursprünglichen Funktionen zu einen Informationsverlust, da nicht festgestellt werden kann, in welche Richtung die Funktion nach oben oder unten verschoben wurde.",
+        "prompt": "Erläutere, warum du (Wahr) oder (Falsch) angekreuzt hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die Unabhängigkeit des Anstiegs von der Verwschiebung entlang der y-Achse noch schließen sie daraus, dass somit ein Informationsverlust der Verschiebung entlang der y-Achse entsteht und die Ausgangsfunktion nicht eindeutig aus der Ableitungsfunktion hergeleitet werden kann.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die Unabhängigkeit des Anstiegs von der Verwschiebung entlang der y-Achse oder sie stellen fest, dass somit ein Informationsverlust der Verschiebung entlang der y-Achse entsteht und die Ausgangsfunktion nicht eindeutig aus der Ableitungsfunktion hergeleitet werden kann.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die Unabhängigkeit des Anstiegs von der Verwschiebung entlang der y-Achse und stellen fest, dass somit ein Informationsverlust der Verschiebung entlang der y-Achse entsteht und die Ausgangsfunktion nicht eindeutig aus der Ableitungsfunktion hergeleitet werden kann.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Momentane Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen momentane Änderungsrate, um etwas anderes zu beschreiben als die daraus abzuleitenden Informationen."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen momentane Änderungsrate, um den Informationsverlust, der bei der Nutzung entsteht, zu erklären."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen momentane Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Daten evaluieren": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Erkennen die Informationen nicht, die durch die momentane Änderungsrate verloren gehen"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Erkennen die Informationen, die durch die momentane Änderungsrate verloren gehen"
+                }
+            }
+        }
+    },
+    "ea3_0704": {
+        "solution": "Es ist nicht möglich, genaue Aussagen über Gründe der Geschwindigkeitsveränderung zu treffen. Allerdings lassen sich Vermutungen anstellen, wie etwa schwieriges Terrain, steilere Berge oder Pausen. Diese lassen sich mit den Daten nicht unterscheiden. ",
+        "prompt": "Erkläre, warum du dich für \"Wahr\" oder \"Falsch\" entschieden hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weden, dass keine genauen Aussagen über Gründe der Geschwindigkeitsveränderung getroffen werden können, noch schließen sie daraus, dass nur Vermutungen angestellt werden können.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder, dass keine genauen Aussagen über Gründe der Geschwindigkeitsveränderung getroffen werden können, oder sie stellen fest, dass nur Vermutungen angestellt werden können.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben, dass keine genauen Aussagen über Gründe der Geschwindigkeitsveränderung getroffen werden können, und stellen fest, dass nur Vermutungen angestellt werden können.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Situationsbeschreibung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Situationsbeschreibung, um etwas anderes zu beschreiben als die Schnelligkeit einer Person in den Abschnitten."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Situationsbeschreibung, um für Abschnitte zu bestimmen, wie schnell oder langsam eine Person war, ohne Aussagen über die Gründe zutreffen."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Situationsbeschreibung ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "innen definieren den Bereich, indem das entwickelte Modell gilt.": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Kennen nicht die Grenzen des Modells"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Kennen die Grenzen des Modells"
+                }
+            }
+        }
+    },
+    "ea6_1009": {
+        "solution": "Man erkennt, dass wenn die Punkte Messanfang und Messung Section Control zusammen auf den Punkt Messung Laserpistole fallen, die genauesten Messungen entstehen. Allerdings wenn sie aufeinander liegen, sind alle Werte 0.  Die minimale Messdauer ist genau dann, wenn alle Punkte aufeinander liegen.",
+        "prompt": "Stelle die minimale Messdauer in Geogebra für beide Messverfahren ein. Vergleiche die Messverfahren im Geogebra-Applet. Erläutere die Ergebnisse aus deinen Beobachtungen.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die minimale Messdauer der Messverfahren noch schließen sie daraus, dass sich ber Verringerung der Messdauer eine genauere Geschwindigkeitsmessung erfolgen kann.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die minimale Messdauer der Messverfahren oder sie stellen fest, dass sich ber Verringerung der Messdauer eine genauere Geschwindigkeitsmessung erfolgen kann.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die minimale Messdauer der Messverfahren und stellen fest, dass sich ber Verringerung der Messdauer eine genauere Geschwindigkeitsmessung erfolgen kann.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Durchschnittliche Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um etwas anderes zu beschreiben als die Geschwindigkeit."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um die Messverfahren zu vergleichen."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "innen beurteilen ihr Modell durch das Vergleichen mit anderen Modellen.": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beurteilen die beiden Messverfahren im Vergleich zueinander nicht"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beurteilen die beiden Messverfahren im Vergleich zueinander"
+                }
+            }
+        }
+    },
+    "ea12_1705": {
+        "solution": "Da die beiden Grenzwerte unterschiedlich sind und wir wissen, dass der Grenzwert von der linken Seite und von der rechten Seite übereinstimmen müssen, bedeutet dies, dass der Grenzwert an der Stelle x=0 für die Funktion nicht existiert.",
+        "prompt": "Was bedeuten die Ergebnisse für die Differenzierbarkeit der Funktion? Erläutere.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder den Grenzwert der Betragsfunktion an der Stelle Null noch schließen sie daraus, dass der Grenzwert an der Stelle Null nicht existiert, da der linke und der rechte Grenzwert nicht übereinstimmen.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder den Grenzwert der Betragsfunktion an der Stelle Null oder sie stellen fest, dass der Grenzwert an der Stelle Null nicht existiert, da der linke und der rechte Grenzwert nicht übereinstimmen.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben den Grenzwert der Betragsfunktion an der Stelle Null und stellen fest, dass der Grenzwert an der Stelle Null nicht existiert, da der linke und der rechte Grenzwert nicht übereinstimmen.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Differenzierbarkeit, Grenzwert": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Grenzwert, um etwas anderes zu beschreiben als die Differenzierbarkeit der Funktion."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Grenzwert, um die Differenzierbarkeit an der Stelle Null zu prüfen."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Grenzwert und Differenzierbarkeit ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Argumentation": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Argumentieren die Differenzierbarkeit nicht mit Hilfe des Grenzwerts"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Argumentieren die Differenzierbarkeit mit Hilfe des Grenzwerts"
+                }
+            }
+        }
+    },
+    "ea11_1609": {
+        "solution": "Da die Streckte durchgehend ist und nicht abbricht, werden alle Werte zwischen 1,6 und -1,6 mindestens einmal angenommen. Somit existiert eine Stelle mit dem Wert 0 und somit die Funktion besitzt an dieser Stelle den Anstieg 0. ",
+        "prompt": "Erläutere, warum man (Wahr) / man nicht (Falsch) einen Punkt auf der Strecke ohne Steigung berechnen oder bestimmen kann.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder den Verlauf der momentanen Steigungen der Funktion noch schließen sie daraus, dass eine Stelle existiert mit dem Anstieg Null.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder den Verlauf der momentanen Steigungen der Funktion oder sie stellen fest, dass eine Stelle existiert mit dem Anstieg Null.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben den Verlauf der momentanen Steigungen der Funktion und stellen fest, dass eine Stelle existiert mit dem Anstieg Null.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Momentane Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen momentane Änderungsrate, um etwas anderes zu beschreiben als den Verlauf der Steigung des Funktionsgraphen."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen momentane Änderungsrate, um aus dem Verlauf der Steigung des Funktionsgraphen Schlussfolgerungen zu schließen."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen momentane Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "innen beurteilen ihr Modell durch das Vergleichen mit anderen Modellen.": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen das Modell nicht, um den Funktionsverlauf zu erschließen"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen das Modell, um den Funktionsverlauf zu erschließen"
+                }
+            }
+        }
+    },
+    "Scoring_Guide_Mathematik_VorlageBeispiel": {
+        "solution": "Eine mögliche Frage könnte sein: Wie hoch die durchschnittliche Geschwindigkeit nun wirklich ist? Oder, wie schnell ist die Person innerhalb der einzelnen Segmente gelaufen? Ist sie wirklich immer diese Geschwindigkeit gelaufen oder hier und da langsamer oder schneller?",
+        "prompt": "Formuliere selbst eine Fragestellung.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die durchschnittliche Geschwindigkeit in Abschnitten, Segmenten etc. noch schließen sie daraus, dass sich damit die Geschwindigkeit bestimmten lässt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die durchschnittliche Geschwindigkeit ohne Zusammenhang mit einzelnen Segmenten bzw. Abschnitten oder sie stellen fest, dass die Geschwindigkeit in einzelnen Segmenten bzw. Anschnitten betrachtet werden kann ohne Zusammenhang zur durchschnittliche Geschwindigkeit.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die durchschnittliche Geschwindigkeit und stellen fest, dass einzelne Segmente betrachtet werden können um die Geschwindigkeit in diesem Abschnitten zu bestimmen.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Strahlungsleistung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit, um etwas anderes zu beschreiben als die Schnelligkeit einer Person in den Abschnitten."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit, um für Abschnitte zu bestimmen wie schnell oder langsam eine Person war."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Zu untersuchende Fragen identifizieren": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nennen keine Frage die sich auf die durchschnittliche Geschwindigkeit bezieht"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nennen eine Frage die sich auf die durchschnittliche Geschwindigkeit bezieht"
+                }
+            }
+        }
+    },
+    "ea9_1401": {
+        "solution": "Die h-Schreibweise kann hilfreich sein, da sich das h, wie in diesem Beispiel, wegkürzen kann. Damit ist der Limes wesentlich leichter zu berechnen. ",
+        "prompt": "Erläutere am folgenden Beispiel, warum die h-Schreibweise hilfreich zur Berechnung des Differentialquotienten sein kann.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder, dass sich das h wegkürzt, noch schließen sie daraus, dass sich damit der Limes leichter berechnen lässt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder, dass sich das h wegkürzt, oder sie stellen fest, dass sich der Limes leichter berechnen lässt.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben, dass sich das h wegkürzt, und stellen fest, dass sich damit der Limes leichter berechnen lässt.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Term, Momentane Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Term, um etwas anderes zu beschreiben als die Berechnung des Differntialquotienten mittels der h-Schreibweise."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Term, um die Berechnung des Differentialquotienten mittels h-Schreibweise zubeurteilen."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Term ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Formulieren einer Hypothese": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Treffen keine Aussage zur Hilfe der h-Schreibweise zum Berechnen des Differentialquotienten."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Treffen eine Aussage zur Hilfe der h-Schreibweise zum Berechnen des Differentialquotienten."
+                }
+            }
+        }
+    },
+    "ea7_1108": {
+        "solution": "Wenn die Punkte der Messungen aufeinander fallen, wird der Nenner des Bruches im Differenzenquotienten 0. Damit würde man durch 0 dividieren, was problematisch ist. ",
+        "prompt": "Erläutere, warum du \"Wahr\" oder \"Falsch\" angekreuzt hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder, dass der Nenner Null wird, wenn die Messungen aufeinander fallen, noch schließen sie daraus, dass das problematisch ist, da man nicht durch 0 dividieren darf.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder , dass der Nenner Null wird, wenn die Messungen aufeinander fallen, oder sie stellen fest, dass das problematisch ist, da man nicht durch 0 dividieren darf.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben, dass der Nenner Null wird, wenn die Messungen aufeinander fallen, und stellen fest, dass das problematisch ist, da man nicht durch 0 dividieren darf.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Durchschnittliche Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um etwas anderes zu beschreiben als die Verringerung des Abstands der Messungen."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um aus der exakte Übereinstimmung der Messpunkte zu schließen, dass der Nenner dann Null werden würde."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Bauen das Experiment": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beurteilen das Modell nicht in Bezug auf Verringerung der Messabstände"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beurteilen das Modell in Bezug auf Verringerung der Messabstände"
+                }
+            }
+        }
+    },
+    "4_Scoring_Guide_Mathematik_unclear_m_ls2_ea6": {
+        "solution": "In einer rein mathematischen Umgebung wäre es möglich, den Nenner immer kleiner werden zu lassen und damit die Messdauer gegen Null gehen zu lassen, da wir in der Mathematik nicht begrenzt durch physikalische Gesetze sind.",
+        "prompt": "Erläutere, warum du dich für \"Wahr\" oder \"Falsch\" entschieden hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder, dass es in einer rein mathematischen Umgebung möglich wäre, noch schließen sie daraus, dass der Nenner im kleiner wird und damit die Messdauer gegen Null läuft.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder, dass es in einer rein mathematischen Umgebung möglich wäre, oder sie stellen fest, dass der Nenner im kleiner wird und damit die Messdauer gegen Null läuft.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben, dass es in einer rein mathematischen Umgebung möglich wäre, und stellen fest, dass der Nenner im kleiner wird und damit die Messdauer gegen Null läuft.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Durchschnittliche Änderungsrate, Momentane Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche und momentane Änderungsrate, um etwas anderes zu beschreiben als Verringerung der Messdauer."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche und momentane Änderungsrate, um die Messdauer immer weiter zu verringern."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche und momentane Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "innen beurteilen ihr Modell durch das Vergleichen mit anderen Modellen,.": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beurteilen die durchschnittliche Änderungsrate nicht im Vergleich zur momentanen Änderungsrate"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beurteilen die durchschnittliche Änderungsrate im Vergleich zur momentanen Änderungsrate"
+                }
+            }
+        }
+    },
+    "ea1_0108": {
+        "solution": "Ich habe mich für wahr entschieden, weil in diesem Fall die Funktionssegmente allesamt lineare Funktionen sind, das heißt mithilfe von Steigungsdreiecken erhalten wir eine Steigung, die der durchschnittlichen Geschwindigkeit innerhalb der Bereiche entspricht.",
+        "prompt": "Erkläre kurz, warum du dich für wahr oder falsch entschieden hast",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder dass die Funktionssegmente (Abschnitte) lineare Funktionen sind noch schließen sie daraus, dass damit durch das Steigungsdreieck die Steigung bestimmt werden kann, die dann die durchschnittliche Geschwindigkeit entspricht.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder  dass die Funktionssegmente (Abschnitte) lienare Funktionen sind oder  sie stellen fest, dass durch das Steigungsdreieck die Steigung bestimmt werden kann und die durchschnittliche Geschwindigkeit berechnet werden kann.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die Steigung des Graphen als Geschwindigkeit und stellen fest, dass bei höherer Geschwindigkeit der Anstieg steiler wird.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "PK-Steigung; durchschnittliche Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Steigung, um etwas anderes als die durchschnittliche Steigung bzw. Geschwindigkeit zu beschreiben."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen Steigung, um die durchschnittliche Steigung bzw. Geschwindigkeit zu beschreiben."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Steigung ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Zu untersuchende Fragen identifizieren": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nennen keine Frage die sich auf die Steigung und durchschnittliche Steigung bzw. Geschwindigkeit bezieht"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nennen eine Frage die sich auf die Steigung und durchschnittliche Steigung bzw. Geschwindigkeit bezieht"
+                }
+            }
+        }
+    },
+    "ea7_1110": {
+        "solution": "Wenn die Messpunkte exakt aufeinander liegen, wird mein Nenner des Bruches im Differenzenquotienten 0. Damit würde man durch 0 dividieren, was problematisch ist.",
+        "prompt": "Erläutere, warum du \"Wahr\" oder \"Falsch\" angekreuzt hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder den Nenner, wenn die Messpunkte exakt aufeinanderfallen, noch schließen sie daraus, dass das mathematisch problematisch ist.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder den Nenner, wenn die Messpunkte exakt aufeinanderfallen, oder sie stellen fest, dass das mathematisch problematisch ist.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben den Nenner, wenn die Messpunkte exakt aufeinanderfallen, und stellen fest, dass das mathematisch problematisch ist.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Durchschnittliche Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um etwas anderes zu beschreiben als die Verringerung des Abstands der Messungen."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um aus der exakte Übereinstimmung der Messpunkte zu schließen, dass der Nenner dann Null werden würde."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Beobachten und Messen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Begründen ihre Beobachtung fachlich nicht korrekt"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Begründen ihre Beobachtung fachlich korrekt"
+                }
+            }
+        }
+    },
+    "ea8_1203": {
+        "solution": "Die Aussage ist wahr, da die Messzeitpunkte immer weiter minimal gewählt werden können und immer kleiner gemacht werden können, dabei kann man aber immer weiter heranzoomen. Das Ergebnis wird sich allerdings immer langsamer verändern, sodass sich ein Grenzwert bildet. ",
+        "prompt": "Erläutere, warum du mit \"Wahr\" oder \"Falsch\" geantwortet hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder, was passiert, wenn die Messzeitpunkte immer weiter minimal gewählt werden, noch schließen sie daraus, dass das Ergebnis immer langsamer verändert, sodass sich ein Grenzwert bildet.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder, was passiert, wenn die Messzeitpunkte immer weiter minimal gewählt werden, oder sie stellen fest, dass das Ergebnis immer langsamer bei Verringerung der Messabstände verändert, sodass sich ein Grenzwert bildet.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben, was passiert, wenn die Messzeitpunkte immer weiter minimal gewählt werden, und stellen fest, dass das Ergebnis immer langsamer verändert, sodass sich ein Grenzwert bildet. bestimmen.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Durchschnittliche Änderungsrate, Grenzwert": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate und Grenzwert, um etwas anderes zu beschreiben als die Veränderung bei steigender Annäherung der Messpunkte"
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um die Veränderung bei steigender Annäherung der Messpunkte zu beschreiben und daraus den Grenzwert abzuleiten"
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Änderungsrate und Grenzwert ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Bewerten der Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen den Grenzwert nicht, um die Situation im Sachkontext zu bewerten"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen den Grenzwert, um die Situation im Sachkontext zu bewerten"
+                }
+            }
+        }
+    },
+    "ea11_1606": {
+        "solution": "Der Verlauf der Steigung ist für x=1, x=2 und x=3 positiv, aber für x=4 negativ. Das bedeutet, dass ein Übergang vom monoton steigenden zu monoton fallenden Anstieg geschehen musste. Insgesamt ist zu beobachten, dass der Anstieg immer flacher wird und schließlich fällt.  ",
+        "prompt": "Beschreibe den möglichen Verlauf der von dir berechneten momentanen Steigungen. Erläutere deine Erkenntnisse.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder den Verlauf der berechneten momentanen Steigungen noch schließen sie daraus, dass sich der Funktionxverlauf von monoton steigend zu monoton falllend wechselt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder den Verlauf der berechneten momentanen Steigungen oder sie stellen fest, dass sich der Funktionxverlauf von monoton steigend zu monoton falllend wechselt.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben den Verlauf der berechneten momentanen Steigungen und stellen fest, dass sich der Funktionxverlauf von monoton steigend zu monoton falllend wechselt.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Knowledge Element\nMomentane Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen momentane Änderungsrate, um etwas anderes zu beschreiben als die momentane Steigung."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen momentane Änderungsrate, um den Funktionsverlauf zu beschreiben."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen momentane Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "innen beschreiben Phänomene mithilfe ihres Modells.": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nutzen das Modell nicht, um den Funktionsverlauf zu beschreiben"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nutzen das Modell, um den Funktionsverlauf zu beschreiben"
+                }
+            }
+        }
+    },
+    "13_Scoring_Guide_Mathematik_ÜbungenzurAbleitungsfunktion_2": {
+        "solution": "Die Punkte der hinterlassenen Spur von D liegen alle auf dem Ableitungsgraphen, oder anders formuliert: Der Anstieg jedes einzelnen Punktes ergibt die Ableitungsfunktion.",
+        "prompt": "Beschreibe deine im Geogebra gemachten Beobachtungen.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die durchschnittliche Geschwindigkeit in Abschnitten, Segmenten etc. noch schließen sie daraus, dass sich damit die Geschwindigkeit bestimmten lässt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die durchschnittliche Geschwindigkeit ohne Zusammenhang mit einzelnen Segmenten bzw. Abschnitten oder sie stellen fest, dass die Geschwindigkeit in einzelnen Segmenten bzw. Anschnitten betrachtet werden kann ohne Zusammenhang zur durchschnittliche Geschwindigkeit.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die durchschnittliche Geschwindigkeit und stellen fest, dass einzelne Segmente betrachtet werden können um die Geschwindigkeit in diesem Abschnitten zu bestimmen.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Knowledge Element": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit, um etwas anderes zu beschreiben als die Schnelligkeit einer Person in den Abschnitten."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit, um für Abschnitte zu bestimmen wie schnell oder langsam eine Person war."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Skills": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nennen keine Frage die sich auf die durchschnittliche Geschwindigkeit bezieht"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nennen eine Frage die sich auf die durchschnittliche Geschwindigkeit bezieht"
+                }
+            }
+        }
+    },
+    "ea4_0814": {
+        "solution": "Eine mögliche Strategie wäre es anfänglich in Etappe 1 und zwischen Loudensvielle bis Col de Val Louron-Azet Kräfte zu sparen, da die letzte Etappe mit dem höchsten Anstieg besonders kräftezehrend ist.  ",
+        "prompt": "Formuliere eine Planung und Strategie für die 17. Etappe der Tour de France für den Teamchef eures Radrennteams. Beurteile die Planung und Strategie durch die mathematischen Ergebnisse.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder den Verlauf der Anstiege im Streckenverlauf noch schließen sie daraus, dass zu Beginn der Etappe Kräfte gespart werden sollten.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder den Verlauf der Anstiege im Streckenverlauf oder sie stellen fest, dass zu Beginn der Etappe Kräfte gespart werden sollten.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben den Verlauf der Anstiege im Streckenverlauf und stellen fest, dass zu Beginn der Etappe Kräfte gespart werden sollten.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Situationsbeschreibung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um etwas anderes zu beschreiben als die Steigung in den Abschnitten."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um die Steigung der Abschnitte im Sachkontext zu interpretieren."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "innen beurteilen ihr Modell durch das Vergleichen mit anderen Modellen.": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beurteilen das Modell nicht zur Planung der Etappe"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beurteilen das Modell zur Planung der Etappe"
+                }
+            }
+        }
+    },
+    "ea3_0710": {
+        "solution": "In dem vierten Abschnitt wird kein Weg zurückgelegt. Damit ist die Geschwindigkeit über das Zeitintervall 0 km/h. Damit macht Marta eine Pause. ",
+        "prompt": "Interpretiere das Ergebnis für Abschnitt 4.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder, dass keine Strecke zurückgelegt wurde und die Laufgeschwindigkeit 0 km/h innerhalb des Abschnitts ist , noch schließen sie daraus, dass Marta eine Pause macht.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder, dass keine Strecke zurückgelegt wurde und die Laufgeschwindigkeit 0 km/h innerhalb des Abschnitts ist, oder sie stellen fest, dass Marta eine Pause macht.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben, dass dass keine Strecke zurückgelegt wurde und die Laufgeschwindigkeit 0 km/h innerhalb des Abschnitts ist, und stellen fest, dass Marta eine Pause macht.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Situationsbeschreibung; Durchschnittliche Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um etwas anderes zu beschreiben als die Geschwindigkeit der Person im letzten Abschnitt."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um für den letzten Abschnitt die Geschwindigkeit im Sachkontext zu interpretieren"
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "innen beschreiben Phänomene mithilfe ihres Modells.": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beschreiben das dargestellte Phänomen nicht mithilfe des Modells"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beschreiben das dargestellte Phänomen mithilfe des Modells"
+                }
+            }
+        }
+    },
+    "ea1_0104": {
+        "solution": "Ich habe mich für falsch entschieden, da bei Funktionen, in diesem Fall innerhalb eines Weg-Zeit-Diagramms, die Betrachtung des Zusammenhanges zwischen den betrachteten Größen, der Strecke und der Zeit, interessant ist.",
+        "prompt": "Erkläre kurz, warum du dich für wahr oder falsch entschieden hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die Funktion noch schließen sie daraus, dass die Betrachtung der Strecke und der Zeit mathematisch relevant ist.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die Funktion oder sie stellen fest, dass das Weg-Zeit-Diagramm relevant ist.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die Funktion und stellen fest, dass das Weg-Zeit-Diagramm relevant ist.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Zuordnung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen Strecke und Zeit, ohne einen erkennbaren funktionalen Zuordnung."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen den Zusammenhang zwischen Strecke und Zeit, um einen funktionalen Zuordnung zu beschreiben."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen den Funktionen oder Strecke und Zeit ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Zu untersuchende Fragen identifizieren": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nennen keine Frage die sich auf eine Funktion und einer Strecke und Zeit beziehen"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nennen eine Frage die sich auf eine Funktion und eine Strecke und Zeit beziehen"
+                }
+            }
+        }
+    },
+    "13_Scoring_Guide_Mathematik_ÜbungenzurAbleitungsfunktion_4": {
+        "solution": "Die entstandene Funktion ist die Funktion sin(x). Überall, wo die Ausgansfunktion Hoch- und Tiefpunkte hat, wechselt die Ableitungsfunktion ihr Vorzeichen.",
+        "prompt": "Beschreibe deine im Geogebra gemachten Beobachtungen.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die durchschnittliche Geschwindigkeit in Abschnitten, Segmenten etc. noch schließen sie daraus, dass sich damit die Geschwindigkeit bestimmten lässt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die durchschnittliche Geschwindigkeit ohne Zusammenhang mit einzelnen Segmenten bzw. Abschnitten oder sie stellen fest, dass die Geschwindigkeit in einzelnen Segmenten bzw. Anschnitten betrachtet werden kann ohne Zusammenhang zur durchschnittliche Geschwindigkeit.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die durchschnittliche Geschwindigkeit und stellen fest, dass einzelne Segmente betrachtet werden können um die Geschwindigkeit in diesem Abschnitten zu bestimmen.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Knowledge Element": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit, um etwas anderes zu beschreiben als die Schnelligkeit einer Person in den Abschnitten."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit, um für Abschnitte zu bestimmen wie schnell oder langsam eine Person war."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Skills": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nennen keine Frage die sich auf die durchschnittliche Geschwindigkeit bezieht"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nennen eine Frage die sich auf die durchschnittliche Geschwindigkeit bezieht"
+                }
+            }
+        }
+    },
+    "ea1_0109": {
+        "solution": "Eine mögliche Frage könnte sein: Wie hoch die durchschnittliche Geschwindigkeit nun wirklich ist? Oder, wie schnell ist die Person innerhalb der einzelnen Segmente gelaufen? Ist sie wirklich immer diese Geschwindigkeit gelaufen oder hier und da langsamer oder schneller?",
+        "prompt": "Formuliere selbst eine Fragestellung.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die durchschnittliche Geschwindigkeit in Abschnitten, Segmenten etc. noch schließen sie daraus, dass sich damit die Geschwindigkeit bestimmten lässt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die durchschnittliche Geschwindigkeit ohne Zusammenhang mit einzelnen Segmenten bzw. Abschnitten oder sie stellen fest, dass die Geschwindigkeit in einzelnen Segmenten bzw. Anschnitten betrachtet werden kann ohne Zusammenhang zur durchschnittliche Geschwindigkeit.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die durchschnittliche Geschwindigkeit und stellen fest, dass einzelne Segmente betrachtet werden können um die Geschwindigkeit in diesem Abschnitten zu bestimmen.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Durchschnittliche Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit, um etwas anderes zu beschreiben als die Schnelligkeit einer Person in den Abschnitten."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit, um für Abschnitte zu bestimmen wie schnell oder langsam eine Person war."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Forschungsfragen stellen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Nennen keine Frage die sich auf die durchschnittliche Geschwindigkeit bezieht"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Nennen eine Frage die sich auf die durchschnittliche Geschwindigkeit bezieht"
+                }
+            }
+        }
+    },
+    "ea5_0909": {
+        "solution": "Die Geschwindigkeit zwischen den Stationen wird nur als ein durchschnittlicher Wert angegeben. Das bedeutet, dass die Person innerhalb dieser Zeit aber durchaus schneller oder langsamer hätte fahren können. Dabei kann die erlaubte Höchstgeschwindigkeit überschritten werden, was zu einem Bußgeld führen könnte.",
+        "prompt": "Erkläre, warum du wahr oder falsch angekreuzt hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die durchschnittliche Geschwindigkeit zwischen den Stationen als durchschnittlichen Wert noch schließen sie daraus, dass die erlaubte Höchstgeschwindigkeit überschritten werden kann, ohne ein Bußgeld zu erhalten.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die durchschnittliche Geschwindigkeit zwischen den Stationen als durchschnittlichen Wert oder sie stellen fest, die erlaubte Höchstgeschwindigkeit überschritten werden kann, ohne ein Bußgeld zu erhalten.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die durchschnittliche Geschwindigkeit zwischen den Stationen als durchschnittlichen Wert und stellen fest, die erlaubte Höchstgeschwindigkeit überschritten werden kann, ohne ein Bußgeld zu erhalten.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Durchschnittliche Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um etwas anderes zu beschreiben als die durchschnittliche Geschwindigkeit zwischen den Stationen."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um die durchschnittliche Geschwindigkeit im Sachkontext zu interpretieren."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Behauptung": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Stellen keine Behauptung im Sachkontext auf"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Stellen eine Behauptung im Sachkontext auf"
+                }
+            }
+        }
+    },
+    "ea5_0914": {
+        "solution": "Die Geschwindigkeit zwischen den Stationen wird nur als ein durchschnittlicher Wert angegeben. Das bedeutet, dass die Person innerhalb dieser Zeit aber durchaus schneller oder langsamer hätte fahren können. Dabei kann die erlaubte Höchstgeschwindigkeit überschritten werden. ",
+        "prompt": "Begründe, inwieweit ein Auto die Höchstgeschwindigkeit bei der Messung mit der Section Control überschreiten kann, ohne ein Bußgeld zu erhalten.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder, dass die Geschwindigkeit zwischen den Stationen nur ein durchschnittlicher Wert ist, noch schließen sie daraus, dass die erlaubte Höchstgeschwindigkeit überschritten werden kann.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder,dass die Geschwindigkeit zwischen den Stationen nur ein durchschnittlicher Wert ist, oder sie stellen fest, dass die erlaubte Höchstgeschwindigkeit überschritten werden kann.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben, dass die Geschwindigkeit zwischen den Stationen nur ein durchschnittlicher Wert ist, und stellen fest, die erlaubte Höchstgeschwindigkeit überschritten werden kann.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Situationsbeschreibung": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um etwas anderes zu beschreiben als die durchschnittliche Geschwindigkeit zwischen den Stationen."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um die Geschwindigkeit zwischen den Stationen als durchschnittlichen Wert zu erfassen und im Sachkontext zu interpretieren."
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Geschwindigkeit ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "Skills": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Argumentieren die Entscheidung nicht"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Argumentieren die Entscheidung"
+                }
+            }
+        }
+    },
+    "ea6_1007": {
+        "solution": "Eine Möglichkeit wäre es, den Abstand von einem Meter zu verringern und die Messungen schneller aufeinander zu machen oder im optimalen Fall gegen Null laufen zu lassen. Damit wird die Messdauer minimal. ",
+        "prompt": "Die Polizei möchte von dir eine Erklärung zu deinen Ergebnissen. Erläutere, warum du mit \"Wahr\" oder \"Falsch\" geantwortet hast.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben weder die Veringerung des Messabstands noch schließen sie daraus, dass sich damit die Messdauer verringert und die Geschwindigkeitsmessung genauer wird.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben entweder die Veringerung des Messabstands oder sie stellen fest, dass sich damit die Messdauer verringert werden muss und die Geschwindigkeitsmessung genauer wird.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben die Veringerung des Messabstands und stellen fest, dass sich damit die Messdauer verringert und die Geschwindigkeitsmessung genauer wird.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Durchschnittliche Änderungsrate": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
+                },
+                "1": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um etwas anderes zu beschreiben als die Geschwindigkeitsmessung."
+                },
+                "2": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Nutzen durchschnittliche Änderungsrate, um Schlussfolgerungen für die genauere Geschwindigkeitsmessung zuerlangen"
+                },
+                "?": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen durchschnittliche Änderungsrate ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                }
+            }
+        },
+        "skills": {
+            "innen beurteilen ihr Modell durch das Vergleichen mit anderen Modellen.": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Beurteilen das Modell nicht im Sachkontext"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Beurteilen das Modell im Sachkontext"
+                }
+            }
+        }
+    }
+}

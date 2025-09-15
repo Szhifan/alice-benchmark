@@ -1,0 +1,1923 @@
+{
+    "4.3": {
+        "solution": "Warum sind die Männchen bunter als die Weibchen? Warum haben die Individuen unterschiedliche Farben? Warum sind die Flecken bei den Individuen unterschiedlich groß? Wie sind die verschiedenen Farben der Individuen entstanden? Warum sehen die Männchen anders aus als die Weibchen?",
+        "prompt": "Aufgaben: Welche wissenschaftlichen Fragen fallen dir zur Färbung und Musterung der Guppys ein? Trage Sie hier ein. Tipp: Wissenschaftliche Fragen sollten überprüfbar sein, beispielsweise durch Experimente.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Schüler:innen formulieren keine wissenschaftliche Frage zur Färbung und Musterung der Guppys genannt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Schüler:innen formulieren eine wissenschaftliche Frage zur Färbung und Musterung der Guppys genannt mit Bezug aufVariation zwischen Individuen oder Geschlechtern",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Schüler:innen formulieren mindestens zwei wissenschaftliche Fragen zur Färbung und Musterung der Guppys genannt mit Bezug auf Variation zwischen Individuen und Geschlechtern",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf das das Vorhandensein phänotypischer Variation zwischen Individuen oder Geschlechtern."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf das das Vorhandensein phänotypischer Variation zwischen Individuen und Geschlechtern."
+                }
+            }
+        },
+        "skills": {
+            "Forschungsfragen stellen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Es wird keine überprüfbare, präzise formulierte Frage mit Bezug auf das Material angeboten."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Es wird eine teilweise überprüfbare, präzise formulierte Frage mit Bezug auf das Material angeboten."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Es wird eine überprüfbare, präzise formulierte Frage mit Bezug auf das Material angeboten."
+                }
+            }
+        }
+    },
+    "5.3": {
+        "solution": "Wie hängt die Fleckengröße der Männchen mit dem Untergrund zusammen?  Wie hängt die Fleckenanzahl der Männchen mit dem Untergrund zusammen?  Wie hängt die Fleckengröße der Männchen mit dem Vorhandensein von Räubern zusammen?  Wie hängt die Fleckenanzahl der Männchen mit dem Vorhandensein von Räubern zusammen? ...",
+        "prompt": "Aufgabe: Kannst du aus dem obigen Text eine oder mehrere konkrete Forschungsfragen ableiten? Trage sie hier in das Textfeld ein.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Schüler:innen formulieren keine konkrete wissenschaftliche Forschungsfrage mit Bezug auf das Material.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Schüler:innen formulieren eine  konkrete wissenschaftliche Forschungsfrage mit Bezug auf Variation zwischen Individuen/Lebensräumen oder Geschlechtern.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Schüler:innen formulieren mindestens zwei konkrete wissenschaftliche Forschungsfragen mit Bezug mit Bezug auf Variation zwischen Individuen/Lebensräumen und Geschlechtern.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf das das Vorhandensein phänotypischer Variation zwischen Individuen/Lebensräumen oder Geschlechtern."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf das das Vorhandensein phänotypischer Variation zwischen Individuen/Lebensräumen und Geschlechtern."
+                }
+            }
+        },
+        "skills": {
+            "Forschungsfragen stellen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Es wird keine überprüfbare, präzise formulierte Frage mit Bezug auf das Material angeboten."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Es wird eine teilweise überprüfbare, präzise formulierte Frage mit Bezug auf das Material angeboten."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Es wird eine überprüfbare, präzise formulierte Frage mit Bezug auf das Material angeboten."
+                }
+            }
+        }
+    },
+    "5.5": {
+        "solution": "Die Flecken werden auf dem groben Untergrund mit Barschen größer, weil die Guppys dann besser an den Untergrund angepasst und schlechter sichtbar sind . Die Flecken werden auf dem feinen Untergrund mit Barschen kleiner, weil die Guppys dann besser an den Untergrund angepasst und schlechter sichtbar sind. Die Fleckenzahl sinkt auf dem groben Untergrund mit Barschen, weil die Guppys dann besser an den Untergrund angepasst und schlechter sichtbar sind. Die Fleckenzahl sinkt auf dem feinen Untergrund mit Barschen, weil die Guppys dann besser an den Untergrund angepasst und schlechter sichtbar sind. Ohne Barsch werden die Flecken auffälliger (größer auf feinem Kies, kleiner auf grobem Kies; Fleckenanzahl steigt auf beiden Untergründen), da auffällige Männchen bei der Paarung von den Weibchen bevorzugt werden.  (Hinweis: Nicht zu erwarten wenn sexuelle Selektion nicht im Vorfeld bekannt ist!)",
+        "prompt": "Aufgabe: Formuliere nun eine oder mehrere Hypothesen zu euren gemeinsamen Fragen. Erinnere dich, was du bisher schon zur Evolutionsbiologie weißt!",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Schüler:innen formulieren keine konkrete Hypothese mit Bezug auf das Material.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Schüler:innen formulieren eine  konkrete Hypothese mit Bezug mit Bezug auf Variation zwischen Individuen/Lebensräumen oder Geschlechtern.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Schüler:innen formulieren mindestens zwei konkrete Hypothesen mit Bezug mit Bezug auf Variation zwischen Individuen/Lebensräumen und Geschlechtern.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf das das Vorhandensein phänotypischer Variation zwischen Individuen/Lebensräumen oder Geschlechtern."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf das das Vorhandensein phänotypischer Variation zwischen Individuen/Lebensräumen und Geschlechtern."
+                }
+            }
+        },
+        "skills": {
+            "Formulieren eine Hypothese": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Hypothese ist nicht als überprüfbarer Hauptsatz formuliert oder enthält keinen Zusammenhang zwischen einer unabhängigen und einer abhängigen Variablen."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die Hypothese ist teilweise als überprüfbarer Hauptsatz formuliert oder enthält einen teilweisen Zusammenhang zwischen einer unabhängigen und einer abhängigen Variablen."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Hypothese ist als überprüfbarer Hauptsatz formuliert und enthält einen Zusammenhang zwischen einer unabhängigen und einer abhängigen Variablen."
+                }
+            }
+        }
+    },
+    "5.8": {
+        "solution": "In einem Tropenhaus werden zwei große Becken aufgebaut. Der Boden wird mit feinem oder grobem Kies (je nach Gruppe!) bedeckt. In beiden Becken werden nun viele verschiedene Guppymännchen und Guppyweibchen ausgesetzt. In den ersten 6 Monaten bleiben die Guppys unter sich und bekommen genügend Zeit sich einzuleben und zu vermehren. Nun werden in einem Becken Buntbarsche eingesetzt. Buntbarsche sind typische Fressfeinde der Guppys. In regelmäßigen Abständen werden die Guppys beider Becken nun hinsichtlich der Fleckenanzahl und der Fleckengröße miteinander verglichen. ",
+        "prompt": "Aufgaben: Plant in Partnerarbeit ein Experiment, um den Einfluss der Buntbarsche auf die Entwicklung der Guppys in einem Fluss mit einem Flussbett aus feinem oder grobem Kies zu untersuchen. Beschreibt in eigenen Worten eure Planung des Experiments. Folgendes Material steht euch zur Verfügung: 2 Becken mit feinem oder grobem Kies am Boden viele verschiedene Guppys (sowohl Männchen als auch Weibchen) Buntbarsche",
+        "learning_performance": {
+            "0": {
+                "rule": "Das geplante Experiment eignet sich nicht zur Überprüfung der Hypothese zum Zusammenhang zwischen den Variablen.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Das geplante Experiment variiert die unabhängige Variable (Jäger/Barsch) und/oder misst nach einem sinnvollen Zeitraum (in Hinblick auf den gewählten Aufbau) die abhängige Variable (Anzahl überlebender Guppys [untersch. Überlebenserfolg] oder die Anzahl der Guppys mit bestimmten Merkmalen  [untersch. Überlebens- oder Fortpflanzungserfolg] und /oder variiert keine anderen Variablen (z.B. Untergrund, Anzahl Guppys, Fressen, Temperatur o.ä.)",
+                "description": "von 3 Aspekten sollten berücksichtigt sein; falls dann zu oft 0 raus kommt, bitte notieren "
+            },
+            "2": {
+                "rule": "Das geplante Experiment variiert die unabhängige Variable (Jäger/Barsch) und misst nach einem sinnvollen Zeitraum (in Hinblick auf den gewählten Aufbau) die abhängige Variable (Anzahl überlebender Guppys [untersch. Überlebenserfolg] oder die Anzahl der Guppys mit bestimmten Merkmalen  [untersch. Überlebens- oder Fortpflanzungserfolg] und variiert keine anderen Variablen (z.B. Untergrund, Anzahl Guppys, Fressen, Temperatur o.ä.)",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS setzen ausreichend Guppys in ihr Becken, damit VARIATION vorhanden ist (nicht nur bspw. 1  Männchen und 1 Weibchen) oder Die SuS beschreiben das Vorhandensein PHÄNOTYPISCHER VARIATION"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS setzen ausreichend Guppys in ihr Becken, damit VARIATION vorhanden ist (nicht nur bspw. 1  Männchen und 1 Weibchen) und Die SuS beschreiben das Vorhandensein PHÄNOTYPISCHER VARIATION"
+                }
+            },
+            "Natürliche Selektion": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept natürliche Selektion wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen natürliche Selektion ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben UNTERSCH. ÜBERLEBENSCHANCEN als abhängige Variable (bspw. wir schauen, wie viele Guppys überlebt haben) oder Die SuS beschreiben VERÄNDERTE MERKMALSFREQUENZ als abhängige Variable (bspw. wir schauen, ob sich die Anzahl der Guppys mit großen Flecken verändert hat)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben UNTERSCH. ÜBERLEBENSCHANCEN als abhängige Variable (bspw. wir schauen, wie viele Guppys überlebt haben) und Die SuS beschreiben VERÄNDERTE MERKMALSFREQUENZ als abhängige Variable (bspw. wir schauen, ob sich die Anzahl der Guppys mit großen Flecken verändert hat)"
+                }
+            }
+        },
+        "skills": {
+            "Beschreiben den Experimentaufbau": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Das geplante Experiment erfüllt die wissenschaftlichen Anforderungen nicht."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Das geplante wissenschaftliche Experiment variiert die unabhängige Variable und/oder misst die abhängige Variable und/oder hält andere Variablen konstant"
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Das geplante wissenschaftliche Experiment variiert die unabhängige Variable und misst die abhängige Variable und hält andere Variablen konstant"
+                }
+            }
+        }
+    },
+    "5.10": {
+        "solution": "Gruppe feiner Kies:  • Mit Buntbarschen (Fressfeind): Verringerung der Fleckenzahl und -größe über die Zeit: Kleinere Flecken bewirken eine bessere Tarnung auf dem feinen Untergrund. Der Barsch wirkt als Selektionsdruck auf die Guppys (natürliche Selektion). • Ohne Buntbarsche: Anstieg der Fleckenzahl und –größe über die Zeit: Offenbar wirkt hier ein anderer Selektionsdruck, der für auffälligere Färbung und Muster sorgt (sexuelle Selektion). • Nach 20 Monaten ohne Barsch sind die größten Flecken zu sehen, die am auffälligsten sind. Mit Barsch die kleinsten, die dem Untergrund am ähnlichsten sind. • Ohne Buntbarsche: Nummer 2; Mit Buntbarschen: Nummer 4 (ignorieren) Gruppe grober Kies:  • Mit Buntbarschen (Fressfeind): Anstieg der Fleckengröße über die Zeit; Verrin-gerung der Fleckenzahl: Größere Flecken bewirken eine bessere Tarnung auf dem groben Untergrund. Der Barsch wirkt als Selektionsdruck auf die Guppys (natürliche Selektion). • Ohne Buntbarsche: Anstieg der Fleckenzahl über die Zeit, Verringerung der Fleckengröße: Offenbar wirkt hier ein anderer Selektionsdruck, der für auffälligere Färbung und Muster sorgt (sexuelle Selektion). • Nach 20 Monaten ohne Barsch sind die kleinsten Flecken zu sehen sind, die am auffälligsten sind. Mit Barsch die größten, die dem Untergrund am ähnlichsten sind. • Ohne Buntbarsche: Nummer 3; Mit Buntbarschen: Nummer 1 (ignorieren)",
+        "prompt": "Aufgaben: Öffne das Material für deine Gruppe! Schaue dir nun auf der ersten Seite die beiden Diagramme unter \"Versuchsbeobachtung\" an. Schreibe deine Beobachtungen auf. Fällt dir etwas auf? Wähle auf der zweiten Seite des Materials die Guppys aus, die zu Endlers Beobachtung nach 20 Monaten passen, und ordne sie den entsprechenden Becken zu. Notiere deine Zuordnungen (Nummer)! Was fällt dir hier auf?",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben die Daten aus beiden Becken nicht vollständig korrekt und geben keine korrekte Interpretation der Daten.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben korrekt wie sich die Flecken in dem Becken ohne Buntbarsche entwickeln und wie sich die Flecken in dem Becken mit Buntbarsche entwickeln.",
+                "description": "rein deskriptiv (korrekte Beschreibung)"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben korrekt wie sich die Flecken in dem Becken ohne Buntbarsche entwickeln und wie sich die Flecken in dem Becken mit Buntbarsche entwickeln. und  nennen entweder die bessere Tarnung vor dem Untergrund im Becken mit Barschen (nat. Selektion) oder  die bevorzugte Wahl von Partnern mit auffäligem Muster im Becken ohne Barsche (sex. Selektion)  als Grund für die Entwicklung.",
+                "description": "Hier  korrekte Beschreibung und mindestens eine korrekte Interpretation"
+            }
+        },
+        "knowledge_elements": {
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die Unterschiede in den Merkmalsfrequenzen zwischen den Becken oder Die SuS beschreiben die Veränderung der Merkmalsfrequenzen in den Becken über die Zeit"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die Unterschiede in den Merkmalsfrequenzen zwischen den Becken und Die SuS beschreiben die Veränderung der Merkmalsfrequenzen in den Becken über die Zeit"
+                }
+            },
+            "Natürliche Selektion": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept natürliche Selektion wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen natürliche Selektion ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen mit unterschiedlichen Merkmalen UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN haben oder (1 von 3)  Die SuS beschreiben, dass Individuen aufgrund von unterschiedlichen Überlebenschancen UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben oder (1 von 3) Die SuS beschreiben, dass es durch die o.g. Prozesse zu einer VERÄNDERTEN ALLELFREQUENZ kommt (Fachbegriffe müssen nicht genannt werden, siehe Beispiel rechts)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen mit unterschiedlichen Merkmalen UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN haben und/oder (2 von 3)  Die SuS beschreiben, dass Individuen aufgrund von unterschiedlichen Überlebenschancen UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben und/oder (2 von 3) Die SuS beschreiben, dass es durch die o.g. Prozesse zu einer VERÄNDERTEN ALLELFREQUENZ kommt (Fachbegriffe müssen nicht genannt werden, siehe Beispiel rechts)"
+                }
+            },
+            "Sexuelle Selektion": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Selektion wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Selektion ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen aufgrund von unzufälliger Partnerwahl UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben oder Die SuS beschreiben, dass es durch die o.g. Prozesse zu einer VERÄNDERTEN ALLELFREQUENZ kommt (Fachbegriffe müssen nicht genannt werden)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen aufgrund von unzufälliger Partnerwahl UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben und Die SuS beschreiben, dass es durch die o.g. Prozesse zu einer VERÄNDERTEN ALLELFREQUENZ kommt (Fachbegriffe müssen nicht genannt werden)"
+                }
+            }
+        },
+        "skills": {
+            "Bewerten der Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Daten werden nicht oder falsch beschrieben."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Es wird eine rein deskriptive Beschreibung der Daten angeboten."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Es wird eine Interpretation der Daten mit Bezug auf die Forschungsfrage angeboten."
+                }
+            }
+        }
+    },
+    "3.3": {
+        "solution": "Wie entsteht innerartliche Variation bei Stadttauben? C: Rekombination verursacht phänotypische Variation. E: Auch bei konstantem Genpool treten durch die Kombination von Gameten bei der Befruchtung neue Allelkombinationen auf. R: Durch die bei der Rekombination entstandenen neuen Allelkombinationen kommt auch bei konstantem Genpool zur Ausprägung neuer Merkmalskombinationen (phänotypische innerartliche Variation).",
+        "prompt": "Aufgabe: Schau dir deine Hypothesen noch einmal an. Entscheide dich nun, sie anzunehmen oder zu verwerfen. Schreibe auf Grundlage einer deiner Hypothesen (oder einer neuen Vermutung) eine Erklärung für die innerartlichen Variation bei Stadttauben. Benutze dazu das CER-Schema! Tipp: Deine Hypothese oder Vermutung ist schon dein Claim!",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Erklärung  beschreibt das Vorhandensein  phänotypischer Variation ohne weitere (korrekte) Erklärung.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Erklärung beschreibt das Vorhandensein  phänotypischer Variation und erklärt die Entstehung von phänotypischer Variation  durch Rekombination/Crossing-over. (eins von beidem reicht) oder erklärt das Auftreten phänotypischer Variation durch das Auftreten von genotypischer Variation ",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Erklärung beschreibt das Vorhandensein  phänotypischer Variation und erklärt die Entstehung von phänotypischer Variation  durch Rekombination/Crossing-over. (eins von beidem reicht) und erklärt das Auftreten phänotypischer Variation durch das Auftreten von genotypischer Variation",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Genetik": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genetik wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genetik/genetische Fachbegriffe ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die Enstehung genotypischer Variation durch Rekombination/CO oder Die SuS beschreiben den Zusammenhang zwischen genotypischer und phänotypischer Variation"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die Enstehung genotypischer Variation durch Rekombination/CO und Die SuS beschreiben den Zusammenhang zwischen genotypischer und phänotypischer Variation"
+                }
+            },
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Vorhandensein genotypischer Variation  oder Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Vorhandensein genotypischer Variation  und Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                }
+            },
+            "Zufall": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Zufall wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Zufall ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben Rekombination/CO als zufälligen Prozess. und/oder Die SuS beschreiben genotypische/phänotypische Variation in einer Population als zufällig"
+                }
+            }
+        },
+        "skills": {
+            "Claim": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Der Claim ist nicht als wissenschaftlich überprüfbare Behauptung formuliert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Claim ist teilweise als wissenschaftlich überprüfbare Behauptung formuliert, hat aber rein deskriptiven Charakter."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Der Claim ist als wissenschaftlich überprüfbare Behauptung formuliert und geht über eine rein deskriptive Beschreibung hinaus."
+                }
+            },
+            "Evidence": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Evidence stellt keine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die Evidence stellt eine teilweise korrekte Beobachtung aus dem Experiment/Modell oder einen teilweise korrekten wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Evidence stellt eine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                }
+            },
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Das Reasoning verbindet Claim und Evidence nicht  in einer sinnvollen Argumentation."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Das Reasoning verbindet Claim und Evidence in einer teilweise sinnvollen Argumentation."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Das Reasoning verbindet Claim und Evidence in einer sinnvollen Argumentation. "
+                }
+            }
+        }
+    },
+    "10.2": {
+        "solution": "Gerichtete Selektion C: Gerichtete Selektion wird dadurch verursacht, dass eine bestimmte Ausprägung eines bestimmten Merkmals [PHÄNOTYP. VARIATION] zu der höchsten Fitness führt [UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN/UNTERSCHIEDLICHER FORTPFLANZUNGSERFOLG].  E: Individuen mit einer bestimmten Merkmalsausprägung [PHÄNOTYP. VARIATION] haben eine höhere Fitness [UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN/UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG].  R: Dadurch, dass  Individuen mit einer bestimmten Merkmalsausprägung [PHÄNOTYP. VARIATION] ein besseres Überlebenspotenzial [UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN] und damit besseren Fortpflanzungserfolg [UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG] haben, verschiebt sich die durchschnittliche Merkmalsausprägung [UNTERSCH. MERKMALSFREQUENZEN] der Population in diese Richtung.",
+        "prompt": "Wie kommen die drei abgebildeten Selektionstypen (gerichtete, stabilisierende und disruptive Selektion) zustande? Schreibe je eine kurze Erklärung nach dem CER-Schema!",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Erklärung  beschreibt das Vorhandensein phänotypischer Variation  und/oder  das Auftreten verschiedener Merkmalsfrequenzen ohne weitere (korrekte) Erklärung.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Erklärung  beschreibt das Vorhandensein phänotypischer Variation  und beschreibt die jeweilige Veränderung der Merkmalsfrequenz korrekt (welche Merkmalsausprägung vorteilhaft ist und in welche Richtung sich die durchschnittl. Merkmalsausprägung verschiebt)",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Erklärung  beschreibt das Vorhandensein phänotypischer Variation  und beschreibt die jeweilige Veränderung der Merkmalsfrequenz korrekt (welche Merkmalsausprägung vorteilhaft ist und in welche Richtung sich die durchschnittl. Merkmalsausprägung verschiebt) und  beschreibt mindestens eins der Konzepte [UNTERSCH. ÜBERLEBENSCHANCEN, UNTERSCH. FORTPFLANZUNGSERFOLG]",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Natürliche Selektion": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept natürliche Selektion wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen natürliche Selektion ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen mit unterschiedlichen Merkmalen UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN haben oder  Die SuS beschreiben, dass Individuen aufgrund von unterschiedlichen Überlebenschancen UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen mit unterschiedlichen Merkmalen UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN haben und  Die SuS beschreiben, dass Individuen aufgrund von unterschiedlichen Überlebenschancen UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben"
+                }
+            },
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten unterschiedlicher Merkmalsfrequenzen  oder Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten unterschiedlicher Merkmalsfrequenzen  und Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                }
+            }
+        },
+        "skills": {
+            "Claim": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Der Claim ist nicht als wissenschaftlich überprüfbare Behauptung formuliert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Claim ist teilweise als wissenschaftlich überprüfbare Behauptung formuliert, hat aber rein deskriptiven Charakter."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Der Claim ist als wissenschaftlich überprüfbare Behauptung formuliert und geht über eine rein deskriptive Beschreibung hinaus."
+                }
+            },
+            "Evidence": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Evidence stellt keine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die Evidence stellt eine teilweise korrekte Beobachtung aus dem Experiment/Modell oder einen teilweise korrekten wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Evidence stellt eine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                }
+            },
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf aber stellt keinen sinnvollen Zusammenhang dazwischen her."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf  und  und stellt einen sinnvollen Zusammenhang her."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C und E auf  und  stellt einen sinnvollen Zusammenhang dazwischen her."
+                }
+            }
+        }
+    },
+    "7.4": {
+        "solution": "C: Habitatfragmentierung verursacht einen Gründereffekt in Waldbäumen. E: Beim Gründereffekt werden Populationen voneinander getrennt (ISOLATION). In diesen sind weniger verschiedene Allele vorhanden (VERRINGERTE VARIABILITÄT). R: Durch zufällige (ZUFALL) ISOLATION von kleinen Teilen von Populationen (GRÜNDEREFFEKT) kann es zu neuen Populationen mit weniger verschiedenen Allelen/Genen (VERRINGERTE VARIABILITÄT) und daher abweichenden Merkmals- / Allelfrequenzen kommen (VERÄNDERTE MERKMALS- bzw. ALLELFREQUENZ).",
+        "prompt": "Aufgabe: Welchen evolutiven Prozess verursacht Habitatfragmentierung in Baumbeständen? Schreibe eine Erklärung nach dem CER-Schema! ",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Erklärung  benennt das Auftreten von Gendrift oder einen Gründereffekt ohne weitere (korrekte) Erklärung.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Erklärung  benennt das Auftreten von Gendrift oder einen Gründereffekt und  begründet dies mit der Isolation von Teilpopulationen oder beschreibt verringerte Variablität oder veränderte Merkmalsfrequenzen oder veränderte Allelfrequenzen in den Teilpopulationen  ",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Erklärung  benennt das Auftreten von Gendrift oder einen Gründereffekt und  begründet dies mit der Isolation von Teilpopulationen und beschreibt verringerte Variablität oder veränderte Merkmalsfrequenzen oder veränderte Allelfrequenzen in den Teilpopulationen ",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Gendrift": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Gendrift wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Gendrift ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die ISOLATION einer kleinen Teilpopulation  (verrringerter genetischer Austausch) oder Die SuS beschreiben, dass es durch den o.g. Prozess zu einer VERÄNDERTEN ALLELFREQUENZ kommt"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die ISOLATION einer kleinen Teilpopulation  (verrringerter genetischer Austausch) und Die SuS beschreiben, dass es durch den o.g. Prozess zu einer VERÄNDERTEN ALLELFREQUENZ kommt"
+                }
+            },
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten von VERRINGERTER VARIABILITÄT  (Fachbegriffe müssen nicht genannt werden) oder Die SuS beschreiben das Vorhandensein VERÄNDERTER MERKMALSFREQUENZEN"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten von VERRINGERTER VARIABILITÄT  (Fachbegriffe müssen nicht genannt werden) und Die SuS beschreiben das Vorhandensein VERÄNDERTER MERKMALSFREQUENZEN"
+                }
+            },
+            "Zufall": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Zufall wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Zufall ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die Allelfrequenzen in durch Habitatfragmentierung entstandenden Einzelpopulationen als zufällig und/oder Die SuS beschreiben die Isolation von Teilpopulationen als zufällig"
+                }
+            }
+        },
+        "skills": {
+            "Claim": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Der Claim ist nicht als wissenschaftlich überprüfbare Behauptung formuliert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Claim ist teilweise als wissenschaftlich überprüfbare Behauptung formuliert, hat aber rein deskriptiven Charakter."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Der Claim ist als wissenschaftlich überprüfbare Behauptung formuliert und geht über eine rein deskriptive Beschreibung hinaus."
+                }
+            },
+            "Evidence": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Evidence stellt keine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die Evidence stellt eine teilweise korrekte Beobachtung aus dem Experiment/Modell oder einen teilweise korrekten wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Evidence stellt eine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                }
+            },
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf aber stellt keinen sinnvollen Zusammenhang dazwischen her."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf  und  und stellt einen sinnvollen Zusammenhang her."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C und E auf  und  stellt einen sinnvollen Zusammenhang dazwischen her."
+                }
+            }
+        }
+    },
+    "7.2": {
+        "solution": "individuelle Lösung",
+        "prompt": "Aufgabe: Was könnte die Entwicklung hin zu stark fragmentierten Lebensräumen für evolutionsbiologische Vorgänge bedeuten? Schreibe deine Hypothesen auf!",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Schüler:innen nennen keine wissenschaftlich korrekte Hypothese/Vermutung zu den Auswirkungen von Habitatfragmentierung auf Baumbestände.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Schüler:innen nennen eine wissenschaftlich korrekte Hypothese/Vermutung zu den Auswirkungen von Habitatfragmentierung auf Baumbestände mit Bezug auf Gendrift, Genfluss oder die Abnahme von Variation.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Schüler:innen nennen mindestens zwei wissenschaftlich korrekte Hypothesen/Vermutungen zu den Auswirkungen von Habitatfragmentierung auf Baumbestände mit Bezug auf Gendrift, Genfluss oder die Abnahme von Variation.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Gendrift": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Gendrift wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Gendrift ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben/benennen die Isolation von Populationen. oder Die SuS beschreiben, dass es durch Isolation zu unterschiedlichen Entwicklungen von Populationen kommen kann (ggf. Artbildung)."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben/benennen die Isolation von Populationen. und Die SuS beschreiben, dass es durch Isolation zu unterschiedlichen Entwicklungen von Populationen kommen kann (ggf. Artbildung)."
+                }
+            },
+            "Genfluss": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genfluss wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genfluss ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben/benennen Migration zwischen den Populationen oder Die SuS beschreiben das Abnehmen von Migration/gen. Austausch zwischen Populationen"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben/benennen Migration zwischen den Populationen und Die SuS beschreiben das Abnehmen von Migration/gen. Austausch zwischen Populationen"
+                }
+            },
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beziehen sich auf das Vorhandensein genotypischer oder phänotypischer Variation in Baumbeständen  oder Die SuS beschreiben die Abnahme der genetischen Variation bei Populationen in fragmentierten Lebensräumen"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beziehen sich auf das Vorhandensein genotypischer oder phänotypischer Variation in Baumbeständen  und Die SuS beschreiben die Abnahme der genetischen Variation bei Populationen in fragmentierten Lebensräumen"
+                }
+            },
+            "Zufall": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Zufall wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Zufall ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben Gendrift als zufälligen Prozess"
+                }
+            }
+        },
+        "skills": {
+            "Hypothesen/Vermutungen aufstellen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Es wird keine überprüfbare, präzise formulierte Frage (hier: Hypothese oder Vermutung) angeboten."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Es wird eine teilweise überprüfbare, präzise formulierte Frage (hier: Hypothese oder Vermutung) angeboten."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Es wird eine überprüfbare, präzise formulierte Frage (hier: Hypothese oder Vermutung) angeboten."
+                }
+            }
+        }
+    },
+    "7.3": {
+        "solution": "Der Gründereffekt, bezeichnet einen Prozess, bei dem eine kleine zufällig zusammengesetzte Gruppe von der Ausgangspopulation abgespalten und eine neue Population gegründet wird. In dieser Population können sich die Allelfrequenzen von denen in der Ausgangspopulation unterscheiden. Manche Allele sind eventuell gar nicht mehr im Genpool der neuen Population vorhanden. Zufällige Todesfälle können jedes Individuum einer Population betreffen, unabhängig von dessen Allelen oder phänotypischen Eigenschaften. Dieses Individuum kann sich in Folge nicht weiter fortpflanzen und seine Allele nicht mehr weitergeben. Dadurch können sich die Allelfrequenzen in der Population verändern und manche Allele sind in Folge eventuell gar nicht mehr im Genpool der Population vorhanden, insbesondere bei kleinen Populationen. Beim Flaschenhalseffekt (auch bottleneck effect) wird die Größe der Population stark reduziert. Welche Individuen aus der Population entfernt werden ist dabei zufällig. Die Allelfrequenzen in der Population können sich durch so ein Ereignis verändern und manche Allele sind nach dem Ereignis eventuell gar nicht mehr im Genpool der Population vorhanden.",
+        "prompt": "Aufgabe:  Beschreibt kurz in eigenen Worten die drei verschiedenen Ereignisse und ihre Auswirkungen auf eure Klebezettel-Populationen! Gründereffekt, Flaschenhalseffekt, zufällige Todesfälle",
+        "learning_performance": {
+            "0": {
+                "rule": "Die SuS beschreiben maximal einen Effekt der Gendrift (Gründereffekt, zufällige Todesfälle, Flaschenhalseffekt) korrekt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die SuS beschreiben 2 von 3 Effekte der Gendrift (Gründereffekt, zufällige Todesfälle, Flaschenhalseffekt) korrekt.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die SuS beschreiben alle drei Effekte der Gendrift (Gründereffekt, zufällige Todesfälle, Flaschenhalseffekt) korrekt.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Gendrift": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Gendrift wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Gendrift ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die ISOLATION einer kleinen Teilpopulation  (verrringerter genetischer Austausch) oder Die SuS beschreiben, dass es durch den o.g. Prozess zu einer VERÄNDERTEN ALLELFREQUENZ kommt"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die ISOLATION einer kleinen Teilpopulation  (verrringerter genetischer Austausch) und Die SuS beschreiben, dass es durch den o.g. Prozess zu einer VERÄNDERTEN ALLELFREQUENZ kommt"
+                }
+            },
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten von VERRINGERTER VARIABILITÄT  (Fachbegriffe müssen nicht genannt werden) oder Die SuS beschreiben das Vorhandensein VERÄNDERTER MERKMALSFREQUENZEN"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten von VERRINGERTER VARIABILITÄT  (Fachbegriffe müssen nicht genannt werden) und Die SuS beschreiben das Vorhandensein VERÄNDERTER MERKMALSFREQUENZEN"
+                }
+            },
+            "Zufall": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Zufall wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Zufall ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die Allelfrequenzen in durch Habitatfragmentierung entstandenden Einzelpopulationen als zufällig und/oder Die SuS beschreiben die Isolation von Teilpopulationen als zufällig"
+                }
+            }
+        },
+        "skills": {
+            "Bewerten der Daten": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS erläutern keine wiss. korrekten Rückschlüsse zu den Implikation ihrer Ergebnisse."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die SuS beschreiben die Auswirkungen von mindestens zwei Effekten auf ihre Zettelpopulationen als diskrete Ereignisse (je eine Beschreibung zu Gründereffekt, zufälligen Todesfällen und Flaschenhalseffekt, Fachbegriffe müssen nicht genannt werden) ODER Die SuS bschreiben die jeweils dahinterliegenden abstrakten Prozesse der Gendrift."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS beschreiben die Auswirkungen mindestens zwei Effekten auf ihre Zettelpopulationen als diskrete Ereignisse (je eine Beschreibung zu Gründereffekt, zufälligen Todesfällen und Flaschenhalseffekt, Fachbegriffe müssen nicht genannt werden) UND Die SuS bschreiben die jeweils dahinterliegenden abstrakten Prozesse der Gendrift."
+                }
+            }
+        }
+    },
+    "8.3": {
+        "solution": "Populationen werden homogen als Kreise dargestellt, Unterschiede zwischen Teilpopulationen gibt es nicht. Abstände zwischen Populationen werden nicht berücksichtigt.  Populationsgröße wird nicht berücksichtigt Migration (Pfeile) wird nicht quantifiziert / Dir. Austausch zwischen allen Populationen (prozedural) Es wird nicht zwischen sekundärer und primärer Migration unterschieden (strukturell und prozedural) Das Modell ist \"abgeschlossen\" , als würde es keine Migration nach \"außen\" geben Pfeile bilden Start- und Endpunkt der Migration nur grob ab Migration findet nicht zu jedem Zeitpunkt in gleichem Maße statt (-> z.B. auch Jahreszeiten) Reihenfolge der  Ereignisse (so lange es sich auf Aspekte des Modells bezieht, sinnvoll und korrekt ist)",
+        "prompt": "Aufgabe: Überlege dir, welche Aspekte von Migration im Insel-Modell nicht abgebildet werden. Schreibe 2-3 Sätze zu den Grenzen des Modells!",
+        "learning_performance": {},
+        "knowledge_elements": {
+            "Genfluss": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genfluss wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genfluss ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beziehen sich auf  Charakteristika von Populationen (Kreise) (strukturelle Aspekte; Homogenität, Abstände, Größe, Abgeschlossenheit des Systems, ...) oder die SuS beziehen sich auf Aspekte der Migrationsbewegung (Pfeile) (prozedurale Aspekte; Quantifizierung der Bewegung, zeitliche Homogenität der Bewegung, Start- und Endpunkte der Migration, Ablauf, Hindernisse, ...)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beziehen sich auf  Charakteristika von Populationen (Kreise) (strukturelle Aspekte; Homogenität, Abstände, Größe, Abgeschlossenheit des Systems, ...) und die SuS beziehen sich auf Aspekte der Migrationsbewegung (Pfeile) (prozedurale Aspekte; Quantifizierung der Bewegung, zeitliche Homogenität der Bewegung, Start- und Endpunkte der Migration, Ablauf, Hindernisse, ...)"
+                }
+            }
+        },
+        "skills": {
+            "Erläutern die Erklärungskraft eines Modells": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Der Nutzen) die Grenzen des Modells werden nicht vollständig und präzise mit Bezug auf das Material beschrieben."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Nutzen (die Grenzen) des Modells wird teilweise präzise mit Bezug auf das Material beschrieben."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Grenzen (/der Nutzen) des Modells wird umfangreich und präzise mit Bezug auf das Material beschrieben."
+                }
+            }
+        }
+    },
+    "8.6": {
+        "solution": "Das neue Modell zieht einen oder mehrere der folgenden (oder weitere korrekte und relevante Aspekte, s. 8.3) in Betracht: Populationen werden homogen als Kreise dargestellt, Unterschiede zwischen Teilpopulationen gibt es nicht. Abstände zwischen Populationen werden nicht berücksichtigt.  Populationsgröße wird nicht berücksichtigt Migration (Pfeile) wird nicht quantifiziert / Dir. Austausch zwischen allen Populationen Es wird nicht zwischen sekundärer und primärer Migration unterschieden Das Modell ist \"abgeschlossen\" , als würde es keine Migration nach \"außen\" geben Pfeile bilden Start- und Endpunkt der Migration nur grob ab Migration findet nicht zu jedem Zeitpunkt in gleichem Maße statt (so lange es sich auf Aspekte des Modells bezieht, sinnvoll und korrekt ist)",
+        "prompt": "Aufgabe: Formuliere einmal deine kurze Begründung für das überarbeitete Modell, das ihr euch in der Gruppe überlegt habt. Warum ist es besser als das Inselmodell?",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Begründung des verbesserten Modells enthält keinen Bezug zu korrekten oder relevanten Grenzen des urspünglichen Modells oder benennt Grenzen aber keine Lösung.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Begründung des verbesserten Modells bezieht sich auf mind. eine strukturelle  Grenze von Migration (Populationen) des urspünglichen Modells und beschreibt konkret, warum das neue Modell besser ist. oder bezieht sich auf mind. eine prozedurale  Grenze von Migration (Populationen) des urspünglichen Modells und beschreibt konkret, warum das neue Modell besser ist.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Begründung des verbesserten Modells bezieht sich auf mind. eine strukturelle  Grenze von Migration (Populationen) des urspünglichen Modells und beschreibt konkret, warum das neue Modell besser ist. und bezieht sich auf mind. eine prozedurale  Grenze von Migration (Populationen) des urspünglichen Modells und beschreibt konkret, warum das neue Modell besser ist.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Genfluss": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genfluss wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genfluss ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beziehen sich auf  Charakteristika von Populationen (Kreise) (strukturelle Aspekte; Homogenität, Abstände, Größe, Abgeschlossenheit des Systems, ...) oder die SuS beziehen sich auf Aspekte der Migrationsbewegung (Pfeile) (prozedurale Aspekte; Quantifizierung der Bewegung, zeitliche Homogenität der Bewegung, Start- und Endpunkte der Migration, Ablauf, Hindernisse, ...)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beziehen sich auf  Charakteristika von Populationen (Kreise) (strukturelle Aspekte; Homogenität, Abstände, Größe, Abgeschlossenheit des Systems, ...) und die SuS beziehen sich auf Aspekte der Migrationsbewegung (Pfeile) (prozedurale Aspekte; Quantifizierung der Bewegung, zeitliche Homogenität der Bewegung, Start- und Endpunkte der Migration, Ablauf, Hindernisse, ...)"
+                }
+            }
+        },
+        "skills": {
+            "Das Modell evaluieren": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die SuS evaluieren ihr Modell nicht begründet und kriterienorientiert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die SuS evaluieren ihr Modell teilweise begründet und kriterienorientiert."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die SuS evaluieren ihr Modell begründet und kriterienorientiert."
+                }
+            }
+        }
+    },
+    "6.3.1": {
+        "solution": "C: Unterschiedliche Merkmalsausprägungen auf unterschiedlichem Untergrund entstehen durch Nat. Selektion. E: Einige Guppys sind auf dem jeweiligen Untergrund besser sichtbar (VARIATION).  Wenn Barsche dabei sind, gibt es nach einigen Generationen gibt es mehr von den Guppys, die schlechter sichtbar sind (oder weniger von denen, die besser sichtbar sind) (VERÄNDERTE MERKMALSFREQUENZ). R: Die Guppys, die schlechter sichtbar sind (VARIATION), werden weniger häufig von den Barschen gefressen (UNTERSCH. ÜBERLEBENSCHANCEN) und können sich häufiger fortpflanzen (UNTERSCH. FORTPFLANZUNGSERFOLG). Sie können ihre Gene häufiger an die nächste Generation weitergeben (VERERBUNG), wodurch die schlechter sichtbaren Muster häufiger werden (VERÄNDERTE ALLELFREQUENZ).",
+        "prompt": "Aufgabe: Beantworte jeweils eine der wissenschaftlichen Fragen aus der ersten Stunde mit einer Erklärung, die auf dem Konzept der (1) Natürlichen Selektion (2) Sexuellen Selektion (3) Mutation beruht. Benutze dazu das CER-Schema! ",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Erklärung  beschreibt das Vorhandensein  phänotypischer Variation  und/oder  das Auftreten verschiedener Merkmalsfrequenzen ohne weitere (korrekte) Erklärung.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Erklärung beschreibt das Vorhandensein phänotypischer Variation und das Auftreten  verschiedener Merkmalsfrequenzen  und  beschreibt ein oder zwei der Konzepte [UNTERSCH. ÜBERLEBENSCHANCEN, UNTERSCH. FORTPFLANZUNGSERFOLG, VERERBUNG, VERÄNDERTE ALLELFREQUENZ, VERÄNDERTE MERKMALSFREQUENZ].",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Erklärung beschreibt das Vorhandensein phänotypischer Variation und das Auftreten  verschiedener Merkmalsfrequenzen  und  beschreibt drei bis fünf der Konzepte [UNTERSCH. ÜBERLEBENSCHANCEN, UNTERSCH. FORTPFLANZUNGSERFOLG, VERERBUNG, VERÄNDERTE ALLELFREQUENZ, VERÄNDERTE MERKMALSFREQUENZ].",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten unterschiedlicher Merkmalsfrequenzen  oder Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten unterschiedlicher Merkmalsfrequenzen  und Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                }
+            },
+            "Genetik": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genetik wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genetik ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf Die VERERBUNG der relevanten Merkmale auf Genebene oder auf Merkmalsebene"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf Die VERERBUNG der relevanten Merkmale auf Genebene und auf Merkmalsebene"
+                }
+            },
+            "Natürliche Selektion": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept natürliche Selektion wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen natürliche Selektion ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen mit unterschiedlichen Merkmalen UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN haben und/oder (2 von 3)  Die SuS beschreiben, dass Individuen aufgrund von unterschiedlichen Überlebenschancen UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben und/oder (2 von 3) Die SuS beschreiben, dass es durch die o.g. Prozesse zu einer VERÄNDERTEN ALLELFREQUENZ kommt (Fachbegriffe müssen nicht genannt werden, siehe Beispiel rechts)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen mit unterschiedlichen Merkmalen UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN haben und  Die SuS beschreiben, dass Individuen aufgrund von unterschiedlichen Überlebenschancen UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben und Die SuS beschreiben, dass es durch die o.g. Prozesse zu einer VERÄNDERTEN ALLELFREQUENZ kommt (Fachbegriffe müssen nicht genannt werden, siehe Beispiel rechts)"
+                }
+            },
+            "Wahrscheinlichkeit": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Wahrscheinlichkeit wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Wahrscheinlichkeit ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN als einen Prozess, der von Wahrscheinlichkeit bestimmt wird und/oder Die SuS beschreiben UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG als einen Prozess, der von Wahrscheinlichkeit bestimmt wird"
+                }
+            }
+        },
+        "skills": {
+            "Claim": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Der Claim ist nicht als wissenschaftlich überprüfbare Behauptung formuliert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Claim ist teilweise als wissenschaftlich überprüfbare Behauptung formuliert, hat aber rein deskriptiven Charakter."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Der Claim ist als wissenschaftlich überprüfbare Behauptung formuliert und geht über eine rein deskriptive Beschreibung hinaus."
+                }
+            },
+            "Evidence": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Evidence stellt keine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die Evidence stellt eine teilweise korrekte Beobachtung aus dem Experiment/Modell oder einen teilweise korrekten wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Evidence stellt eine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                }
+            },
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf aber stellt keinen sinnvollen Zusammenhang dazwischen her."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf  und  und stellt einen sinnvollen Zusammenhang her."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C und E auf  und  stellt einen sinnvollen Zusammenhang dazwischen her."
+                }
+            }
+        }
+    },
+    "6.3.2": {
+        "solution": "C: Unterschiedliche Färbung bei Männchen und Weibchen entsteht durch Sexuelle Selektion. E: Einige Guppys haben auffälligere Farben als andere (VARIATION).  Wenn keine Barsche dabei sind, gibt es nach einigen Generationen mehr von  den Guppys, die besser sichtbar sind (oder weniger von denen, die schlechter sichtbar sind) (VERÄNDERTE MERKMALSFREQUENZ). R: Die männlichen Guppys, die besser sichtbar sind (VARIATION), werden häufiger von den Weibchen als Sexualpartner ausgewählt und pflanzen sich im Mittel häufiger fort (UNTERSCH. FORTPFLANZUNGSERFOLG). Sie können ihre Gene häufiger an die nächste Generation weitergeben (VERERBUNG), wodurch die besser sichtbaren Muster häufiger werden (VERÄNDERTE ALLELFREQUENZ).",
+        "prompt": "Aufgabe: Beantworte jeweils eine der wissenschaftlichen Fragen aus der ersten Stunde mit einer Erklärung, die auf dem Konzept der (1) Natürlichen Selektion (2) Sexuellen Selektion (3) Mutation beruht. Benutze dazu das CER-Schema! ",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Erklärung  beschreibt das Vorhandensein  phänotypischer Variation  und/oder  das Auftreten verschiedener Merkmalsfrequenzen ohne weitere (korrekte) Erklärung.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Erklärung beschreibt das Vorhandensein phänotypischer Variation und das Auftreten  verschiedener Merkmalsfrequenzen  und  beschreibt ein oder zwei der Konzepte [UNTERSCH. FORTPFLANZUNGSERFOLG, VERERBUNG, VERÄNDERTE ALLELFREQUENZ, VERÄNDERTE MERKMALSFREQUENZ].",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Erklärung beschreibt das Vorhandensein phänotypischer Variation und das Auftreten  verschiedener Merkmalsfrequenzen  und  beschreibt drei bis vier der Konzepte UNTERSCH. FORTPFLANZUNGSERFOLG, VERERBUNG, VERÄNDERTE ALLELFREQUENZ, VERÄNDERTE MERKMALSFREQUENZ].",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten unterschiedlicher Merkmalsfrequenzen  oder Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten unterschiedlicher Merkmalsfrequenzen  und Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                }
+            },
+            "Sexuelle Selektion": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Selektion wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Selektion ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen aufgrund von unzufälliger Partnerwahl UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben oder Die SuS beschreiben, dass es durch die o.g. Prozesse zu einer VERÄNDERTEN ALLELFREQUENZ kommt (Fachbegriffe müssen nicht genannt werden, siehe Beispiel rechts)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen aufgrund von unzufälliger Partnerwahl UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben und Die SuS beschreiben, dass es durch die o.g. Prozesse zu einer VERÄNDERTEN ALLELFREQUENZ kommt (Fachbegriffe müssen nicht genannt werden, siehe Beispiel rechts)"
+                }
+            },
+            "Genetik": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genetik wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genetik ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf Die VERERBUNG der relevanten Merkmale auf Genebene oder auf Merkmalsebene"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf Die VERERBUNG der relevanten Merkmale auf Genebene und auf Merkmalsebene"
+                }
+            },
+            "Wahrscheinlichkeit": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Wahrscheinlichkeit wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Wahrscheinlichkeit ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG als einen Prozess, der von Wahrscheinlichkeit bestimmt wird"
+                }
+            }
+        },
+        "skills": {
+            "Claim": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Der Claim ist nicht als wissenschaftlich überprüfbare Behauptung formuliert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Claim ist teilweise als wissenschaftlich überprüfbare Behauptung formuliert, hat aber rein deskriptiven Charakter."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Der Claim ist als wissenschaftlich überprüfbare Behauptung formuliert und geht über eine rein deskriptive Beschreibung hinaus."
+                }
+            },
+            "Evidence": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Evidence stellt keine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die Evidence stellt eine teilweise korrekte Beobachtung aus dem Experiment/Modell oder einen teilweise korrekten wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Evidence stellt eine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                }
+            },
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf aber stellt keinen sinnvollen Zusammenhang dazwischen her."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf  und  und stellt einen sinnvollen Zusammenhang her."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C und E auf  und  stellt einen sinnvollen Zusammenhang dazwischen her."
+                }
+            }
+        }
+    },
+    "6.3.3": {
+        "solution": "Die Idee der Gesamterklärung ist, dass Mutationen zu genotypischer Variation führen und genotypische Variation zu phänotypischer. C: Verschiedene Farben bei Guppys  [PHÄNOTYPISCHE VARIATION] entstehen durch MUTATIONEN. E: Durch MUTATIONEN können Gene verändert werden/kaputt gehen/Chromosomen neu zusammengesetzt werden [GENOTYPISCHE VARIATION]. R: Verschiedene Farben bei Guppys [PHÄNOTYPISCHE VARIATION] entstehen dadurch, dass sich durch MUTATIONEN ZUFÄLLIG Gene verändern [GENOTYPISCHE VARIATION].  Anmerkung: Eigentlich total analog zu 3.3 nur eben mit Mutation als Ursprung von Variation statt Rekombination/CO",
+        "prompt": "Aufgabe: Beantworte jeweils eine der wissenschaftlichen Fragen aus der ersten Stunde mit einer Erklärung, die auf dem Konzept der (1) Natürlichen Selektion (2) Sexuellen Selektion (3) Mutation beruht. Benutze dazu das CER-Schema! ",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Erklärung  beschreibt das Vorhandensein  phänotypischer Variation ohne weitere (korrekte) Erklärung.",
+                "description": "korrekt -> keine offensichtliche Fehlvorstellung (z.B. absichtsvolle oder zielgerichtete Mutationen)"
+            },
+            "1": {
+                "rule": "Die Erklärung beschreibt das Vorhandensein  phänotypischer Variation und erklärt die Entstehung von phänotypischer od. genotypischer Variation  durch Mutation(en) oder erklärt das Auftreten phänotypischer Variation durch das Auftreten von genotypischer Variation ",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Erklärung beschreibt das Vorhandensein phänotypischer Variation und erklärt die Entstehung von phänotypischer Variation  durch Mutation(en) und erklärt das Auftreten phänotypischer Variation durch das Auftreten von genotypischer Variation",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Mutation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Mutation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Mutation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS erklären die Entstehung genotypischer Variation durch Mutation. oder Die SuS erklären die Entstehung phänotypischer Variation durch Mutationen auf Genebene"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS erklären die Entstehung genotypischer Variation durch Mutation. und Die SuS erklären die Entstehung phänotypischer Variation durch Mutationen auf Genebene"
+                }
+            },
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Vorhandensein genotypischer Variation  oder Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Vorhandensein genotypischer Variation  und Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                }
+            },
+            "Zufall": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Zufall wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Zufall ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten von Mutationen als zufälligen Prozess und/oder Die SuS beschreiben genotypische/phänotypische Variation in einer Population als zufällig"
+                }
+            }
+        },
+        "skills": {
+            "Claim": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Der Claim ist nicht als wissenschaftlich überprüfbare Behauptung formuliert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Claim ist teilweise als wissenschaftlich überprüfbare Behauptung formuliert, hat aber rein deskriptiven Charakter."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Der Claim ist als wissenschaftlich überprüfbare Behauptung formuliert und geht über eine rein deskriptive Beschreibung hinaus."
+                }
+            },
+            "Evidence": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Evidence stellt keine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die Evidence stellt eine teilweise korrekte Beobachtung aus dem Experiment/Modell oder einen teilweise korrekten wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Evidence stellt eine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                }
+            },
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf aber stellt keinen sinnvollen Zusammenhang dazwischen her."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf  und  und stellt einen sinnvollen Zusammenhang her."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C und E auf  und  stellt einen sinnvollen Zusammenhang dazwischen her."
+                }
+            }
+        }
+    },
+    "8.7": {
+        "solution": "Warum ist Habitatfragmentierung problematisch?  C: Habitatfragmentierung verringert den genetischen Austausch zwischen Populationen, wodurch diese weniger anpassungsfähig gegenüber Veränderungen in der Umwelt werden. E: Sind die Populationen weiter voneinander getrennt [ISOLATION], findet weniger MIGRATION / nur indirekte Migration statt.  R: Durch die verringerte Migration kommt es zu einem verringerten genetischen Austausch zwischen Populationen.  Der verringerte genetische Austausch führt zu weniger VARIABILITÄT in der Population, wodurch Arten weniger anpassungsfähig werden.",
+        "prompt": "Aufgabe: Warum ist Habitatfragmentierung problematisch? Schreibe eine Erklärung nach dem CER-Schema!",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Erklärung beschreibt weder den verringerten genetischen Austausch zwischen Populationen noch die verringerte Anpassungsfähigkeit von Populationen durch verringerte gen. Variabilität",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Erklärung beschreibt weder den verringerten genetischen Austausch zwischen Populationen oder die verringerte Anpassungsfähigkeit von Populationen durch verringerte gen. Variabilität und  verwendet dabei 1-2 der Konzepte [MIGRATION, GEN. AUSTAUSCH, ISOLATION, VERÄNDERTE ALLELFREQUENZ, VERÄNDERTE MERKMALSFREQUENZ, ANPASSUNGSFÄHIGKEIT].",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Erklärung beschreibt weder den verringerten genetischen Austausch zwischen Populationen und die verringerte Anpassungsfähigkeit von Populationen durch verringerte gen. Variabilität und  verwendet dabei 2-6 der Konzepte [MIGRATION, GEN. AUSTAUSCH, ISOLATION, VERÄNDERTE ALLELFREQUENZ, VERÄNDERTE MERKMALSFREQUENZ, ANPASSUNGSFÄHIGKEIT].",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Genfluss": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genfluss wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genfluss ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben verringerte oder indirekte Migration zwischen fragmentierten Populationen oder Die SuS beschreiben einen verringerte genetischen Austausch zwischen fragmentierten Populationen"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben verringerte oder indirekte Migration zwischen fragmentierten Populationen und Die SuS beschreiben einen verringerte genetischen Austausch zwischen fragmentierten Populationen"
+                }
+            },
+            "Gendrift": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Gendrift wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Gendrift ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die Isolation von Populationen durch Habitatfragmentierung oder Die SuS beschreiben, dass es durch den o.g. Prozess zu einer VERÄNDERTEN ALLELFREQUENZ kommt"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die Isolation von Populationen durch Habitatfragmentierung und Die SuS beschreiben, dass es durch den o.g. Prozess zu einer VERÄNDERTEN ALLELFREQUENZ kommt"
+                }
+            },
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten von VERRINGERTER VARIABILITÄT  (Fachbegriffe müssen nicht genannt werden) oder Die SuS beschreiben die Relevanz von Variation für die Anpassungsfähigkeit einer Population"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten von VERRINGERTER VARIABILITÄT  (Fachbegriffe müssen nicht genannt werden) und Die SuS beschreiben die Relevanz von Variation für die Anpassungsfähigkeit einer Population"
+                }
+            },
+            "Zufall": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Zufall wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Zufall ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben die Allelfrequenzen in durch Habitatfragmentierung entstandenden Einzelpopulationen als zufällig und/oder Die SuS beschreiben die Isolation von Teilpopulationen als zufällig"
+                }
+            }
+        },
+        "skills": {
+            "Claim": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Der Claim ist nicht als wissenschaftlich überprüfbare Behauptung formuliert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Claim ist teilweise als wissenschaftlich überprüfbare Behauptung formuliert, hat aber rein deskriptiven Charakter."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Der Claim ist als wissenschaftlich überprüfbare Behauptung formuliert und geht über eine rein deskriptive Beschreibung hinaus."
+                }
+            },
+            "Evidence": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Evidence stellt keine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die Evidence stellt eine teilweise korrekte Beobachtung aus dem Experiment/Modell oder einen teilweise korrekten wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Evidence stellt eine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                }
+            },
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf aber stellt keinen sinnvollen Zusammenhang dazwischen her."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf  und  und stellt einen sinnvollen Zusammenhang her."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C und E auf  und  stellt einen sinnvollen Zusammenhang dazwischen her."
+                }
+            }
+        }
+    },
+    "9.2": {
+        "solution": "C: Antibiotikaresistenzen entstehen zufällig durch MUTATION und setzen sich durch NATÜRLICHE SELEKTION in Populationen durch. E: Einzelne Bakterien mutieren [MUTATION] zufällig [ZUFALL]; die mutierten Bakterien  [PHÄNOTYPISCHE VARIATION] haben eine erhöhte Überlebenschance [UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN] auf dem Agar mit mehr Antibiotikum und vermehren sich [VERERBUNG] R: Durch zufällige [ZUFALL] Mutationen [MUTATION] haben einige Bakterien eine bessere Überlebenschance / höheren Fortpflanzungserfolg [UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN / FORTPFLANZUNGSERFOLG] trotz Antibiotikum. Dies führt dazu, dass sich die Allel-/Merkmalsfrequenz [VERÄNDERTE ALLELFREQUENZ / MERKMALSFREQUENZ] in einer Population im Laufe der Zeit verändern.",
+        "prompt": "Aufgabe: Wie würde ein Evolutionsbiologe bzw. eine Evolutionsbiologin die Entstehung von Antibiotikaresistenzen erklären? Schreibe eine kurze Erklärung basierend auf dem, was du bisher zu Evolution gelernt hast! Hinweis: Beachte das CER-Schema.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Erklärung beschreibt weder Entstehung von Antibiotikaresistenzen durch Mutation noch das Durchsetzen der Resistenz in einer Population durch natürliche Selektion wiss. korrekt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Erklärung beschreibt die Entstehung von Antibiotikaresistenzen durch Mutation oder das Durchsetzen der Resistenz in einer Population durch natürliche Selektion und  verwendet dabei 1-2 der Konzepte [UNTERSCH. ÜBERLEBENSCHANCEN, UNTERSCH. FORTPFLANZUNGSERFOLG, VERERBUNG, VERÄNDERTE ALLELFREQUENZ, VERÄNDERTE MERKMALSFREQUENZ, PHÄNOTYPISCHE VARIATION].",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Erklärung beschreibt die Entstehung von Antibiotikaresistenzen durch Mutation und das Durchsetzen der Resistenz in einer Population durch natürliche Selektion. und  verwendet 2-6 der Konzepte [UNTERSCH. ÜBERLEBENSCHANCEN, UNTERSCH. FORTPFLANZUNGSERFOLG, VERERBUNG, VERÄNDERTE ALLELFREQUENZ, VERÄNDERTE MERKMALSFREQUENZ, PHÄNOTYPISCHE VARIATION].",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Mutation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Mutation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Mutation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS erklären die Entstehung von Antibiotikaresistenzen durch Mutation. oder Die SuS erklären die Entstehung phänotypischer Variation durch Mutationen auf Genebene"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS erklären die Entstehung von Antibiotikaresistenzen durch Mutation. und Die SuS erklären die Entstehung phänotypischer Variation durch Mutationen auf Genebene"
+                }
+            },
+            "Natürliche Selektion": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept natürliche Selektion wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen natürliche Selektion ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen mit unterschiedlichen Merkmalen UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN haben oder (1 von 3)  Die SuS beschreiben, dass Individuen aufgrund von unterschiedlichen Überlebenschancen UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben oder (1 von 3) Die SuS beschreiben, dass es durch die o.g. Prozesse zu einer VERÄNDERTEN ALLELFREQUENZ kommt (Fachbegriffe müssen nicht genannt werden, siehe Beispiel rechts)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben, dass Individuen mit unterschiedlichen Merkmalen UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN haben und/oder (2 von 3)  Die SuS beschreiben, dass Individuen aufgrund von unterschiedlichen Überlebenschancen UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG haben und/oder (2 von 3) Die SuS beschreiben, dass es durch die o.g. Prozesse zu einer VERÄNDERTEN ALLELFREQUENZ kommt (Fachbegriffe müssen nicht genannt werden, siehe Beispiel rechts)"
+                }
+            },
+            "Genetik": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genetik wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genetik ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf Die VERERBUNG der relevanten Merkmale auf Genebene oder auf Merkmalsebene"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen Bezug auf Die VERERBUNG der relevanten Merkmale auf Genebene und auf Merkmalsebene"
+                }
+            },
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten veränderter Merkmalsfrequenzen  oder Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten veränderter Merkmalsfrequenzen  und Die SuS beschreiben das Vorhandensein phänotypischer Variation"
+                }
+            },
+            "Zufall": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Zufall wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Zufall ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Auftreten von Mutationen als zufälligen Prozess und/oder Die SuS beschreiben genotypische/phänotypische Variation in einer Population als zufällig"
+                }
+            },
+            "Wahrscheinlichkeit": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Wahrscheinlichkeit wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Wahrscheinlichkeit ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben UNTERSCHIEDLICHE ÜBERLEBENSCHANCEN als einen Prozess, der von Wahrscheinlichkeit bestimmt wird und/oder Die SuS beschreiben UNTERSCHIEDLICHEN FORTPFLANZUNGSERFOLG als einen Prozess, der von Wahrscheinlichkeit bestimmt wird"
+                }
+            }
+        },
+        "skills": {
+            "Claim": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Der Claim ist nicht als wissenschaftlich überprüfbare Behauptung formuliert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Claim ist teilweise als wissenschaftlich überprüfbare Behauptung formuliert, hat aber rein deskriptiven Charakter."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Der Claim ist als wissenschaftlich überprüfbare Behauptung formuliert und geht über eine rein deskriptive Beschreibung hinaus."
+                }
+            },
+            "Evidence": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Evidence stellt keine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die Evidence stellt eine teilweise korrekte Beobachtung aus dem Experiment/Modell oder einen teilweise korrekten wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Evidence stellt eine Beobachtung aus dem Experiment/Modell oder einen wissenschaflich belegbaren Fakt/Zusammenhang dar, der den Claim untermauert."
+                }
+            },
+            "Reasoning": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf aber stellt keinen sinnvollen Zusammenhang dazwischen her."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C oder E auf  und  und stellt einen sinnvollen Zusammenhang her."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Das Reasoning greift Aspekte aus C und E auf  und  stellt einen sinnvollen Zusammenhang dazwischen her."
+                }
+            }
+        }
+    },
+    "2.2": {
+        "solution": "Unterschiede: Gefiederfarbe, Musterung der Flügel, Musterung am KopfGemeinsamkeiten: Flügel, Körperform, Schnabelform, Gefieder, Augen, Schnabel",
+        "prompt": "Aufgabe: Sammle zusammen mit einem Partner äußere Merkmale der Stadttauben und unterscheide diese in Gemeinsamkeiten und Unterschiede zwischen den Individuen. Nutze dazu die vorgegebene Tabelle.Beispiele:    Alle Tauben haben zwei Augen (Gemeinsamkeit).    Eine der Tauben hat einen besonders großen Kopf (Unterschied).",
+        "learning_performance": {
+            "0": {
+                "rule": "Jeweils weniger als zwei korrekte und relevante Gemeinsamkeiten oder Unterschiede werden genannt.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Mindestens zwei korrekte und relevante Gemeinsamkeiten oder mindestens zwei korrekte Unterschiede werden genannt.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Jeweils mindestens zwei korrekte und relevante Gemeinsamkeiten und Unterschiede werden genannt.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS ordnen entweder mindestens 2 Merkmale der Tauben korrekt als Unterschiede oder Gemeinsamkeiten ein"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS ordnen je mindestens 2 Merkmale der Tauben korrekt als Unterschiede oder Gemeinsamkeiten ein"
+                }
+            }
+        },
+        "skills": {
+            "Konzentration auf bestimmte Aspekte": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Schüler:innen beschreiben für die Aufgabe irrelevante Aspekte."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Die Schüler:innen beschreiben für die Aufgabe relevante und irrelevante Aspekte."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Schüler:innen beschreiben für die Aufgabe relevante Aspekte."
+                }
+            }
+        }
+    },
+    "2.4": {
+        "solution": "Ursache für Unterschiede zwischen den Individuen:Rekombination bei Meiose und Befruchtung führt auch bei konstantem Genpool zum Auftreten innerartlicher Variation durch neue Merkmalskombinationen. ",
+        "prompt": "Aufgabe: Entwickle Hypothesen zur Ursache der Unterschiede zwischen Individuen / Variation innerhalb der Art. Greife dabei auf dein Vorwissen zum Thema Genetik aus der Sekundarstufe I zurück. (LK stellt Frage: \"Wie entsteht Variation in einer Population, wenn sich die Allelfrequenzen im Genpool nicht verändern?\") ",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Schüler:innen nennen keine wissenschaftlich korrekte Hypothese/Vermutung zur Ursache der innerartlichen Variation bei Stadttauben.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Schüler:innen nennen eine wissenschaftlich korrekte Hypothese/Vermutung zur Ursache der innerartlichen Variation bei Stadttauben mit Bezug auf Rekombination, Crossing-over oder Mutation.",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Schüler:innen nennen mindestens zwei wissenschaftlich korrekte Hypothesen/Vermutungen zur Ursache der innerartlichen Variation bei Stadttauben mit Bezug auf Rekombination, Crossing-over oder Mutation.",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Genetik": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genetik wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genetik ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben Rekombination als potentielle Ursache genotypischer Variation (bei konstantem Genpool)oderDie SuS beschreiben Crossing-over als potentielle Ursache genotypischer Variation (bei konstantem Genpool)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben Rekombination als potentielle Ursache genotypischer Variation (bei konstantem Genpool)und Die SuS beschreiben Crossing-over als potentielle Ursache genotypischer Variation (bei konstantem Genpool)"
+                }
+            },
+            "Variation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Variation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Variation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Vorhandensein genotypischer Variation oderDie SuS beschreiben das Vorhandensein phänotypischer Variation"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben das Vorhandensein genotypischer Variation undDie SuS beschreiben das Vorhandensein phänotypischer Variation"
+                }
+            },
+            "Mutation": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Mutation wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Mutation ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben Mutation teilweise wissenschaftlich korrekt oder nennen Mutation als Ursache für Unterschiede."
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben Mutation wiss. korrekt als Begründung für genotypische Variation (Unterschiede zwischen den Individuen)."
+                }
+            },
+            "Zufall": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Zufall wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Zufall ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": ""
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS beschreiben Rekombination/CO/Mutation als zufälligen Prozess.oderDie SuS beschreiben genotypische/phänotypische Variation in einer Population als zufällig"
+                }
+            }
+        },
+        "skills": {
+            "Hypothesen/Vermutungen aufstellen": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Es wird keine überprüfbare, präzise formulierte Frage (hier: Hypothese oder Vermutung) angeboten."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Es wird eine teilweise überprüfbare, präzise formulierte Frage (hier: Hypothese oder Vermutung) angeboten."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Es wird eine überprüfbare, präzise formulierte Frage (hier: Hypothese oder Vermutung) angeboten."
+                }
+            }
+        }
+    },
+    "2.5": {
+        "solution": "Der Nutzen des Modells liegt darin, dass es den Mechanismus der Entstehung von Variation allein durch Rekombination und Crossing-Over darstellt. Außerdem stellt es die Chromosomen vergrößert dar und reduziert die Anzahl der Chromosomen und der beteiligten Gene, sodass sich der Mechanismus leichter nachvollziehen lässt.",
+        "prompt": "Aufgabe: Öffne bitte die PDF-Datei \"Modell: Baue deine eigene Taube!\". Lies dir die Arbeitsanweisungen gut durch und schaue dir die Tauben-Schablone genau an.Beschreibe gemeinsam mit einem Partner bzw. einer Partnerin den Nutzen bzw. Zweck des Modells in eigenen Worten.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Beschreibung des Nutzens des Modells enthält keinen Bezug auf strukturelle oder prozedurale genetische Aspekte.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Beschreibung des Nutzens des Modells bezieht sich nur auf strukturelle genetische Aspekte (Gene, Allele, Chromosomen)oder  bezieht sich nur auf prozedurale genetische Aspekte des Modells (Rekombination/CO)und bezieht sich entweder auf die Reduktion oder verbesserte Visualisierung durch das Modell (s.u.)",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Beschreibung des Nutzens des Modells bezieht sich auf strukturelle genetische Aspekte des Modells (Gene, Allele, Chromosomen)und bezieht sich auf prozedurale genetische Aspekte des Modells (Rekombination/CO)und bezieht sich entweder auf die Reduktion oder verbesserter Visualisierung durch das Modell (s.u.)",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Genetik": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genetik wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genetik ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen  Bezug auf strukturelle (Gene/Allele/Chromosomen) oderauf prozedurale Aspekte des Modells (Rekombination/CO)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen  Bezug auf strukturelle (Gene/Allele/Chromosomen) undauf prozedurale Aspekte des Modells (Rekombination/CO)"
+                }
+            }
+        },
+        "skills": {
+            "Erläutern die Erklärungskraft eines Modells": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Der Nutzen (die Grenzen) des Modells wird nicht vollständig und präzise mit Bezug auf das Material beschrieben."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Nutzen (die Grenzen) des Modells wird teilweise präzise mit Bezug auf das Material beschrieben."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Der Nutzen (die Grenzen) des Modells wird vollständig und präzise mit Bezug auf das Material beschrieben."
+                }
+            }
+        }
+    },
+    "2.6": {
+        "solution": "Die Anzahl der Chromosomen (nur ein homologes Paar) und der Gene und die Größe der Chromosomen stellen eine Vereinfachung der Realität dar, bestimmte Formen der Rekombination können dadurch nicht abgebildet werden. Außerdem kann das Modell nur die Entstehung von Vielfalt durch Rekombination und Crossing-Over erklären, aber nicht die Entstehung von Variation z.B. durch neue, mutierte Allele.",
+        "prompt": "Aufgaben: Reflektiere mit einem Partner über die Grenzen und Vereinfachungen des Modells im Vergleich zur Realität und notiert eure Ergebnisse.",
+        "learning_performance": {
+            "0": {
+                "rule": "Die Beschreibung der Grenzen des Modells enthält keinen Bezug auf strukturelle oder prozedurale genetische Aspekte.",
+                "description": "nan"
+            },
+            "1": {
+                "rule": "Die Beschreibung der Grenzen des Modells bezieht sich nur auf strukturelle genetische Aspekte (Gene, Allele, Chromosomen)oder  bezieht sich nur auf prozedurale genetische Aspekte des Modells  (z.B. Rekombination/CO, Polygenie, Genkopplung)und nennt zumindest eine korrekte Vereinfachung des Modells (s.o.)",
+                "description": "nan"
+            },
+            "2": {
+                "rule": "Die Beschreibung der Grenzen des Modells bezieht sich zumindest auf strukturelle genetische Aspekte (Gene, Allele, Chromosomen)und  bezieht sich auf prozedurale genetische Aspekte des Modells  (z.B. Rekombination/CO, Polygenie, Genkopplung)und nennt zumindest eine korrekte Vereinfachung des Modells (s.o.)",
+                "description": "nan"
+            }
+        },
+        "knowledge_elements": {
+            "Genetik": {
+                "0": {
+                    "rule": "Keine Nennung",
+                    "description": "Das Konzept Genetik wird nicht verwendet."
+                },
+                "1": {
+                    "rule": "Inhaltsleere Wortnutzung",
+                    "description": "Nutzen Genetik ohne einen sinnvollen Zusammenhang zur Aufgabe."
+                },
+                "2": {
+                    "rule": "nicht zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen  Bezug auf strukturelle (Gene/Allele/Chromosomen) oderauf prozedurale Aspekte des Modells (Rekombination/CO)"
+                },
+                "3": {
+                    "rule": "zielgerichtete Verwendung",
+                    "description": "Die SuS nehmen  Bezug auf strukturelle genetische (Gene/Allele/Chromosomen) und  auf prozedurale genetische Aspekte des Modells (z.B. Rekombination/CO, Polygenie, Genkopplung)"
+                }
+            }
+        },
+        "skills": {
+            "Erläutern die Erklärungskraft eines Modells": {
+                "0": {
+                    "rule": "nicht vorhanden",
+                    "description": "Die Grenzen (/der Nutzen) des Modells wird nicht vollständig und präzise mit Bezug auf das Material beschrieben."
+                },
+                "1": {
+                    "rule": "teilweise vorhanden",
+                    "description": "Der Nutzen (die Grenzen) des Modells wird teilweise präzise mit Bezug auf das Material beschrieben."
+                },
+                "2": {
+                    "rule": "vorhanden",
+                    "description": "Die Grenzen (/der Nutzen) des Modells wird umfangreich und präzise mit Bezug auf das Material beschrieben."
+                }
+            }
+        }
+    }
+}
