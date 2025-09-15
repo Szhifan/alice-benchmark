@@ -6,4 +6,4 @@ move.sh
 __pycache__/
 *.DS_Store
 wandb*
-test*
+test.py
