@@ -350,7 +350,7 @@ class BaseLoader:
 
 
 class RubricRetrievalLoader(BaseLoader):
-    def __init__(self, train_frac=1, task_type="ke"):
+    def __init__(self, train_frac=1, task_type="lp"):
         """
         Alice dataset for snet and xnet pair-wise ranking. 
         Each entry is expended to include all rubric levels.
@@ -377,5 +377,5 @@ class RubricRetrievalLoader(BaseLoader):
         self.test_uq = _expand_dataset(self.test_uq)
 if __name__ == "__main__":
     from train_utils import get_tokenizer
-    loader = RubricRetrievalLoader(train_frac=0.01, task_type="ke")
+    loader = RubricRetrievalLoader(train_frac=1, task_type="ke")
     print(loader.train[:3])
