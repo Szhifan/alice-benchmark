@@ -255,7 +255,7 @@ class BaseLoader:
             fields_to_keep = ["id","question_id","question","answer","sample_solution","rubric","level"]
             entry["question"] = meta_info.get("prompt", "")
             entry["sample_solution"] = meta_info.get("solution", "")
-            rubric = meta_info.get("learning_performance", {})
+            rubric = meta_info["learning_performance"]
             entry["rubric"] = {k: v['rule'] for k, v in rubric.items()}
             entry["level"] = int(next(iter(entry["learning_performance"].values())))
             new_entry = {k: entry[k] for k in entry if k in fields_to_keep}
@@ -335,12 +335,12 @@ class BaseLoader:
                 for new_entry in self.retrieve_metadata(entry):
                     new_test_uq.append(new_entry)
         test_uq_data = new_test_uq
-        self.train = Dataset.from_list(train_data)
-        # if self.train_frac < 1:
-        #     train_dataset = train_dataset.shuffle(seed=42).select(range(int(len(train_dataset)*self.train_frac)))
-        # val_dataset = train_dataset.train_test_split(test_size=0.1, seed=42)["test"]
-        # self.train = train_dataset
-        # self.val = val_dataset
+        train_dataset = Dataset.from_list(train_data)
+        if self.train_frac < 1:
+            train_dataset = train_dataset.shuffle(seed=42).select(range(int(len(train_dataset)*self.train_frac)))
+        val_dataset = train_dataset.train_test_split(test_size=0.1, seed=42)["test"]
+        self.train = train_dataset
+        self.val = val_dataset
         self.test_ua = Dataset.from_list(test_ua_data)
         self.test_uq = Dataset.from_list(test_uq_data)
 

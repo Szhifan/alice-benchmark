@@ -239,6 +239,7 @@ class AsagTrainer:
 
     def train(self):
         print("Starting training...")
+        metric = "eval_accuracy" if self.task_args.model_class in ["snet", "xnet"] and self.task_args.n_labels > 1 else "eval_loss"
         train_args = TrainingArguments(
             # optimization parameters
             num_train_epochs=self.train_args.max_epoch,
@@ -256,10 +257,10 @@ class AsagTrainer:
             gradient_checkpointing_kwargs = {"use_reentrant": False} if self.multi_gpu else None,
             # logging and saving parameters
             label_names=["labels"],
-            greater_is_better=True,
+            greater_is_better=metric == "eval_accuracy",
             save_only_model=True,
             load_best_model_at_end=True,
-            metric_for_best_model="eval_accuracy" if not self.task_args.model_class == "gen" else "eval_loss",
+            metric_for_best_model=metric,
             logging_dir=os.path.join(self.train_args.save_dir, "logs"),
             logging_steps=50,
             save_strategy="best",
