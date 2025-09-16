@@ -101,6 +101,18 @@ class BackwardSupportedArguments:
         default="last", 
         metadata={"help": "Pooling type for the model output. Options: avg, weightedavg, cls, last"}
     )
+    num_prune_layers: Optional[str] = field(
+        default=0,
+        metadata={"help": "Delete the top n layers of the model."}
+    )
+    num_fuse_layers: Optional[str] = field(
+        default=0,
+        metadata={"help": "Fuse the top n layers of the model into one embedding layer."}
+    )
+    fuse_type: Optional[str] = field(
+        default="avg",
+        metadata={"help": "Pooling type for the fused layer. Options: avg, weighted"}
+    )
     def __post_init__(self):
         self.architecture = self.architecture.upper()
         if self.architecture not in ARCHITECTURES:
@@ -110,7 +122,8 @@ class BackwardSupportedArguments:
         if self.pool_type not in ("avg", "weightedavg", "cls", "last"):
             self.pool_type = "avg"
             print(f"Invalid pool_type {self.pool_type}, using default 'avg' pooling.")
-
+        assert self.mask_type in ("MASK0", "BACK"), "mask_type must be one of ('MASK0', 'BACK')"
+        assert self.fuse_type in ("avg", "weighted"), "fuse_type must be one of ('avg', 'weighted')"
     def to_dict(self):
         return asdict(self)
 

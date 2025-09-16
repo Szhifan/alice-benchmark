@@ -52,13 +52,16 @@ class LlamaModel(LlamaPreTrainedModel):
         self.unsink_layers = set(unsink_layers if unsink_layers is not None else [])
         bidir_layers = getattr(config, 'bidir_layers', None)
         self.bidir_layers = set(bidir_layers if bidir_layers is not None else [])
-        self.num_hidden_layers = config.num_hidden_layers # the total number of converted backbone layers
+        self.num_prune_layers = getattr(config, 'num_prune_layers', 0)
+        self.num_hidden_layers = config.num_hidden_layers - self.num_prune_layers
+        self.num_fuse_layers = getattr(config, 'num_fuse_layers', 0)
         num_converted_layers = self.num_unsink_layers + self.num_bidir_layers
         _is_mask0 = self.mask_type == "MASK0"
 
         assert not ((self.unsink_layers or self.bidir_layers) and (self.num_unsink_layers or self.num_bidir_layers))
         assert num_converted_layers <= self.num_hidden_layers
-
+        assert self.num_hidden_layers > 0
+        assert self.num_hidden_layers >= self.num_fuse_layers
         if self.architecture == "EXTEND":
             self.num_hidden_layers += num_converted_layers
             self.layers.extend([LlamaDecoderLayer(config, config.num_hidden_layers + layer_idx) for layer_idx in range(num_converted_layers)])
@@ -75,8 +78,10 @@ class LlamaModel(LlamaPreTrainedModel):
             self.bidir_layers = {layer if layer >= 0 else layer + self.num_hidden_layers for layer in self.bidir_layers}
             for i in self.bidir_layers | (self.unsink_layers if _is_mask0 else set()):
                 self.layers[i].self_attn.is_causal = False
+        self.fuse_layers = {layer for layer in range(self.num_hidden_layers - self.num_fuse_layers, self.num_hidden_layers)}
         # -----------------------------------------------------------------------------------------------------------------
-
+        self.fuse_weights = nn.Parameter(torch.rand(self.num_fuse_layers))
+        nn.xavier_uniform_(self.fuse_weights.view(1, -1))
         # Initialize weights and apply final processing
         self.post_init()
     @check_model_inputs
@@ -135,7 +140,7 @@ class LlamaModel(LlamaPreTrainedModel):
         position_embeddings = self.rotary_emb(hidden_states, position_ids)
         
         # decoder layers
-        h1, h2 = None, 0
+        fuse_layers = () 
         for i in range(self.num_hidden_layers):
             decoder_layer = self.layers[i]
             if isinstance(self.unsink_layers, int):
@@ -148,8 +153,6 @@ class LlamaModel(LlamaPreTrainedModel):
                     bidir_attention_mask if is_bidir else causal_mask
             
             reverse_flag = is_unsink and _is_flash_attn and not _is_mask0
-            if i == self.bidir_layers:
-                h1 = hidden_states
 
 
             hidden_states = flip_tensor(hidden_states, reverse_flag)
@@ -164,35 +167,18 @@ class LlamaModel(LlamaPreTrainedModel):
                 position_embeddings=position_embeddings,
                 **kwargs,
             )
-
+            fuse_layers = fuse_layers + (hidden_states,) if i in self.fuse_layers else fuse_layers
             hidden_states = flip_tensor(hidden_states, reverse_flag)
 
 
-        forward_hidden_states = h1 if _is_intera else h2
-        for i in range(self.bidir_layers, self.config.num_hidden_layers if _is_intera else 0):
-            decoder_layer = self.layers[i]
-
-            tem = decoder_layer.self_attn.is_causal
-            decoder_layer.self_attn.is_causal = True
-
-            forward_hidden_states = decoder_layer(
-                forward_hidden_states,
-                attention_mask=causal_mask,
-                position_ids=position_ids,
-                cache_position=cache_position,
-                position_embeddings=position_embeddings,
-                past_key_value=past_key_values,
-                **kwargs,
-            )
-            
-            decoder_layer.self_attn.is_causal = tem
-
-        hidden_states += forward_hidden_states
-
         hidden_states = self.norm(hidden_states)
         # add hidden states from the last decoder layer
-
-
+        if fuse_layers and self.fuse_type == "avg":
+            hidden_states = torch.stack(fuse_layers, dim=0).mean(dim=0)
+        elif fuse_layers and self.fuse_type == "weighted":
+            fuse_weights = torch.softmax(self.fuse_weights, dim=0)
+            hidden_states = torch.stack(fuse_layers, dim=0)
+            hidden_states = (fuse_weights.view(-1, 1, 1, 1) * hidden_states).sum(dim=0)
 
         return BaseModelOutputWithPast(
             last_hidden_state=hidden_states,
