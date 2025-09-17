@@ -55,7 +55,6 @@ class AsagSNet(nn.Module):
         labels: Optional[torch.LongTensor] = None,
 
     ) -> Union[Tuple, SequenceClassifierOutput]:
-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
         
         transformer_outputs_a = self.encoder(
             input_ids=input_ids_a,

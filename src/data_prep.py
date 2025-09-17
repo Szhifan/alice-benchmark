@@ -123,7 +123,7 @@ def encode_special_tokens_separate(example, tokenizer, other_fields: list[str] =
 
 def encode_with_fields_separate_rubric(
     example, tokenizer, fields: list[str] = ["answer"], 
-    add_instruction: bool = False, format: Literal["natural_lang", "structured"] = "natural_lang"
+    add_instruction: bool = False, format: Literal["natural_lang", "structured"] = "structured"
 ):
     """
     Encoding function for snet llm architecture.
