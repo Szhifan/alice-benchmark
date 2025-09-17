@@ -81,7 +81,6 @@ class LlamaModel(LlamaPreTrainedModel):
         self.fuse_layers = {layer for layer in range(self.num_hidden_layers - self.num_fuse_layers, self.num_hidden_layers)}
         # -----------------------------------------------------------------------------------------------------------------
         self.fuse_weights = nn.Parameter(torch.rand(self.num_fuse_layers))
-        nn.xavier_uniform_(self.fuse_weights.view(1, -1))
         # Initialize weights and apply final processing
         self.post_init()
     @check_model_inputs

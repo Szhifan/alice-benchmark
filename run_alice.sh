@@ -6,7 +6,7 @@ RESULTS_ROOT="${ROOT}/results"
 mkdir -p ${RESULTS_ROOT}
 
 ### NAME YOUR EXPERIMENT HERE ##
-EXP_NAME="gbert+a+q"
+EXP_NAME="llama3.2-3b-qasr"
 ################################
 
 ## Local variables for current experiment
@@ -16,12 +16,14 @@ export WANDB_NAME="${EXP_NAME}"
 export WANDB_NOTES=""
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
-accelerate launch src/train_xnet.py --save-dir "${EXP_ROOT}" \
-    --base-model "deepset/gbert-base" \
+accelerate launch src/train_llm_xnet.py --save-dir "${EXP_ROOT}" \
+    --base-model "meta-llama/Llama-3.2-3B" \
     --batch-size 16 \
     --train-frac 1 \
-    --lr 3e-5 \
-    --max-epoch 5 \
+    --lr 1e-4 \
+    --input-fields q a s r \
+    --log-wandb \
+    --max-epoch 6 \
     --use-lora 2>&1 | tee "out.log"
 
             
