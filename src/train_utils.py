@@ -140,7 +140,13 @@ class ModelLoader:
             model = AsagSNet(config,
                              lora_config=self.lora_config if self.train_args.use_lora else None,
                              bnb_config=self.bnb_config if self.train_args.use_bnb else None)
-            device = torch.device(self.device_map[''] if 'cuda' in self.device_map[''] else DEFAULT_DEVICE)
+            device_value = self.device_map['']
+            if isinstance(device_value, int):
+                device = torch.device(f"cuda:{device_value}" if torch.cuda.is_available() else DEFAULT_DEVICE)
+            elif isinstance(device_value, str) and device_value != 'cpu':
+                device = torch.device(device_value if torch.cuda.is_available() else DEFAULT_DEVICE)
+            else:
+                device = torch.device(DEFAULT_DEVICE)
             model = model.to(device)
         elif self.task_args.model_class == "xnet":
             print("Loading with AutoModelForSequenceClassification...")

@@ -98,6 +98,28 @@ def encode_rubric_separate(example, tokenizer):
     for field in rubric_output:
         example[f"rubric_{field}"] = rubric_output[field]
     return example
+def encode_special_tokens_separate(example, tokenizer, other_fields: list[str] = ["answer"]):
+    """
+    Encode rubric as one encoding and other fields as another encoding for SNet.
+    """
+    # Encode rubric separately
+    rubric_output = tokenizer(example["rubric"], max_length=512, truncation=True, add_special_tokens=True)
+    for field in rubric_output:
+        example[f"rubric_{field}"] = rubric_output[field]
+    
+    # Encode other fields together
+    text2encode = []
+    for field in other_fields:
+        if field not in example:
+            raise ValueError(f"Field '{field}' not found in the example.")
+        text2encode.append(example[field])
+    
+    text2encode = tokenizer.sep_token.join(text2encode)
+    other_output = tokenizer(text2encode, max_length=512, truncation=True, add_special_tokens=True)
+    for field in other_output:
+        example[field] = other_output[field]
+    
+    return example
 
 def encode_with_fields_separate_rubric(
     example, tokenizer, fields: list[str] = ["answer"], 
@@ -222,7 +244,66 @@ def snet_collate_fn(input_batch, pad_id=0, return_meta=False):
     if return_meta:
         return batch, meta
     return batch
-
+def pointer_network_collate_fn(input_batch, pad_id=0, return_meta=False):
+    """
+    Collate function for pointer network where each example has variable number of rubrics.
+    Handles both joint and separate encoding modes.
+    """
+    batch_size = len(input_batch)
+    max_n_seq = max(x["n_seq"] for x in input_batch)
+    
+    # Get the maximum sequence length for padding
+    max_seq_len = 0
+    for example in input_batch:
+        for seq in example["all_input_ids"]:
+            max_seq_len = max(max_seq_len, len(seq))
+    
+    # Initialize batch tensors
+    batch_input_ids = torch.full((batch_size, max_n_seq, max_seq_len), pad_id, dtype=torch.long)
+    batch_attention_mask = torch.zeros((batch_size, max_n_seq, max_seq_len), dtype=torch.long)
+    batch_token_type_ids = None
+    
+    # Check if token_type_ids exist
+    has_token_type_ids = "all_token_type_ids" in input_batch[0] and input_batch[0]["all_token_type_ids"]
+    if has_token_type_ids:
+        batch_token_type_ids = torch.zeros((batch_size, max_n_seq, max_seq_len), dtype=torch.long)
+    
+    # Create sequence mask to indicate valid sequences
+    seq_mask = torch.zeros((batch_size, max_n_seq), dtype=torch.bool)
+    
+    # Fill the batch tensors
+    for i, example in enumerate(input_batch):
+        n_seq = example["n_seq"]
+        seq_mask[i, :n_seq] = True
+        
+        for j in range(n_seq):
+            seq_len = len(example["all_input_ids"][j])
+            batch_input_ids[i, j, :seq_len] = torch.tensor(example["all_input_ids"][j])
+            batch_attention_mask[i, j, :seq_len] = torch.tensor(example["all_attention_mask"][j])
+            
+            if has_token_type_ids:
+                batch_token_type_ids[i, j, :seq_len] = torch.tensor(example["all_token_type_ids"][j])
+    
+    batch = {
+        "input_ids": batch_input_ids,
+        "attention_mask": batch_attention_mask,
+        "seq_mask": seq_mask,  # Mask for valid sequences
+        "n_seq": torch.tensor([x["n_seq"] for x in input_batch]),
+        "n_rubrics": torch.tensor([x["n_rubrics"] for x in input_batch]),
+        "labels": torch.tensor([x["labels"] for x in input_batch]),
+    }
+    
+    if has_token_type_ids:
+        batch["token_type_ids"] = batch_token_type_ids
+    
+    meta = {
+        "id": [x["id"] for x in input_batch],
+        "level": [x["labels"] for x in input_batch],  # Using labels since level was popped
+    }
+    
+    if return_meta:
+        return batch, meta
+    return batch
 # Dataset loaders
 def encode_dataset(dataset, tokenizer, enc_fn, *args, **kwargs):
     dataset = dataset.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
@@ -380,11 +461,59 @@ class RubricRetrievalLoader(BaseLoader):
         self.val = _expand_dataset(self.val)
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
+class RubricPointerNetwork(BaseLoader):
+    def __init__(self, train_frac=1, task_type="lp"):
+        """
+        Loader for rubric pointer network. 
+        """
+        super().__init__(train_frac=train_frac, task_type=task_type)
+    def encode_pointer_network(self, example, tokenizer, joint_encode=True, additional_fields=None):
+        """
+        Even simpler: use tokenizer's batch processing.
+        """
+        rubrics = list(example["rubric"].values())
+        answer = example["answer"]
+        
+        if joint_encode:
+            # Prepare pairs for batch encoding
+            text_pairs = [(answer, rubric) for rubric in rubrics]
+            # Add additional fields as single texts
+            if additional_fields:
+                text_pairs.extend([(example[field], "") for field in additional_fields 
+                                if field in example])
+            
+            # Batch encode
+            encoded = tokenizer([pair[0] for pair in text_pairs], 
+                            [pair[1] for pair in text_pairs],
+                            max_length=512, truncation=True, padding=False)
+        else:
+            # All texts as single sequences
+            texts = rubrics + [answer]
+            if additional_fields:
+                texts.extend([example[field] for field in additional_fields 
+                            if field in example])
+            
+            encoded = tokenizer(texts, max_length=512, truncation=True, padding=False)
+        
+        example["input_ids"] = encoded["input_ids"]
+        example["attention_mask"] = encoded["attention_mask"]
+        if "token_type_ids" in encoded:
+            example["token_type_ids"] = encoded["token_type_ids"]
+        
+        example["n_rubrics"] = len(rubrics)
+        example["labels"] = int(example.pop("level"))
+        
+        return example
+
+
 if __name__ == "__main__":
     from train_utils import get_tokenizer
-    import pandas as pd
-    loader = BaseLoader(task_type="lp")
-    train_original_path = "alice_data/test_uq.csv"
-    train_df = pd.read_csv(train_original_path)
-    for index, row in train_df.iterrows():
-        assert row["id"] == loader.test_uq[index]["id"], f"ID mismatch between {row['id']} and {loader.test_uq[index]['id']}"
+    from torch.utils.data import DataLoader
+    tokenizer = get_tokenizer("deepset/gbert-base")
+    loader = RubricPointerNetwork(train_frac=0.1, task_type="lp")
+    loader.test_ua = encode_dataset(loader.test_ua, tokenizer, loader.encode_pointer_network, joint_encode=False, additional_fields=["question"])
+    # Test the pointer_network_collate_fn with the encoded dataset
+    test_loader = DataLoader(loader.test_ua, batch_size=2, collate_fn=pointer_network_collate_fn)
+    for batch in test_loader:
+        print(batch)
+        break

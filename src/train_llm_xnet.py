@@ -99,29 +99,30 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     # Evaluate on test dataset
     test_model = trainer.load_model()
     inference_speed = 0
-    for test in ["test_ua", "test_uq"]:
-        test_ds = getattr(dts_loader, test)
-        print(f"***** Running evaluation on {test} *****")
-        print("  Num examples = %d", len(test_ds))
-        time_start = time.time()
-        test_predictions, test_loss = evaluate(
-            test_model,
-            test_ds,
-            batch_size=train_args.batch_size,
-            collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
-        )
-        inf_time = time.time() - time_start
-        pred_dir = os.path.join(train_args.save_dir, "predictions")
-        if not os.path.exists(pred_dir):
-            os.makedirs(pred_dir)
-        test_predictions.to_csv(os.path.join(pred_dir, f"{test}_raw_predictions.csv"), index=False)
-        test_predictions = transform_for_inference(test_predictions)
-        test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
-        test_metrics = eval_report(test_predictions)
-        save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
-        inference_speed += inf_time / test_predictions.shape[0]
-        metrics_wandb = {test: test_metrics}
-        wandb.log(metrics_wandb)
+    if is_main_process():
+        for test in ["test_ua", "test_uq"]:
+            test_ds = getattr(dts_loader, test)
+            print(f"***** Running evaluation on {test} *****")
+            print("  Num examples = %d", len(test_ds))
+            time_start = time.time()
+            test_predictions, test_loss = evaluate(
+                test_model,
+                test_ds,
+                batch_size=train_args.batch_size,
+                collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
+            )
+            inf_time = time.time() - time_start
+            pred_dir = os.path.join(train_args.save_dir, "predictions")
+            if not os.path.exists(pred_dir):
+                os.makedirs(pred_dir)
+            test_predictions.to_csv(os.path.join(pred_dir, f"{test}_raw_predictions.csv"), index=False)
+            test_predictions = transform_for_inference(test_predictions)
+            test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
+            test_metrics = eval_report(test_predictions)
+            save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
+            inference_speed += inf_time / test_predictions.shape[0]
+            metrics_wandb = {test: test_metrics}
+            wandb.log(metrics_wandb)
     if train_args.no_save:
         print("No-save flag is set. Deleting checkpoint.")
         for root, dirs, files in os.walk(train_args.save_dir):
