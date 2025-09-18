@@ -18,13 +18,12 @@ from utils import (
 from inference import evaluate
 from data_prep import (
     RubricRetrievalLoader,
-    encode_rubric_separate,
-    encode_with_fields_separate_rubric
+    encode_special_tokens_separate
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
 import torch.distributed as dist
-dist.init_process_group(backend='nccl')
+# dist.init_process_group(backend='nccl')
 def is_main_process():
     """Check if the current process is the main process (rank 0)."""
     return not dist.is_available() or not dist.is_initialized() or dist.get_rank() == 0
@@ -35,7 +34,7 @@ class TaskArguments:
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     n_labels: int = field(default=2, metadata={"help": "number of labels for classification"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
-    input_fields: List[str] = field(default_factory=lambda: ['a']),
+    input_fields: List[str] = field(default_factory=lambda: ['a'])
     model_class: str = field(default='snet', metadata={"help": "model class to use"})
     def __post_init__(self):
         """Validation checks after initialization"""
@@ -70,7 +69,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     # Load the dataset
     dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
     tokenizer = get_tokenizer(task_args.base_model)
-    dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_with_fields_separate_rubric, fields=convert_field(task_args.input_fields))
+    dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_special_tokens_separate, fields=convert_field(task_args.input_fields))
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args)
 
     if not train_args.test_only:

@@ -98,7 +98,7 @@ def encode_rubric_separate(example, tokenizer):
     for field in rubric_output:
         example[f"rubric_{field}"] = rubric_output[field]
     return example
-def encode_special_tokens_separate(example, tokenizer, other_fields: list[str] = ["answer"]):
+def encode_special_tokens_separate(example, tokenizer, fields: list[str] = ["answer"]):
     """
     Encode rubric as one encoding and other fields as another encoding for SNet.
     """
@@ -109,7 +109,7 @@ def encode_special_tokens_separate(example, tokenizer, other_fields: list[str] =
     
     # Encode other fields together
     text2encode = []
-    for field in other_fields:
+    for field in fields:
         if field not in example:
             raise ValueError(f"Field '{field}' not found in the example.")
         text2encode.append(example[field])
@@ -287,7 +287,7 @@ def pointer_network_collate_fn(input_batch, pad_id=0, return_meta=False):
     batch = {
         "input_ids": batch_input_ids,
         "attention_mask": batch_attention_mask,
-        "seq_mask": seq_mask,  # Mask for valid sequences
+        "seq_mask": seq_mask, 
         "n_seq": torch.tensor([x["n_seq"] for x in input_batch]),
         "n_rubrics": torch.tensor([x["n_rubrics"] for x in input_batch]),
         "labels": torch.tensor([x["labels"] for x in input_batch]),
@@ -502,7 +502,7 @@ class RubricPointerNetwork(BaseLoader):
         
         example["n_rubrics"] = len(rubrics)
         example["labels"] = int(example.pop("level"))
-        
+        example["n_seq"] = len(example["input_ids"])
         return example
 
 
