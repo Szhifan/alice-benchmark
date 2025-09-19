@@ -117,4 +117,5 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
 if __name__ == "__main__":
     parser = HfArgumentParser((TaskArguments, AsagTrainingArguments, BackwardSupportedArguments))
     task_args, train_args, custom_model_args = parser.parse_args_into_dataclasses()
+    train_args.use_lora = True
     main(task_args, train_args, custom_model_args)

@@ -18,13 +18,18 @@ from utils import (
 )
 from inference import evaluate_gen
 from data_prep import (
-    RubricRetrievalLoader,
+    BaseLoader,
     encode_generation, 
     encode_dataset
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
 import shutil
+import torch.distributed as dist
+dist.init_process_group(backend='nccl')
+def is_main_process():
+    """Check if the current process is the main process (rank 0)."""
+    return not dist.is_available() or not dist.is_initialized() or dist.get_rank() == 0
 @dataclass
 class TaskArguments:
     """Task/experiment related arguments dataclass"""
@@ -32,16 +37,16 @@ class TaskArguments:
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     n_labels: int = field(default=2, metadata={"help": "number of labels for classification"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
-    input_fields: List[str] = field(default=None, 
+    input_fields: List[str] = field(default_factory=lambda: None, 
                                    metadata={"help": "fields to use as input for the model"})
     model_class: str = field(default='gen', metadata={"help": "model class to use"})
     def __post_init__(self):
         """Validation checks after initialization"""
         assert self.n_labels > 0, "n_labels must be positive"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
-        assert all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
-        assert self.input_format in ['structured', 'natural_language'], "input_format must be one of ['structured', 'natural_language']"
 def convert_field(fields_input_list):
+    if not fields_input_list:
+        return None
     map = {
         "a": "answer",
         "r": "rubric",
@@ -56,7 +61,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         os.makedirs(train_args.save_dir)
 
     wandb.login()
-    if train_args.log_wandb:
+    if train_args.log_wandb and is_main_process():
         wandb.init(
             config={**vars(train_args), **vars(task_args)},
             dir=train_args.save_dir,
@@ -67,7 +72,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         wandb.init(mode="disabled")
     print("Training arguments: %s", train_args)
     # Load the dataset
-    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
+    dts_loader = BaseLoader(train_frac=task_args.train_frac)
     tokenizer = get_tokenizer(task_args.base_model)
 
 
@@ -78,7 +83,13 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         enc_fn=encode_generation,
         additional_fields=input_fields
     )
-
+    dts_loader.val = encode_dataset(
+        dts_loader.val,
+        tokenizer=tokenizer,
+        enc_fn=encode_generation,
+        train=False,
+        additional_fields=input_fields
+    )
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args)
 
     if not train_args.test_only:

@@ -2,7 +2,7 @@ from typing import Literal
 from datasets import load_dataset, enable_caching, Dataset, disable_caching
 import json
 import torch
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, DataCollatorForLanguageModeling
 """
 Dataprep pipeline: 
 1. Load the Alice dataset from json files.
@@ -148,9 +148,9 @@ def encode_with_fields_separate_rubric(
 
 def encode_generation(example, tokenizer, train=True, additional_fields=None):
     """
-    Encode text for generation task 
+    Encode text for generation task
     """
-    rubric = json.loads(example["rubric"])
+    rubric = example["rubric"]
     addition_input_text = ""
     if additional_fields is not None:
         
@@ -164,9 +164,11 @@ def encode_generation(example, tokenizer, train=True, additional_fields=None):
     if train:
         response = f"Antwort: {example['level']}"
         text2encode += response
-    output = tokenizer(text2encode, max_length=512, truncation=True)
-    for field in output:
-        example[field] = output[field]
+    encoded = tokenizer(text2encode, max_length=1024, truncation=True)
+
+    for field in encoded:
+        example[field] = encoded[field]
+    example["text"] = text2encode
     return example
 
 # collate functions
@@ -177,15 +179,10 @@ def gen_collate_fn(input_batch, pad_id=0, return_meta=False):
     """
     input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True, padding_value=pad_id)
     attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True, padding_value=0)
-    if "token_type_ids" in input_batch[0]:
-
-        token_type_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["token_type_ids"]) for x in input_batch], batch_first=True)
-    else: 
-        token_type_ids = None
     batch = {
         "input_ids": input_ids,
+        "labels": input_ids.clone(), 
         "attention_mask": attention_mask,
-        "token_type_ids": token_type_ids,
     } 
     meta = {
         "id": [x["id"] for x in input_batch],
@@ -499,7 +496,6 @@ class RubricPointerNetwork(BaseLoader):
         example["attention_mask"] = encoded["attention_mask"]
         if "token_type_ids" in encoded:
             example["token_type_ids"] = encoded["token_type_ids"]
-        
         example["n_rubrics"] = len(rubrics)
         example["labels"] = int(example.pop("level"))
         example["n_seq"] = len(example["input_ids"])
@@ -507,13 +503,11 @@ class RubricPointerNetwork(BaseLoader):
 
 
 if __name__ == "__main__":
-    from train_utils import get_tokenizer
-    from torch.utils.data import DataLoader
-    tokenizer = get_tokenizer("deepset/gbert-base")
-    loader = RubricPointerNetwork(train_frac=0.1, task_type="lp")
-    loader.test_ua = encode_dataset(loader.test_ua, tokenizer, loader.encode_pointer_network, joint_encode=False, additional_fields=["question"])
-    # Test the pointer_network_collate_fn with the encoded dataset
-    test_loader = DataLoader(loader.test_ua, batch_size=2, collate_fn=pointer_network_collate_fn)
-    for batch in test_loader:
-        print(batch)
-        break
+
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
+    tokenizer.pad_token = tokenizer.eos_token
+    collate_fn = gen_collate_fn
+    loader = BaseLoader(train_frac=1, task_type="lp")
+    loader.val = loader.val.map(lambda x: encode_generation(x, tokenizer, train=False, additional_fields=["question","sample_solution"]))
+    batch = collate_fn([loader.val[i] for i in range(2)])
+    print(batch)
