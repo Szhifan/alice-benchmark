@@ -198,7 +198,7 @@ class ModelLoader:
                 config=AutoConfig.from_pretrained(cp_path),
                 lora_config=self.lora_config if use_lora else None,
             )
-        else:
+        elif self.task_args.model_class == "xnet":
             if use_lora:
                 print(f"Loading sequence classification model with LoRA from checkpoint: {cp_path}")
                 model = self._load_peft_model(cp_path)
@@ -208,6 +208,11 @@ class ModelLoader:
                     cp_path,
                     config=AutoConfig.from_pretrained(cp_path),
                 )
+        elif self.task_args.model_class == "gen":
+            model = AutoModelForCausalLM.from_pretrained(
+                cp_path,
+                config=AutoConfig.from_pretrained(cp_path),
+            )
 
         # Ensure the number of labels matches the task configuration
         model.config.num_labels = self.task_args.n_labels
@@ -245,6 +250,9 @@ class AsagTrainer:
 
     def train(self):
         print("Starting training...")
+        if self.task_args.model_class == "gen":
+            self.train_gen()
+            return 
         metric = "eval_accuracy" if self.task_args.model_class in ["snet", "xnet"] and self.task_args.n_labels > 1 else "eval_loss"
         train_args = TrainingArguments(
             # optimization parameters
@@ -285,5 +293,43 @@ class AsagTrainer:
         trainer.train()
         trainer.model.save_pretrained(self.train_args.save_dir)
         self.tokenizer.save_pretrained(self.train_args.save_dir)
-
-
+    def train_gen(self):
+        from trl import SFTTrainer, SFTConfig
+        collate_fn = gen_collate_fn
+        print("Starting generative model training...")
+        
+        sft_config = SFTConfig(
+            output_dir=self.train_args.save_dir,
+            num_train_epochs=self.train_args.max_epoch,
+            per_device_train_batch_size=self.train_args.batch_size,
+            gradient_accumulation_steps=self.train_args.grad_accumulation_steps,
+            learning_rate=self.train_args.lr,
+            weight_decay=self.train_args.weight_decay,
+            max_grad_norm=self.train_args.clip_norm,
+            warmup_ratio=self.train_args.warmup_ratio,
+            bf16=self.train_args.bf16,
+            lr_scheduler_type="cosine",
+            optim="paged_adamw_32bit" if self.is_llm else "adamw_torch",
+            remove_unused_columns=False,
+            gradient_checkpointing=True if self.is_llm else False,
+            gradient_checkpointing_kwargs={"use_reentrant": False} if self.multi_gpu else None,
+            logging_dir=os.path.join(self.train_args.save_dir, "logs"),
+            logging_steps=50,
+            save_strategy="epoch",
+            eval_strategy="epoch" if self.validation_dataset else "no",
+            save_total_limit=1,
+            packing=False,
+        )
+        
+        trainer = SFTTrainer(
+            model=self.model,
+            peft_config=self.model_loader.lora_config,
+            args=sft_config,
+            train_dataset=self.train_dataset,
+            eval_dataset=self.validation_dataset,
+            data_collator=collate_fn,
+        )
+        
+        trainer.train()
+        trainer.model.save_pretrained(self.train_args.save_dir)
+        self.tokenizer.save_pretrained(self.train_args.save_dir)
