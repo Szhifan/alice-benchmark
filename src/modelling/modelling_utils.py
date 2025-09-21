@@ -99,11 +99,11 @@ class BackwardSupportedArguments:
         default="last", 
         metadata={"help": "Pooling type for the model output. Options: avg, weightedavg, cls, last"}
     )
-    num_prune_layers: Optional[str] = field(
+    num_prune_layers: Optional[int] = field(
         default=0,
         metadata={"help": "Delete the top n layers of the model."}
     )
-    num_fuse_layers: Optional[str] = field(
+    num_fuse_layers: Optional[int] = field(
         default=0,
         metadata={"help": "Fuse the top n layers of the model into one embedding layer."}
     )
@@ -290,7 +290,7 @@ class Network_Backbone(nn.Module):
         super().__init__()
         self.lora_config = lora_config
         if bnb_config is not None:
-            self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path, bnb_config=bnb_config)
+            self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path, quantization_config=bnb_config)
         else:
             self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path)
     def init_peft(self):

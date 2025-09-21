@@ -55,6 +55,7 @@ class LlamaModel(LlamaPreTrainedModel):
         self.num_prune_layers = getattr(config, 'num_prune_layers', 0)
         self.num_hidden_layers = config.num_hidden_layers - self.num_prune_layers
         self.num_fuse_layers = getattr(config, 'num_fuse_layers', 0)
+        self.fuse_type = getattr(config, 'fuse_type', 'avg')  # avg or weighted
         num_converted_layers = self.num_unsink_layers + self.num_bidir_layers
         _is_mask0 = self.mask_type == "MASK0"
 
