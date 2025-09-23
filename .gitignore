@@ -7,3 +7,5 @@ __pycache__/
 *.DS_Store
 wandb*
 test.py
+*.log
+eval_openai.ipynb

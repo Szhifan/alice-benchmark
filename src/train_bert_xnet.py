@@ -39,6 +39,7 @@ class TaskArguments:
     input_fields: List[str] = field(default=None, 
                                    metadata={"help": "fields to use as input for the model"})
     model_class: str = field(default='xnet', metadata={"help": "model class to use"})
+    drop_rub_frac: float = field(default=0.0, metadata={"help": "fraction of training samples to drop one negative rubric"})
     def __post_init__(self):
         """Validation checks after initialization"""
         assert self.model_class in ['xnet', 'snet', 'gen'], f"model_class must be one of ['xnet', 'snet','gen'], got {self.model_class}"
@@ -70,7 +71,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         wandb.init(mode="disabled")
     print("Training arguments: %s", train_args)
     # Load the dataset
-    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
+    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac, drop_rub_frac=task_args.drop_rub_frac)
     tokenizer = get_tokenizer(task_args.base_model)
 
     if task_args.input_fields:

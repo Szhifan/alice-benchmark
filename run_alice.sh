@@ -6,7 +6,7 @@ RESULTS_ROOT="${ROOT}/results"
 mkdir -p ${RESULTS_ROOT}
 
 ### NAME YOUR EXPERIMENT HERE ##
-EXP_NAME="llama3.2-3b-qasr"
+EXP_NAME="llama3.2-3b-bidir2"
 ################################
 
 ## Local variables for current experiment
@@ -21,9 +21,9 @@ accelerate launch src/train_llm_xnet.py --save-dir "${EXP_ROOT}" \
     --batch-size 16 \
     --train-frac 1 \
     --lr 1e-4 \
-    --input-fields q a s r \
     --log-wandb \
     --max-epoch 6 \
+    --num-bidir-layers 2 \
     --use-lora 2>&1 | tee "out.log"
 
             

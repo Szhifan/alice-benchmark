@@ -1,8 +1,9 @@
 from typing import Literal
-from datasets import load_dataset, enable_caching, Dataset, disable_caching
+from datasets import enable_caching, Dataset, disable_caching
 import json
 import torch
-from transformers import AutoTokenizer, DataCollatorForLanguageModeling
+from transformers import AutoTokenizer
+import random
 """
 Dataprep pipeline: 
 1. Load the Alice dataset from json files.
@@ -433,25 +434,35 @@ class BaseLoader:
 
 
 class RubricRetrievalLoader(BaseLoader):
-    def __init__(self, train_frac=1, task_type="lp"):
+    def __init__(self, train_frac=1, task_type="lp",drop_rub_frac=0):
         """
         Alice dataset for snet and xnet pair-wise ranking. 
         Each entry is expended to include all rubric levels.
         The labels is 1 if the level matches the rubric level, otherwise 0.
+        drop_rub_frac: fraction of train data where one rubric except the correct one is dropped.
         """
         super().__init__(train_frac=train_frac, task_type=task_type)
+        self.drop_rub_frac = drop_rub_frac
+        assert drop_rub_frac >= 0 and drop_rub_frac <= 1, "drop_rub_frac must be in [0, 1)"
         self.expand_with_rubric()
+ 
     def expand_with_rubric(self):
+        random.seed(42)
         def _expand_dataset(dataset):
             expanded_data = []
             for example in dataset:
                 rubric = example["rubric"]
+                drop = random.random() < self.drop_rub_frac
                 for level, rb in rubric.items():
                     new_example = example.copy()
                     new_example["rubric"] = rb
                     new_example["rubric_level"] = int(level)  
                     new_example["labels"] = 1 if int(new_example["level"]) == int(level) else 0
-                    expanded_data.append(new_example)
+                    drop = drop and new_example["labels"] == 0
+                    if not drop:
+                        expanded_data.append(new_example)
+                    else:
+                        drop = False # only drop one negative example
             expanded_data = Dataset.from_list(expanded_data)
             return expanded_data
         self.train = _expand_dataset(self.train)
@@ -503,11 +514,5 @@ class RubricPointerNetwork(BaseLoader):
 
 
 if __name__ == "__main__":
-
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
-    tokenizer.pad_token = tokenizer.eos_token
-    collate_fn = gen_collate_fn
-    loader = BaseLoader(train_frac=1, task_type="lp")
-    loader.val = loader.val.map(lambda x: encode_generation(x, tokenizer, train=False, additional_fields=["question","sample_solution"]))
-    batch = collate_fn([loader.val[i] for i in range(2)])
-    print(batch)
+    loader = RubricRetrievalLoader(train_frac=1, task_type="lp", drop_rub_frac=1)
+    print(len(loader.train), len(loader.val), len(loader.test_ua), len(loader.test_uq))
