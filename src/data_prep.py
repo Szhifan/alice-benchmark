@@ -448,24 +448,26 @@ class RubricRetrievalLoader(BaseLoader):
  
     def expand_with_rubric(self):
         random.seed(42)
-        def _expand_dataset(dataset):
+        def _expand_dataset(dataset, do_drop=False):
             expanded_data = []
             for example in dataset:
                 rubric = example["rubric"]
                 drop = random.random() < self.drop_rub_frac
+                if drop and do_drop:
+                    incorrect_rubrics = [key for key in rubric.keys() if int(key) != int(example["level"])]
+                    if incorrect_rubrics:
+                        rubric_to_drop = random.choice(incorrect_rubrics)
+                        rubric.pop(rubric_to_drop)
+
                 for level, rb in rubric.items():
                     new_example = example.copy()
                     new_example["rubric"] = rb
-                    new_example["rubric_level"] = int(level)  
+                    new_example["rubric_level"] = int(level)
                     new_example["labels"] = 1 if int(new_example["level"]) == int(level) else 0
-                    drop = drop and new_example["labels"] == 0
-                    if not drop:
-                        expanded_data.append(new_example)
-                    else:
-                        drop = False # only drop one negative example
+                    expanded_data.append(new_example)
             expanded_data = Dataset.from_list(expanded_data)
             return expanded_data
-        self.train = _expand_dataset(self.train)
+        self.train = _expand_dataset(self.train, do_drop=True)
         self.val = _expand_dataset(self.val)
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
