@@ -15,10 +15,11 @@ import os
 from dataclasses import dataclass, field
 from data_prep import snet_collate_fn, xnet_collate_fn, gen_collate_fn
 from inference import evaluate
-from peft import LoraConfig, get_peft_model, AutoPeftModelForSequenceClassification
+from peft import LoraConfig, get_peft_model, AutoPeftModelForSequenceClassification, AutoPeftModelForCausalLM
 import evaluate
 import numpy as np
 from accelerate import PartialState
+import json
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 # logger = logging.getLogger(__name__)
 print("Using device:", DEFAULT_DEVICE)
@@ -143,6 +144,10 @@ class ModelLoader:
         if self.use_custom_model:
             print("Detected Llama model - preparing custom configuration...")
             config = self._update_with_custom_config(config, self.custom_model_args)
+        # save config for future reference
+        os.makedirs(self.train_args.save_dir, exist_ok=True)
+        with open(os.path.join(self.train_args.save_dir, 'config.json'), 'w') as f:
+            json.dump(config.to_dict(), f, indent=4)
         self.train_args.use_bnb = (self.train_args.use_bnb and torch.cuda.is_available()) or self.use_custom_model
         self.train_args.use_lora = (self.train_args.use_lora and torch.cuda.is_available()) or self.use_custom_model
         if self.task_args.model_class == "snet" or self.task_args.model_class == "xnet_softmax":
@@ -161,6 +166,8 @@ class ModelLoader:
             else:
                 device = torch.device(DEFAULT_DEVICE)
             model = model.to(device)
+            if self.train_args.bf16:
+                model = model.to(torch.bfloat16)
         
         elif self.task_args.model_class == "xnet":
             print("Loading with AutoModelForSequenceClassification...")
@@ -180,6 +187,7 @@ class ModelLoader:
             )
         config.num_labels = self.task_args.n_labels
         model = self._init_peft_model(model)
+
         return model
     def _init_peft_model(self, model):
         """Wrap the model with LoRA."""
@@ -189,13 +197,23 @@ class ModelLoader:
             model = get_peft_model(model, self.lora_config)
         print_trainable_parameters(model, use_4bit=self.train_args.use_bnb)
         return model
-    def _load_peft_model(self,cp_path:str):
-        model =  AutoPeftModelForSequenceClassification.from_pretrained(
-            str(cp_path)+'/',
-            torch_dtype=torch.float16,
-            device_map=self.device_map,
-            num_labels=self.task_args.n_labels,
-        )
+    def _load_peft_model(self, cp_path: str):
+        if self.task_args.model_class == "xnet":
+            model = AutoPeftModelForSequenceClassification.from_pretrained(
+                str(cp_path) + '/',
+                torch_dtype=torch.float16,
+                device_map=self.device_map,
+                num_labels=self.task_args.n_labels,
+            )
+        elif self.task_args.model_class == "gen":
+            model = AutoPeftModelForCausalLM.from_pretrained(
+                str(cp_path) + '/',
+                torch_dtype=torch.float16,
+                device_map=self.device_map,
+            )
+        else:
+            raise ValueError(f"Unsupported model class for PEFT: {self.task_args.model_class}")
+        
         model = model.merge_and_unload()
         return model
     def load_model(self, cp_path: str, use_lora=False):

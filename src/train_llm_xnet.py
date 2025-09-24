@@ -32,7 +32,7 @@ def is_main_process():
 @dataclass
 class TaskArguments:
     """Task/experiment related arguments dataclass"""
-    base_model: str = field(default='bert-base-uncased', metadata={"help": "base model to use"})
+    base_model: str = field(default='meta-llama/Llama-3.2-1B', metadata={"help": "base model to use"})
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     n_labels: int = field(default=2, metadata={"help": "number of labels for classification"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})

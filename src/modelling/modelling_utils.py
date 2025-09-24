@@ -323,12 +323,28 @@ class Network_Backbone(nn.Module):
         # Initialize the model with the given configuration
         model = cls(config, lora_config=lora_config, bnb_config=bnb_config)
         
+        # If LoRA is used, initialize PEFT model first
+        if lora_config:
+            model.init_peft()
+            # Load PEFT adapter weights
+            peft_path = os.path.join(model_path, "adapter_model.safetensors")
+            if os.path.exists(peft_path):
+                 model.load_peft_model(model_path)
+            else:
+                logger.warning(f"LoRA config provided, but no PEFT adapter found at {model_path}")
+
         # Load the state dictionary from the pre-trained model file
+        # For PEFT, this loads non-adapter weights (e.g., classifier head)
         state_dict_path = os.path.join(model_path, "pytorch_model.bin")
-        if os.path.exists(state_dict_path):
+        if not lora_config and os.path.exists(state_dict_path):
             state_dict = torch.load(state_dict_path, map_location="cpu")
-            # Load the state dict, ignoring missing keys and unexpected keys
             model.load_state_dict(state_dict, strict=False)
+        elif lora_config:
+            # For PEFT models, non-PEFT params might be in a separate file
+            non_peft_path = os.path.join(model_path, 'non_peft_params.bin')
+            if os.path.exists(non_peft_path):
+                state_dict = torch.load(non_peft_path, map_location="cpu")
+                model.load_state_dict(state_dict, strict=False)
         else:
             logger.warning(f"Could not find state dict at {state_dict_path}")
             

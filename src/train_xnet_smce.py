@@ -152,7 +152,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         print("***** Training finished *****")
     
     # Evaluate on test datasets
-    test_model = trainer.load_model()
+    test_model = trainer.model
     inference_speed = 0
     
     for test in ["test_ua", "test_uq"]:
@@ -166,7 +166,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
             test_model,
             test_ds,
             batch_size=train_args.batch_size,
-            collate_fn=custom_collate_fn
+            collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
         )
         
         inf_time = time.time() - time_start
