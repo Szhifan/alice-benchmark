@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 import warnings
@@ -7,6 +6,7 @@ from torch import nn
 from transformers.modeling_attn_mask_utils import AttentionMaskConverter
 from transformers import AutoModel
 from torch import Tensor
+import os
 import logging
 from peft import PeftModel, get_peft_model
 
@@ -308,45 +308,33 @@ class Network_Backbone(nn.Module):
     def load_peft_model(self,cp_path):
         self.encoder = PeftModel.from_pretrained(self.encoder, cp_path)
     @classmethod
-    def from_pretrained(cls, model_path, config=None, lora_config=None, emb_type=None):
-
-        import os
-        import json
+    def from_pretrained(cls, model_path, config, lora_config=None, bnb_config=None):
+        """
+        Load a pre-trained model from a specified path.
+        Args:
+            cls: The class of the model to instantiate.
+            model_path (str): The path to the pre-trained model.
+            config: The configuration object for the model.
+            lora_config: The LoRA configuration, if applicable.
+            bnb_config: The BitsAndBytes configuration for quantization.
+        Returns:
+            An instance of the model class.
+        """
+        # Initialize the model with the given configuration
+        model = cls(config, lora_config=lora_config, bnb_config=bnb_config)
         
-
-        if config is None:
-            config_path = os.path.join(model_path, 'config.json')
-            from transformers import AutoConfig
-            config = AutoConfig.from_pretrained(config_path)
-    
-
-        if emb_type is None:
-            emb_type = getattr(config, 'emb_type', 'diffABS')
-        
-        model = cls(config, lora_config, emb_type)
-        adapter_config_path = os.path.join(model_path, 'adapter_config.json')
-        if os.path.exists(adapter_config_path):
-            model.encoder = PeftModel.from_pretrained(model.encoder, model_path)
-
-            non_peft_params_path = os.path.join(model_path, 'non_peft_params.bin')
-            if os.path.exists(non_peft_params_path):
-                non_peft_params = torch.load(non_peft_params_path, map_location='cpu')
-                current_state_dict = model.state_dict()
-                for key, value in non_peft_params.items():
-                    if key in current_state_dict:
-                        current_state_dict[key] = value
-                model.load_state_dict(current_state_dict, strict=False)
+        # Load the state dictionary from the pre-trained model file
+        state_dict_path = os.path.join(model_path, "pytorch_model.bin")
+        if os.path.exists(state_dict_path):
+            state_dict = torch.load(state_dict_path, map_location="cpu")
+            # Load the state dict, ignoring missing keys and unexpected keys
+            model.load_state_dict(state_dict, strict=False)
         else:
-            state_dict_path = os.path.join(model_path, 'pytorch_model.bin')
-            if os.path.exists(state_dict_path):
-                state_dict = torch.load(state_dict_path, map_location='cpu')
-                model.load_state_dict(state_dict, strict=False)
-        
+            logger.warning(f"Could not find state dict at {state_dict_path}")
+            
         return model
 
     def save_pretrained(self, save_path):
-
-        import os
         os.makedirs(save_path, exist_ok=True)
 
         if hasattr(self.encoder, 'save_pretrained') and isinstance(self.encoder, PeftModel):
@@ -361,4 +349,3 @@ class Network_Backbone(nn.Module):
             torch.save(self.state_dict(), os.path.join(save_path, 'pytorch_model.bin'))
         if hasattr(self, 'config'):
             self.config.save_pretrained(save_path)
-

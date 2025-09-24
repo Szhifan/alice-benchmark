@@ -205,12 +205,18 @@ class ModelLoader:
         :param use_lora: Whether to load the model with LoRA (PEFT).
         :return: Loaded model.
         """
-        if self.task_args.model_class == "snet":
-            print(f"Loading SNet model from checkpoint: {cp_path}")
-            model = AsagSNet.from_pretrained(
-                cp_path,
-                config=AutoConfig.from_pretrained(cp_path),
+        if self.task_args.model_class == "snet" or self.task_args.model_class == "xnet_softmax":
+            model_class = self._model_mapping(self.task_args.model_class)
+            config = AutoConfig.from_pretrained(str(cp_path)+'/')
+            
+            # Pass bnb_config only if bnb is enabled
+            bnb_config = self.bnb_config if self.train_args.use_bnb else None
+            
+            model = model_class.from_pretrained(
+                str(cp_path)+'/', 
+                config=config,
                 lora_config=self.lora_config if use_lora else None,
+                bnb_config=bnb_config
             )
         elif self.task_args.model_class == "xnet":
             if use_lora:
