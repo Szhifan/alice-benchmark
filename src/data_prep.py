@@ -242,71 +242,184 @@ def snet_collate_fn(input_batch, pad_id=0, return_meta=False):
     if return_meta:
         return batch, meta
     return batch
-def pointer_network_collate_fn(input_batch, pad_id=0, return_meta=False):
+def grouped_xnet_collate_fn(input_batch, pad_id=0, return_meta=False):
     """
-    Collate function for pointer network where each example has variable number of rubrics.
-    Handles both joint and separate encoding modes.
+    Collate function for grouped dataset where each example contains multiple rubrics
+    with input_ids, attention_mask etc. in shape [R, S] format.
+    
+    Args:
+        input_batch: List of examples from grouped dataset
+        pad_id: Padding token id
+        return_meta: Whether to return metadata
+        
+    Returns:
+        batch: Dict with tensors of shape [B, R, S] where B=batch_size, R=num_rubrics, S=seq_len
+        meta: Optional metadata dict
     """
     batch_size = len(input_batch)
-    max_n_seq = max(x["n_seq"] for x in input_batch)
+    max_rubrics = max(len(x["input_ids"]) for x in input_batch)
     
-    # Get the maximum sequence length for padding
-    max_seq_len = 0
+    # Initialize lists to collect padded sequences
+    batch_input_ids = []
+    batch_attention_mask = []
+    batch_token_type_ids = []
+    batch_labels = []
+    
     for example in input_batch:
-        for seq in example["all_input_ids"]:
-            max_seq_len = max(max_seq_len, len(seq))
-    
-    # Initialize batch tensors
-    batch_input_ids = torch.full((batch_size, max_n_seq, max_seq_len), pad_id, dtype=torch.long)
-    batch_attention_mask = torch.zeros((batch_size, max_n_seq, max_seq_len), dtype=torch.long)
-    batch_token_type_ids = None
-    
-    # Check if token_type_ids exist
-    has_token_type_ids = "all_token_type_ids" in input_batch[0] and input_batch[0]["all_token_type_ids"]
-    if has_token_type_ids:
-        batch_token_type_ids = torch.zeros((batch_size, max_n_seq, max_seq_len), dtype=torch.long)
-    
-    # Create sequence mask to indicate valid sequences
-    seq_mask = torch.zeros((batch_size, max_n_seq), dtype=torch.bool)
-    
-    # Fill the batch tensors
-    for i, example in enumerate(input_batch):
-        n_seq = example["n_seq"]
-        seq_mask[i, :n_seq] = True
+        num_rubrics = len(example["input_ids"])
         
-        for j in range(n_seq):
-            seq_len = len(example["all_input_ids"][j])
-            batch_input_ids[i, j, :seq_len] = torch.tensor(example["all_input_ids"][j])
-            batch_attention_mask[i, j, :seq_len] = torch.tensor(example["all_attention_mask"][j])
+        # Convert input_ids and attention_mask to tensors
+        input_ids_tensors = [torch.tensor(seq) for seq in example["input_ids"]]
+        attention_mask_tensors = [torch.tensor(seq) for seq in example["attention_mask"]]
+        
+        # Pad sequences within this example to same length
+        padded_input_ids = torch.nn.utils.rnn.pad_sequence(
+            input_ids_tensors, batch_first=True, padding_value=pad_id
+        )  # [R, S]
+        padded_attention_mask = torch.nn.utils.rnn.pad_sequence(
+            attention_mask_tensors, batch_first=True, padding_value=0
+        )  # [R, S]
+        
+        # Handle token_type_ids if present
+        if "token_type_ids" in example and example["token_type_ids"] is not None:
+            token_type_ids_tensors = [torch.tensor(seq) for seq in example["token_type_ids"]]
+            padded_token_type_ids = torch.nn.utils.rnn.pad_sequence(
+                token_type_ids_tensors, batch_first=True, padding_value=0
+            )
+        else:
+            padded_token_type_ids = None
+        
+        # Pad rubrics dimension to max_rubrics if needed
+        if num_rubrics < max_rubrics:
+            seq_len = padded_input_ids.shape[1]
+            # Create padding for missing rubrics
+            rubric_padding = torch.full((max_rubrics - num_rubrics, seq_len), pad_id, dtype=torch.long)
+            padded_input_ids = torch.cat([padded_input_ids, rubric_padding], dim=0)
             
-            if has_token_type_ids:
-                batch_token_type_ids[i, j, :seq_len] = torch.tensor(example["all_token_type_ids"][j])
+            mask_padding = torch.zeros((max_rubrics - num_rubrics, seq_len), dtype=torch.long)
+            padded_attention_mask = torch.cat([padded_attention_mask, mask_padding], dim=0)
+            
+            if padded_token_type_ids is not None:
+                token_type_padding = torch.zeros((max_rubrics - num_rubrics, seq_len), dtype=torch.long)
+                padded_token_type_ids = torch.cat([padded_token_type_ids, token_type_padding], dim=0)
+        
+        batch_input_ids.append(padded_input_ids)
+        batch_attention_mask.append(padded_attention_mask)
+        if padded_token_type_ids is not None:
+            batch_token_type_ids.append(padded_token_type_ids)
+        
+        # Use the original labels (not binary)
+        batch_labels.append(example["labels"])
     
+    # Pad sequence length dimension across batch
+    max_seq_len = max(x.shape[1] for x in batch_input_ids)
+    
+    final_input_ids = []
+    final_attention_mask = []
+    final_token_type_ids = []
+    
+    for i in range(batch_size):
+        current_seq_len = batch_input_ids[i].shape[1]
+        if current_seq_len < max_seq_len:
+            # Pad sequence length dimension
+            seq_padding = torch.full((max_rubrics, max_seq_len - current_seq_len), pad_id, dtype=torch.long)
+            padded_input_ids = torch.cat([batch_input_ids[i], seq_padding], dim=1)
+            
+            mask_seq_padding = torch.zeros((max_rubrics, max_seq_len - current_seq_len), dtype=torch.long)
+            padded_attention_mask = torch.cat([batch_attention_mask[i], mask_seq_padding], dim=1)
+            
+            if batch_token_type_ids:
+                token_seq_padding = torch.zeros((max_rubrics, max_seq_len - current_seq_len), dtype=torch.long)
+                padded_token_type_ids = torch.cat([batch_token_type_ids[i], token_seq_padding], dim=1)
+        else:
+            padded_input_ids = batch_input_ids[i]
+            padded_attention_mask = batch_attention_mask[i]
+            if batch_token_type_ids:
+                padded_token_type_ids = batch_token_type_ids[i]
+        
+        final_input_ids.append(padded_input_ids)
+        final_attention_mask.append(padded_attention_mask)
+        if batch_token_type_ids:
+            final_token_type_ids.append(padded_token_type_ids)
+    
+    # Stack to create final batch tensors [B, R, S]
     batch = {
-        "input_ids": batch_input_ids,
-        "attention_mask": batch_attention_mask,
-        "seq_mask": seq_mask, 
-        "n_seq": torch.tensor([x["n_seq"] for x in input_batch]),
-        "n_rubrics": torch.tensor([x["n_rubrics"] for x in input_batch]),
-        "labels": torch.tensor([x["labels"] for x in input_batch]),
+        "input_ids": torch.stack(final_input_ids),  # [B, R, S]
+        "attention_mask": torch.stack(final_attention_mask),  # [B, R, S]
+        "labels": torch.tensor(batch_labels),  # [B] - original labels
+        "num_rubrics": torch.tensor([len(x["input_ids"]) for x in input_batch]),  # [B] - actual number of rubrics per example
     }
     
-    if has_token_type_ids:
-        batch["token_type_ids"] = batch_token_type_ids
+    if final_token_type_ids:
+        batch["token_type_ids"] = torch.stack(final_token_type_ids)  # [B, R, S]
     
     meta = {
         "id": [x["id"] for x in input_batch],
-        "level": [x["labels"] for x in input_batch],  # Using labels since level was popped
+        "level": [x["level"] for x in input_batch],
+        "question_id": [x["question_id"] for x in input_batch],
     }
     
     if return_meta:
         return batch, meta
     return batch
-# Dataset loaders
 def encode_dataset(dataset, tokenizer, enc_fn, *args, **kwargs):
     dataset = dataset.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
     return dataset
-
+def group_by_id(dataset):
+    """
+    Group the expanded dataset back by id, reshaping input_ids, attention_mask etc 
+    to have shape [R, S] where R is the number of rubrics and S is the sequence length.
+    
+    Args:
+        dataset: Dataset that has been expanded with rubrics and encoded
+        
+    Returns:
+        Dataset: Grouped dataset where each example contains tensors of shape [R, S]
+    """
+    # Group examples by their base ID (removing rubric suffixes if any)
+    grouped_data = {}
+    
+    for example in dataset:
+        base_id = example["id"]
+        # Remove rubric expansion suffixes like "_ke0", "_sk1" etc if present
+        # Keep the base structure for grouping
+        if base_id not in grouped_data:
+            grouped_data[base_id] = []
+        grouped_data[base_id].append(example)
+    
+    # Convert grouped data back to list format
+    regrouped_examples = []
+    
+    for base_id, examples in grouped_data.items():
+        # Sort examples by rubric_level to ensure consistent ordering
+        examples = sorted(examples, key=lambda x: x["rubric_level"])
+        
+        # Create the new grouped example
+        grouped_example = {
+            "id": base_id,
+            "question_id": examples[0]["question_id"],
+            "level": examples[0]["level"],  # Original level
+        }
+        
+        # Stack the encoded fields
+        grouped_example["input_ids"] = [ex["input_ids"] for ex in examples]
+        grouped_example["attention_mask"] = [ex["attention_mask"] for ex in examples]
+        
+        # Handle token_type_ids if present
+        if "token_type_ids" in examples[0]:
+            grouped_example["token_type_ids"] = [ex["token_type_ids"] for ex in examples]
+        
+        # Keep labels and rubric levels for each rubric
+        grouped_example["labels"] = examples[0]["rubric_level"]
+        grouped_example["num_rubrics"] = len(examples)
+        # Keep other metadata from first example
+        for key in examples[0]:
+            if key not in ["input_ids", "attention_mask", "token_type_ids", "labels", "num_rubrics"]:
+                grouped_example[key] = examples[0][key]
+        
+        regrouped_examples.append(grouped_example)
+    
+    return Dataset.from_list(regrouped_examples)
 class BaseLoader:
     """
     Load the splits of Alice dataset.
@@ -471,50 +584,15 @@ class RubricRetrievalLoader(BaseLoader):
         self.val = _expand_dataset(self.val)
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
-class RubricPointerNetwork(BaseLoader):
-    def __init__(self, train_frac=1, task_type="lp"):
-        """
-        Loader for rubric pointer network. 
-        """
-        super().__init__(train_frac=train_frac, task_type=task_type)
-    def encode_pointer_network(self, example, tokenizer, joint_encode=True, additional_fields=None):
-        """
-        Even simpler: use tokenizer's batch processing.
-        """
-        rubrics = list(example["rubric"].values())
-        answer = example["answer"]
-        
-        if joint_encode:
-            # Prepare pairs for batch encoding
-            text_pairs = [(answer, rubric) for rubric in rubrics]
-            # Add additional fields as single texts
-            if additional_fields:
-                text_pairs.extend([(example[field], "") for field in additional_fields 
-                                if field in example])
-            
-            # Batch encode
-            encoded = tokenizer([pair[0] for pair in text_pairs], 
-                            [pair[1] for pair in text_pairs],
-                            max_length=512, truncation=True, padding=False)
-        else:
-            # All texts as single sequences
-            texts = rubrics + [answer]
-            if additional_fields:
-                texts.extend([example[field] for field in additional_fields 
-                            if field in example])
-            
-            encoded = tokenizer(texts, max_length=512, truncation=True, padding=False)
-        
-        example["input_ids"] = encoded["input_ids"]
-        example["attention_mask"] = encoded["attention_mask"]
-        if "token_type_ids" in encoded:
-            example["token_type_ids"] = encoded["token_type_ids"]
-        example["n_rubrics"] = len(rubrics)
-        example["labels"] = int(example.pop("level"))
-        example["n_seq"] = len(example["input_ids"])
-        return example
+
 
 
 if __name__ == "__main__":
+    from torch.utils.data import DataLoader
     loader = RubricRetrievalLoader(train_frac=1, task_type="lp", drop_rub_frac=1)
-    print(len(loader.train), len(loader.val), len(loader.test_ua), len(loader.test_uq))
+    loader.test_uq = encode_dataset(loader.test_uq, AutoTokenizer.from_pretrained("bert-base-multilingual-cased"), encode_rubric_pair)
+    loader.test_uq = group_by_id(loader.test_uq)
+    dataloader = DataLoader(loader.test_uq, batch_size=2, collate_fn=grouped_xnet_collate_fn)   
+    for batch in dataloader:
+        print(batch)
+        break

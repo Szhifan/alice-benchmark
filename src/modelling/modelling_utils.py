@@ -286,7 +286,16 @@ def flip_tensor(tensor, flag=True):
         return tensor
 
 class Network_Backbone(nn.Module):
+    """
+    Network Backbone for handling pre-trained models with optional PEFT support.
+    Supports loading, saving, and initializing models with LoRA or 4-bit quantization.
+    Args:
+        config: Configuration object for the model.
+        lora_config: Configuration for LoRA (Low-Rank Adaptation) if using LoRA.
+        bnb_config: Configuration for 4-bit quantization if using bitsandbytes.
+    """
     def __init__(self, config, lora_config=None, bnb_config=None):
+  
         super().__init__()
         self.lora_config = lora_config
         if bnb_config is not None:

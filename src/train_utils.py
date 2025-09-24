@@ -9,6 +9,7 @@ from transformers import (
     TrainingArguments
 )
 from modelling.modelling_snet import AsagSNet
+from modelling.modelling_softmaxce import XnetSoftmaxCE 
 import torch
 import os 
 from dataclasses import dataclass, field
@@ -124,7 +125,17 @@ class ModelLoader:
         for key, value in self.custom_model_args.to_dict().items():
             setattr(config, key, value)
         return config
-
+    def _model_mapping(self, model_class):
+        """Map model class string to actual model class."""
+        mapping = {
+            "snet": AsagSNet,
+            "xnet": AutoModelForSequenceClassification,
+            "gen": AutoModelForCausalLM,
+            "xnet_softmax": XnetSoftmaxCE,
+        }
+        if model_class not in mapping:
+            raise ValueError(f"Unsupported model class: {model_class}")
+        return mapping[model_class]
     def init_model(self):
 
         
@@ -134,10 +145,12 @@ class ModelLoader:
             config = self._update_with_custom_config(config, self.custom_model_args)
         self.train_args.use_bnb = (self.train_args.use_bnb and torch.cuda.is_available()) or self.use_custom_model
         self.train_args.use_lora = (self.train_args.use_lora and torch.cuda.is_available()) or self.use_custom_model
-        if self.task_args.model_class == "snet":
+        if self.task_args.model_class == "snet" or self.task_args.model_class == "xnet_softmax":
             config.pool_type = self.custom_model_args.pool_type if self.custom_model_args else "avg"
             config.base_model_name_or_path = self.task_args.base_model
-            model = AsagSNet(config,
+            model_class = self._model_mapping(self.task_args.model_class)
+            print(f"Initializing model of class {self.task_args.model_class}...")
+            model = model_class(config,
                              lora_config=self.lora_config if self.train_args.use_lora else None,
                              bnb_config=self.bnb_config if self.train_args.use_bnb else None)
             device_value = self.device_map['']
@@ -148,6 +161,7 @@ class ModelLoader:
             else:
                 device = torch.device(DEFAULT_DEVICE)
             model = model.to(device)
+        
         elif self.task_args.model_class == "xnet":
             print("Loading with AutoModelForSequenceClassification...")
             model = AutoModelForSequenceClassification.from_pretrained(
@@ -247,7 +261,9 @@ class AsagTrainer:
         """Load the model for inference or evaluation."""
         cp_path = self.train_args.cp_dir or self.train_args.save_dir
         return self.model_loader.load_model(cp_path, use_lora=self.train_args.use_lora)
-
+    def set_collate_fn(self, collate_fn):
+        """Set the data collate function."""
+        self.collate_fn = collate_fn
     def train(self):
         print("Starting training...")
         if self.task_args.model_class == "gen":
