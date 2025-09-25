@@ -50,7 +50,6 @@ class TaskArguments:
     def __post_init__(self):
         """Validation checks after initialization"""
         assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
-        assert self.n_labels > 0, "n_labels must be positive"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
         assert all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
         assert self.input_format in ['structured', 'natural_language'], "input_format must be one of ['structured', 'natural_language']"
@@ -114,12 +113,11 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         print(f"  Num examples = {len(dts_loader.train)}")
         print(f"  Num Epochs = {train_args.max_epoch}")
         print(f"  Instantaneous batch size per GPU = {train_args.batch_size}")
-        print(f"  Temperature (tau) = {task_args.tau}")
         trainer.train()
         print("***** Training finished *****")
     
     # Evaluate on test datasets
-    test_model = trainer.model
+    test_model = trainer.load_model()
     inference_speed = 0
     if is_main_process():
         for test in ["test_ua", "test_uq"]:

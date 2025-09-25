@@ -9,7 +9,7 @@ from transformers import (
     TrainingArguments
 )
 from modelling.modelling_snet import AsagSNet
-from src.modelling.modelling_xnet import XnetSoftmaxCE 
+from modelling.modelling_xnet import XnetSoftmaxCE 
 import torch
 import os 
 from dataclasses import dataclass, field
@@ -142,12 +142,12 @@ class ModelLoader:
         config = AutoConfig.from_pretrained(self.task_args.base_model)
         if self.use_custom_model:
             print("Detected Llama model - preparing custom configuration...")
-            config = self._update_with_custom_config(config, self.custom_model_args)
+            config = self._update_with_custom_config(config)
         # save config for future reference
         os.makedirs(self.train_args.save_dir, exist_ok=True)
 
-        self.train_args.use_bnb = (self.train_args.use_bnb and torch.cuda.is_available()) or self.use_custom_model
-        self.train_args.use_lora = (self.train_args.use_lora and torch.cuda.is_available()) or self.use_custom_model
+        self.train_args.use_bnb = (self.train_args.use_bnb and torch.cuda.is_available()) 
+        self.train_args.use_lora = (self.train_args.use_lora and torch.cuda.is_available()) 
         # Use the custom implementations for snet and the softmax-style xnet.
         if self.task_args.model_class in ["snet", "xnet"]:
             config.pool_type = self.custom_model_args.pool_type if self.custom_model_args else "avg"
@@ -210,8 +210,6 @@ class ModelLoader:
         """
         cp_path = str(cp_path)
         config = AutoConfig.from_pretrained(cp_path + "/")
-        if self.use_custom_model and self.custom_model_args:
-            config = self._update_with_custom_config(config, self.custom_model_args)
 
         bnb_config = self.bnb_config if self.train_args.use_bnb else None
         model = None
@@ -231,7 +229,7 @@ class ModelLoader:
                 model = AutoModelForCausalLM.from_pretrained(cp_path, config=config)
         else:
             raise ValueError(f"Unknown model_class: {self.task_args.model_class}")
-
+        model = model.to(dtype=torch.float32)
         return model
 
 class AsagTrainer:
