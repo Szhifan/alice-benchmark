@@ -284,7 +284,6 @@ def flip_tensor(tensor, flag=True):
         return tensor.flip(dims=(1,))
     else:
         return tensor
-
 class Network_Backbone(nn.Module):
     """
     Network Backbone for handling pre-trained models with optional PEFT support.
@@ -299,69 +298,72 @@ class Network_Backbone(nn.Module):
         super().__init__()
         self.lora_config = lora_config
         if bnb_config is not None:
-            self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path, quantization_config=bnb_config)
+            self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path, quantization_config=bnb_config, config=config)
         else:
-            self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path)
+            self.encoder = AutoModel.from_pretrained(config.base_model_name_or_path, config=config)
     def init_peft(self):
-        self.lora_config.TASK_TYPE = None
         self.encoder = get_peft_model(self.encoder, self.lora_config)
-    def load_peft_model(self,cp_path):
-        self.encoder = PeftModel.from_pretrained(self.encoder, cp_path)
+
+    def load_peft_adapter(self, ckpt_dir: str):
+        # 仅加载 LoRA 适配器权重
+        self.encoder = PeftModel.from_pretrained(self.encoder, ckpt_dir)
+
     @classmethod
     def from_pretrained(cls, model_path, config, lora_config=None, bnb_config=None):
         """
-        Load a pre-trained model from a specified path.
-        Args:
-            cls: The class of the model to instantiate.
-            model_path (str): The path to the pre-trained model.
-            config: The configuration object for the model.
-            lora_config: The LoRA configuration, if applicable.
-            bnb_config: The BitsAndBytes configuration for quantization.
-        Returns:
-            An instance of the model class.
+        自定义模型加载逻辑，支持:
+          1) 纯模型 (pytorch_model.bin)
+          2) LoRA: adapter_model + non_peft_params.bin
         """
-        # Initialize the model with the given configuration
         model = cls(config, lora_config=lora_config, bnb_config=bnb_config)
-        
-        # If LoRA is used, initialize PEFT model first
-        if lora_config:
-            model.init_peft()
-            # Load PEFT adapter weights
-            peft_path = os.path.join(model_path, "adapter_model.safetensors")
-            if os.path.exists(peft_path):
-                 model.load_peft_model(model_path)
-            else:
-                logger.warning(f"LoRA config provided, but no PEFT adapter found at {model_path}")
 
-        # Load the state dictionary from the pre-trained model file
-        # For PEFT, this loads non-adapter weights (e.g., classifier head)
-        state_dict_path = os.path.join(model_path, "pytorch_model.bin")
-        if not lora_config and os.path.exists(state_dict_path):
-            state_dict = torch.load(state_dict_path, map_location="cpu")
-            model.load_state_dict(state_dict, strict=False)
-        elif lora_config:
-            # For PEFT models, non-PEFT params might be in a separate file
-            non_peft_path = os.path.join(model_path, 'non_peft_params.bin')
-            if os.path.exists(non_peft_path):
-                state_dict = torch.load(non_peft_path, map_location="cpu")
-                model.load_state_dict(state_dict, strict=False)
+        adapter_file_pt = os.path.join(model_path, "adapter_model.bin")
+        adapter_file_st = os.path.join(model_path, "adapter_model.safetensors")
+        has_adapter = os.path.exists(adapter_file_pt) or os.path.exists(adapter_file_st)
+
+        non_peft_file = os.path.join(model_path, "non_peft_params.bin")
+        full_file = os.path.join(model_path, "pytorch_model.bin")
+
+        if lora_config:
+            if has_adapter:
+                model.load_peft_adapter(model_path)
+                logger.info(f"[LoRA Load] Successfully loaded LoRA adapter from {model_path}")
+            else:
+                logger.warning(f"[LoRA Load] Adapter model not found in {model_path}")
+            if os.path.exists(non_peft_file):
+                non_peft_state = torch.load(non_peft_file, map_location="cpu")
+                missing, unexpected = model.load_state_dict(non_peft_state, strict=False)
+                if missing:
+                    logger.warning(f"[LoRA Load] Missing non_peft parameters: {missing}")
+                if unexpected:
+                    logger.warning(f"[LoRA Load] Unexpected non_peft parameters: {unexpected}")
+            else:
+                logger.warning(f"[LoRA Load] non_peft_params.bin not found in {model_path}")
         else:
-            logger.warning(f"Could not find state dict at {state_dict_path}")
-            
+            # Non-LoRA: Directly load the full state dict
+            if os.path.exists(full_file):
+                full_state = torch.load(full_file, map_location="cpu")
+                missing, unexpected = model.load_state_dict(full_state, strict=False)
+                if missing:
+                    logger.warning(f"[Full Load] Missing parameters: {missing}")
+                if unexpected:
+                    logger.warning(f"[Full Load] Unexpected parameters: {unexpected}")
+            else:
+                logger.error(f"[Full Load] {full_file} not found")
         return model
 
     def save_pretrained(self, save_path):
         os.makedirs(save_path, exist_ok=True)
-
-        if hasattr(self.encoder, 'save_pretrained') and isinstance(self.encoder, PeftModel):
-            self.encoder.save_pretrained(save_path)
-            full_state_dict = self.state_dict()
-            encoder_keys = [k for k in full_state_dict.keys() if k.startswith('encoder.')]
-            for key in encoder_keys:
-                full_state_dict.pop(key, None)
-            torch.save(full_state_dict, os.path.join(save_path, 'non_peft_params.bin'))
-        else:
-
-            torch.save(self.state_dict(), os.path.join(save_path, 'pytorch_model.bin'))
-        if hasattr(self, 'config'):
+        # 保存配置
+        if hasattr(self, "config"):
             self.config.save_pretrained(save_path)
+
+        if isinstance(self.encoder, PeftModel):
+            self.encoder.save_pretrained(save_path)
+            full_state = self.state_dict()
+            to_remove = [k for k in full_state.keys() if k.startswith("encoder.")]
+            for k in to_remove:
+                full_state.pop(k, None)
+            torch.save(full_state, os.path.join(save_path, "non_peft_params.bin"))
+        else:
+            torch.save(self.state_dict(), os.path.join(save_path, "pytorch_model.bin"))

@@ -20,7 +20,7 @@ class XnetSoftmaxCE(Network_Backbone):
         self.use_token_type_ids = getattr(config, 'use_token_type_ids', True)
         
         # Classification head - outputs scalar score per rubric
-        self.head = nn.Linear(config.hidden_size, 1, bias=False)
+        self.score = nn.Linear(config.hidden_size, 1, bias=False)
     def forward(
         self,
         input_ids: torch.LongTensor = None,
@@ -63,7 +63,7 @@ class XnetSoftmaxCE(Network_Backbone):
             pooled_output = self.pooler(transformer_outputs.last_hidden_state, flat_inputs["attention_mask"])
         
         # Get logits: [B*R, 1] -> [B*R] -> [B, R]
-        logits = self.head(pooled_output).squeeze(-1)  # [B*R]
+        logits = self.score(pooled_output).squeeze(-1)  # [B*R]
         logits = logits.view(B, R)  # [B, R]
         
         loss = None

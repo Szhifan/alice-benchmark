@@ -193,30 +193,6 @@ def gen_collate_fn(input_batch, pad_id=0, return_meta=False):
         return batch, meta
     return batch
 
-def xnet_collate_fn(input_batch, pad_id=0, return_meta=False):
-    """
-    collate function for cross-encoder settings where all fields are encoded together.
-    """
-    input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True, padding_value=pad_id)
-    attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True, padding_value=0)
-    if "token_type_ids" in input_batch[0]:
-        token_type_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["token_type_ids"]) for x in input_batch], batch_first=True)
-    else:
-        token_type_ids = None
-    batch = {
-        "input_ids": input_ids,
-        "attention_mask": attention_mask,
-        "token_type_ids": token_type_ids,
-        "labels": torch.tensor([x["labels"] for x in input_batch]),
-    }
-    meta = {
-        "id": [x["id"] for x in input_batch],
-        "rubric_level": [x["rubric_level"] for x in input_batch],
-        "level": [x["level"] for x in input_batch],
-    }
-    if return_meta:
-        return batch, meta
-    return batch
 def snet_collate_fn(input_batch, pad_id=0, return_meta=False):
     """
     collate function for settings where the rubric and answer are encoded separately.
@@ -242,7 +218,8 @@ def snet_collate_fn(input_batch, pad_id=0, return_meta=False):
     if return_meta:
         return batch, meta
     return batch
-def grouped_xnet_collate_fn(input_batch, pad_id=0, return_meta=False):
+
+def xnet_collate_fn(input_batch, pad_id=0, return_meta=False):
     """
     Collate function for grouped dataset where each example contains multiple rubrics
     with input_ids, attention_mask etc. in shape [R, S] format.
@@ -410,7 +387,7 @@ def group_by_id(dataset):
             grouped_example["token_type_ids"] = [ex["token_type_ids"] for ex in examples]
         
         # Keep labels and rubric levels for each rubric
-        grouped_example["labels"] = examples[0]["rubric_level"]
+        grouped_example["labels"] = examples[0]["level"]
         grouped_example["num_rubrics"] = len(examples)
         # Keep other metadata from first example
         for key in examples[0]:
@@ -547,30 +524,20 @@ class BaseLoader:
 
 
 class RubricRetrievalLoader(BaseLoader):
-    def __init__(self, train_frac=1, task_type="lp",drop_rub_frac=0):
+    def __init__(self, train_frac=1, task_type="lp"):
         """
         Alice dataset for snet and xnet pair-wise ranking. 
         Each entry is expended to include all rubric levels.
         The labels is 1 if the level matches the rubric level, otherwise 0.
-        drop_rub_frac: fraction of train data where one rubric except the correct one is dropped.
         """
         super().__init__(train_frac=train_frac, task_type=task_type)
-        self.drop_rub_frac = drop_rub_frac
-        assert drop_rub_frac >= 0 and drop_rub_frac <= 1, "drop_rub_frac must be in [0, 1)"
         self.expand_with_rubric()
  
     def expand_with_rubric(self):
-        random.seed(42)
-        def _expand_dataset(dataset, do_drop=False):
+        def _expand_dataset(dataset):
             expanded_data = []
             for example in dataset:
                 rubric = example["rubric"]
-                drop = random.random() < self.drop_rub_frac
-                if drop and do_drop:
-                    incorrect_rubrics = [key for key in rubric.keys() if int(key) != int(example["level"])]
-                    if incorrect_rubrics:
-                        rubric_to_drop = random.choice(incorrect_rubrics)
-                        rubric.pop(rubric_to_drop)
 
                 for level, rb in rubric.items():
                     new_example = example.copy()
@@ -580,7 +547,7 @@ class RubricRetrievalLoader(BaseLoader):
                     expanded_data.append(new_example)
             expanded_data = Dataset.from_list(expanded_data)
             return expanded_data
-        self.train = _expand_dataset(self.train, do_drop=True)
+        self.train = _expand_dataset(self.train)
         self.val = _expand_dataset(self.val)
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
@@ -589,10 +556,10 @@ class RubricRetrievalLoader(BaseLoader):
 
 if __name__ == "__main__":
     from torch.utils.data import DataLoader
-    loader = RubricRetrievalLoader(train_frac=1, task_type="lp", drop_rub_frac=1)
+    loader = RubricRetrievalLoader(train_frac=1, task_type="lp")
     loader.test_uq = encode_dataset(loader.test_uq, AutoTokenizer.from_pretrained("bert-base-multilingual-cased"), encode_rubric_pair)
     loader.test_uq = group_by_id(loader.test_uq)
-    dataloader = DataLoader(loader.test_uq, batch_size=2, collate_fn=grouped_xnet_collate_fn)   
+    dataloader = DataLoader(loader.test_uq, batch_size=2, collate_fn=xnet_collate_fn)   
     for batch in dataloader:
         print(batch)
         break

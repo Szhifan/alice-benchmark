@@ -22,7 +22,7 @@ from data_prep import (
     encode_rubric_pair,
     encode_dataset,
     group_by_id,
-    grouped_xnet_collate_fn,
+    xnet_collate_fn,
     encode_with_fields,
 )
 from modelling.modelling_utils import BackwardSupportedArguments
@@ -35,43 +35,21 @@ def is_main_process():
     """Check if the current process is the main process (rank 0)."""
     return not dist.is_available() or not dist.is_initialized() or dist.get_rank() == 0
 
-# @dataclass
-# class TaskArguments:
-#     """Task/experiment related arguments dataclass"""
-#     base_model: str = field(default='bert-base-uncased', metadata={"help": "base model to use"})
-#     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
-#     n_labels: int = field(default=3, metadata={"help": "number of labels for classification"})
-#     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
-#     input_fields: List[str] = field(default=None, 
-#                                    metadata={"help": "fields to use as input for the model"})
-#     model_class: str = field(default='xnet_softmax', metadata={"help": "model class to use"})
-#     drop_rub_frac: float = field(default=0.0, metadata={"help": "fraction of training samples to drop one negative rubric"})
-#     tau: float = field(default=1.0, metadata={"help": "temperature parameter for softmax"})
-    
-#     def __post_init__(self):
-#         """Validation checks after initialization"""
-#         assert self.model_class in ['xnet', 'snet', 'gen', 'xnet_softmax'], f"model_class must be one of ['xnet', 'snet','gen', 'xnet_softmax'], got {self.model_class}"
-#         assert self.n_labels > 0, "n_labels must be positive"
-#         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
-#         assert not self.input_fields or all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
-#         assert self.tau > 0, "tau (temperature) must be positive"
 @dataclass
 class TaskArguments:
     """Task/experiment related arguments dataclass"""
     base_model: str = field(default='bert-base-uncased', metadata={"help": "base model to use"})
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
-    n_labels: int = field(default=2, metadata={"help": "number of labels for classification"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
     input_fields: List[str] = field(default_factory=lambda: ['a', 'r'],
                                    metadata={"help": "fields to use as input for the model"})
-    model_class: str = field(default='xnet_softmax', metadata={"help": "model class to use"})
+    model_class: str = field(default="xnet", metadata={"help": "model class to use"})
     input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
     add_instruction: bool = field(default=False,metadata={"help":"whether to add instruction to the LLM input"})
-    drop_rub_frac: float = field(default=0.0, metadata={"help": "fraction of training samples to drop one negative rubric"})
-    tau: float = field(default=1.0, metadata={"help": "temperature parameter for softmax"})
+
     def __post_init__(self):
         """Validation checks after initialization"""
-        assert self.model_class in ['xnet', 'snet', 'xnet_softmax'], f"model_class must be one of ['xnet', 'snet', 'xnet_softmax'], got {self.model_class}"
+        assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
         assert self.n_labels > 0, "n_labels must be positive"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
         assert all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
@@ -105,20 +83,9 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     print(f"Task arguments: {task_args}")
     
     # Load the dataset
-    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac, drop_rub_frac=task_args.drop_rub_frac)
+    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
     tokenizer = get_tokenizer(task_args.base_model)
 
-    # Encode the datasets
-    # if task_args.input_fields:
-    #     input_fields = convert_field(task_args.input_fields)
-    #     dts_loader.encode_all_splits(
-    #         tokenizer=tokenizer,
-    #         enc_fn=encode_fields_special_tokens,
-    #         fields=input_fields,
-    #     )
-    # else:
-    #     dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
-    # LLM 
     input_fields = convert_field(task_args.input_fields)
     dts_loader.encode_all_splits(
         tokenizer=tokenizer,
@@ -140,7 +107,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
 
     # Initialize trainer with grouped collate function
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
-    trainer.set_collate_fn(grouped_xnet_collate_fn)
+    trainer.set_collate_fn(xnet_collate_fn)
 
     if not train_args.test_only:
         print("***** Running training *****")
@@ -154,45 +121,45 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     # Evaluate on test datasets
     test_model = trainer.model
     inference_speed = 0
-    
-    for test in ["test_ua", "test_uq"]:
-        test_ds = getattr(dts_loader, test)
-        print(f"***** Running evaluation on {test} *****")
-        print(f"Num examples = {len(test_ds)}")
-        
-        time_start = time.time()
-        
-        test_predictions, test_loss = evaluate(
-            test_model,
-            test_ds,
-            batch_size=train_args.batch_size,
-            collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
-        )
-        
-        inf_time = time.time() - time_start
-        
-        # Save predictions
-        pred_dir = os.path.join(train_args.save_dir, "predictions")
-        if not os.path.exists(pred_dir):
-            os.makedirs(pred_dir)
-        
+    if is_main_process():
+        for test in ["test_ua", "test_uq"]:
+            test_ds = getattr(dts_loader, test)
+            print(f"***** Running evaluation on {test} *****")
+            print(f"Num examples = {len(test_ds)}")
+            
+            time_start = time.time()
+            
+            test_predictions, test_loss = evaluate(
+                test_model,
+                test_ds,
+                batch_size=train_args.batch_size,
+                collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
+            )
+            
+            inf_time = time.time() - time_start
+            
+            # Save predictions
+            pred_dir = os.path.join(train_args.save_dir, "predictions")
+            if not os.path.exists(pred_dir):
+                os.makedirs(pred_dir)
+            
 
-        test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
+            test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
+            
+            # Calculate and save metrics
+            test_metrics = eval_report(test_predictions)
+            save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
+            
+            inference_speed += inf_time / test_predictions.shape[0]
+            
+            # Log metrics to wandb
+            metrics_wandb = {f"{test}": test_metrics}
+            wandb.log(metrics_wandb)
+            
+            print(f"***** {test} Results *****")
+            for key, value in test_metrics.items():
+                print(f"  {key} = {value:.4f}")
         
-        # Calculate and save metrics
-        test_metrics = eval_report(test_predictions)
-        save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
-        
-        inference_speed += inf_time / test_predictions.shape[0]
-        
-        # Log metrics to wandb
-        metrics_wandb = {f"{test}": test_metrics}
-        wandb.log(metrics_wandb)
-        
-        print(f"***** {test} Results *****")
-        for key, value in test_metrics.items():
-            print(f"  {key} = {value:.4f}")
-    
     # Clean up if no-save flag is set
     if train_args.no_save:
         print("No-save flag is set. Deleting checkpoint.")

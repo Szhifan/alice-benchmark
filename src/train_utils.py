@@ -9,7 +9,7 @@ from transformers import (
     TrainingArguments
 )
 from modelling.modelling_snet import AsagSNet
-from modelling.modelling_softmaxce import XnetSoftmaxCE 
+from src.modelling.modelling_xnet import XnetSoftmaxCE 
 import torch
 import os 
 from dataclasses import dataclass, field
@@ -108,7 +108,6 @@ class ModelLoader:
             lora_dropout=0.1,
             bias='none',
             target_modules="all-linear",
-            modules_to_save=["classifier", "score", "lm_head"],
             task_type="SEQ_CLS" if self.task_args.model_class != "gen" else "CAUSAL_LM",
         )
         self.bnb_config = BitsAndBytesConfig(
@@ -118,7 +117,7 @@ class ModelLoader:
             bnb_4bit_compute_dtype = torch.float32 if self.train_args.bf16 else torch.bfloat16, 
             )
         self.use_custom_model = "llama" in self.task_args.base_model
-    def _update_with_custom_config(self, config, model_args):
+    def _update_with_custom_config(self, config):
         """
         Update autoconfig with backwardsarguments 
         """
@@ -130,9 +129,9 @@ class ModelLoader:
         """Map model class string to actual model class."""
         mapping = {
             "snet": AsagSNet,
-            "xnet": AutoModelForSequenceClassification,
+            # 'xnet' is the canonical name for the softmax-based Xnet implementation.
+            "xnet": XnetSoftmaxCE,
             "gen": AutoModelForCausalLM,
-            "xnet_softmax": XnetSoftmaxCE,
         }
         if model_class not in mapping:
             raise ValueError(f"Unsupported model class: {model_class}")
@@ -146,18 +145,18 @@ class ModelLoader:
             config = self._update_with_custom_config(config, self.custom_model_args)
         # save config for future reference
         os.makedirs(self.train_args.save_dir, exist_ok=True)
-        with open(os.path.join(self.train_args.save_dir, 'config.json'), 'w') as f:
-            json.dump(config.to_dict(), f, indent=4)
+
         self.train_args.use_bnb = (self.train_args.use_bnb and torch.cuda.is_available()) or self.use_custom_model
         self.train_args.use_lora = (self.train_args.use_lora and torch.cuda.is_available()) or self.use_custom_model
-        if self.task_args.model_class == "snet" or self.task_args.model_class == "xnet_softmax":
+        # Use the custom implementations for snet and the softmax-style xnet.
+        if self.task_args.model_class in ["snet", "xnet"]:
             config.pool_type = self.custom_model_args.pool_type if self.custom_model_args else "avg"
             config.base_model_name_or_path = self.task_args.base_model
             model_class = self._model_mapping(self.task_args.model_class)
             print(f"Initializing model of class {self.task_args.model_class}...")
             model = model_class(config,
-                             lora_config=self.lora_config if self.train_args.use_lora else None,
-                             bnb_config=self.bnb_config if self.train_args.use_bnb else None)
+                                lora_config=self.lora_config if self.train_args.use_lora else None,
+                                bnb_config=self.bnb_config if self.train_args.use_bnb else None)
             device_value = self.device_map['']
             if isinstance(device_value, int):
                 device = torch.device(f"cuda:{device_value}" if torch.cuda.is_available() else DEFAULT_DEVICE)
@@ -166,17 +165,6 @@ class ModelLoader:
             else:
                 device = torch.device(DEFAULT_DEVICE)
             model = model.to(device)
-            if self.train_args.bf16:
-                model = model.to(torch.bfloat16)
-        
-        elif self.task_args.model_class == "xnet":
-            print("Loading with AutoModelForSequenceClassification...")
-            model = AutoModelForSequenceClassification.from_pretrained(
-                self.task_args.base_model,
-                config=config,  # Pass custom config if it's a Llama model
-                quantization_config=self.bnb_config if self.train_args.use_bnb else None,
-                device_map=self.device_map,
-            )
         elif self.task_args.model_class == "gen":
             print("Loading with AutoModelForCausalLM...")
             model = AutoModelForCausalLM.from_pretrained(
@@ -185,34 +173,31 @@ class ModelLoader:
                 quantization_config=self.bnb_config if self.train_args.use_bnb else None,
                 device_map=self.device_map,
             )
-        config.num_labels = self.task_args.n_labels
         model = self._init_peft_model(model)
-
+        with open(os.path.join(self.train_args.save_dir, 'config.json'), 'w') as f:
+            json.dump(config.to_dict(), f, indent=4)
         return model
     def _init_peft_model(self, model):
         """Wrap the model with LoRA."""
-        if self.task_args.model_class == "snet" and self.train_args.use_lora:
-            model = model.init_peft()
-        elif self.train_args.use_lora:
+        if not self.train_args.use_lora:
+            return model
+        # For our custom snet and xnet implementations use their internal init_peft if available.
+        if self.task_args.model_class in ["snet", "xnet"]:
+            model.init_peft()
+        else:
             model = get_peft_model(model, self.lora_config)
         print_trainable_parameters(model, use_4bit=self.train_args.use_bnb)
         return model
-    def _load_peft_model(self, cp_path: str):
-        if self.task_args.model_class == "xnet":
-            model = AutoPeftModelForSequenceClassification.from_pretrained(
-                str(cp_path) + '/',
-                torch_dtype=torch.float16,
-                device_map=self.device_map,
-                num_labels=self.task_args.n_labels,
-            )
-        elif self.task_args.model_class == "gen":
+    def _load_peft_model(self, cp_path: str, config=None):
+        # Only support loading PEFT-wrapped causal LM checkpoints here (used for 'gen').
+        if self.task_args.model_class == "gen":
             model = AutoPeftModelForCausalLM.from_pretrained(
                 str(cp_path) + '/',
                 torch_dtype=torch.float16,
                 device_map=self.device_map,
             )
         else:
-            raise ValueError(f"Unsupported model class for PEFT: {self.task_args.model_class}")
+            raise ValueError(f"Unsupported model class for PEFT in _load_peft_model: {self.task_args.model_class}")
         
         model = model.merge_and_unload()
         return model
@@ -223,42 +208,31 @@ class ModelLoader:
         :param use_lora: Whether to load the model with LoRA (PEFT).
         :return: Loaded model.
         """
-        if self.task_args.model_class == "snet" or self.task_args.model_class == "xnet_softmax":
+        cp_path = str(cp_path)
+        config = AutoConfig.from_pretrained(cp_path + "/")
+        if self.use_custom_model and self.custom_model_args:
+            config = self._update_with_custom_config(config, self.custom_model_args)
+
+        bnb_config = self.bnb_config if self.train_args.use_bnb else None
+        model = None
+
+        if self.task_args.model_class in ["snet", "xnet"]:
             model_class = self._model_mapping(self.task_args.model_class)
-            config = AutoConfig.from_pretrained(str(cp_path)+'/')
-            
-            # Pass bnb_config only if bnb is enabled
-            bnb_config = self.bnb_config if self.train_args.use_bnb else None
-            
             model = model_class.from_pretrained(
-                str(cp_path)+'/', 
+                cp_path,
                 config=config,
                 lora_config=self.lora_config if use_lora else None,
                 bnb_config=bnb_config
             )
-        elif self.task_args.model_class == "xnet":
+        elif self.task_args.model_class == "gen":
             if use_lora:
-                print(f"Loading sequence classification model with LoRA from checkpoint: {cp_path}")
                 model = self._load_peft_model(cp_path)
             else:
-                print(f"Loading standard sequence classification model from checkpoint: {cp_path}")
-                model = AutoModelForSequenceClassification.from_pretrained(
-                    cp_path,
-                    config=AutoConfig.from_pretrained(cp_path),
-                )
-        elif self.task_args.model_class == "gen":
-            model = AutoModelForCausalLM.from_pretrained(
-                cp_path,
-                config=AutoConfig.from_pretrained(cp_path),
-            )
+                model = AutoModelForCausalLM.from_pretrained(cp_path, config=config)
+        else:
+            raise ValueError(f"Unknown model_class: {self.task_args.model_class}")
 
-        # Ensure the number of labels matches the task configuration
-        model.config.num_labels = self.task_args.n_labels
-
-        print("Model successfully loaded.")
         return model
-                
-    
 
 class AsagTrainer:
     """
@@ -283,7 +257,9 @@ class AsagTrainer:
         self.is_llm = "llama" in task_args.base_model
     def load_model(self):
         """Load the model for inference or evaluation."""
-        cp_path = self.train_args.cp_dir or self.train_args.save_dir
+        if not self.train_args.cp_dir and not self.task_args.test_only:
+            return self.model
+        cp_path = self.train_args.cp_dir 
         return self.model_loader.load_model(cp_path, use_lora=self.train_args.use_lora)
     def set_collate_fn(self, collate_fn):
         """Set the data collate function."""
@@ -293,7 +269,7 @@ class AsagTrainer:
         if self.task_args.model_class == "gen":
             self.train_gen()
             return 
-        metric = "eval_accuracy" if self.task_args.model_class in ["snet", "xnet"] and self.task_args.n_labels > 1 else "eval_loss"
+        metric = "eval_accuracy" if self.task_args.model_class in ["snet", "xnet"] else "eval_loss"
         train_args = TrainingArguments(
             # optimization parameters
             num_train_epochs=self.train_args.max_epoch,
@@ -307,7 +283,6 @@ class AsagTrainer:
             lr_scheduler_type="cosine",
             optim="paged_adamw_32bit" if self.is_llm else "adamw_torch",
             remove_unused_columns=False,
-            gradient_checkpointing=True if self.is_llm else False,
             gradient_checkpointing_kwargs = {"use_reentrant": False} if self.multi_gpu else None,
             # logging and saving parameters
             label_names=["labels"],
@@ -331,8 +306,12 @@ class AsagTrainer:
             compute_metrics=compute_metrics,
         )
         trainer.train()
+
+        self.model.save_pretrained(self.train_args.save_dir)
+
         trainer.model.save_pretrained(self.train_args.save_dir)
         self.tokenizer.save_pretrained(self.train_args.save_dir)
+        return
     def train_gen(self):
         from trl import SFTTrainer, SFTConfig
         collate_fn = gen_collate_fn
@@ -371,5 +350,5 @@ class AsagTrainer:
         )
         
         trainer.train()
-        trainer.model.save_pretrained(self.train_args.save_dir)
+        self.model.save_pretrained(self.train_args.save_dir)
         self.tokenizer.save_pretrained(self.train_args.save_dir)
