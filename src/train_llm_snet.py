@@ -18,7 +18,7 @@ from utils import (
 from inference import evaluate
 from data_prep import (
     RubricRetrievalLoader,
-    encode_with_fields_separate_rubric
+    encode_with_fields_snet
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
@@ -69,7 +69,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     # Load the dataset
     dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
     tokenizer = get_tokenizer(task_args.base_model)
-    dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_with_fields_separate_rubric, fields=convert_field(task_args.input_fields))
+    dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_with_fields_snet, fields=convert_field(task_args.input_fields))
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args)
 
     if not train_args.test_only:

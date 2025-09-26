@@ -11,7 +11,7 @@ logger = logging.get_logger(__name__)
 _CONFIG_FOR_DOC = "LlamaConfig"
 
 
-class XnetSoftmaxCE(Network_Backbone):
+class AsagXnet(Network_Backbone):
     def __init__(self, config, lora_config=None, bnb_config=None):
         super().__init__(config=config, lora_config=lora_config, bnb_config=bnb_config)
         self.config = config

@@ -83,6 +83,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     
     # Load the dataset
     dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
+    dts_loader.expand_with_rubric()
     tokenizer = get_tokenizer(task_args.base_model)
 
     input_fields = convert_field(task_args.input_fields)

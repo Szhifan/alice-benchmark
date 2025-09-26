@@ -9,7 +9,7 @@ from transformers import (
     TrainingArguments
 )
 from modelling.modelling_snet import AsagSNet
-from modelling.modelling_xnet import XnetSoftmaxCE 
+from modelling.modelling_xnet import AsagXnet 
 import torch
 import os 
 from dataclasses import dataclass, field
@@ -130,15 +130,13 @@ class ModelLoader:
         mapping = {
             "snet": AsagSNet,
             # 'xnet' is the canonical name for the softmax-based Xnet implementation.
-            "xnet": XnetSoftmaxCE,
+            "xnet": AsagXnet,
             "gen": AutoModelForCausalLM,
         }
         if model_class not in mapping:
             raise ValueError(f"Unsupported model class: {model_class}")
         return mapping[model_class]
     def init_model(self):
-
-        
         config = AutoConfig.from_pretrained(self.task_args.base_model)
         if self.use_custom_model:
             print("Detected Llama model - preparing custom configuration...")
@@ -188,7 +186,7 @@ class ModelLoader:
             model = get_peft_model(model, self.lora_config)
         print_trainable_parameters(model, use_4bit=self.train_args.use_bnb)
         return model
-    def _load_peft_model(self, cp_path: str, config=None):
+    def _load_peft_model(self, cp_path: str):
         # Only support loading PEFT-wrapped causal LM checkpoints here (used for 'gen').
         if self.task_args.model_class == "gen":
             model = AutoPeftModelForCausalLM.from_pretrained(
@@ -201,7 +199,7 @@ class ModelLoader:
         
         model = model.merge_and_unload()
         return model
-    def load_model(self, cp_path: str, use_lora=False):
+    def __call__(self, cp_path: str, use_lora=False):
         """
         Load a model from a checkpoint path, with or without LoRA (PEFT).
         :param cp_path: Path to the model checkpoint.
@@ -210,7 +208,6 @@ class ModelLoader:
         """
         cp_path = str(cp_path)
         config = AutoConfig.from_pretrained(cp_path + "/")
-
         bnb_config = self.bnb_config if self.train_args.use_bnb else None
         model = None
 
@@ -255,10 +252,10 @@ class AsagTrainer:
         self.is_llm = "llama" in task_args.base_model
     def load_model(self):
         """Load the model for inference or evaluation."""
-        if not self.train_args.cp_dir and not self.task_args.test_only:
+        if not self.train_args.cp_dir and not self.train_args.test_only:
             return self.model
         cp_path = self.train_args.cp_dir 
-        return self.model_loader.load_model(cp_path, use_lora=self.train_args.use_lora)
+        return self.model_loader(cp_path, use_lora=self.train_args.use_lora)
     def set_collate_fn(self, collate_fn):
         """Set the data collate function."""
         self.collate_fn = collate_fn

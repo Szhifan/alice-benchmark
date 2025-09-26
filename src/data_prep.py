@@ -87,19 +87,7 @@ def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric
     for field in output:
         example[field] = output[field]
     return example
-
-def encode_rubric_separate(example, tokenizer):
-    """
-    Encode rubric and answer separately into different keys for SNet 
-    """
-    answer_output = tokenizer(example["answer"], max_length=512, truncation=True)
-    rubric_output = tokenizer(example["rubric"], max_length=512, truncation=True)
-    for field in answer_output:
-        example[field] = answer_output[field]
-    for field in rubric_output:
-        example[f"rubric_{field}"] = rubric_output[field]
-    return example
-def encode_special_tokens_separate(example, tokenizer, fields: list[str] = ["answer"]):
+def encode_special_tokens_snet(example, tokenizer, fields: list[str] = ["answer"]):
     """
     Encode rubric as one encoding and other fields as another encoding for SNet.
     """
@@ -122,7 +110,7 @@ def encode_special_tokens_separate(example, tokenizer, fields: list[str] = ["ans
     
     return example
 
-def encode_with_fields_separate_rubric(
+def encode_with_fields_snet(
     example, tokenizer, fields: list[str] = ["answer"], 
     add_instruction: bool = False, format: Literal["natural_lang", "structured"] = "structured"
 ):
@@ -531,14 +519,12 @@ class RubricRetrievalLoader(BaseLoader):
         The labels is 1 if the level matches the rubric level, otherwise 0.
         """
         super().__init__(train_frac=train_frac, task_type=task_type)
-        self.expand_with_rubric()
  
     def expand_with_rubric(self):
         def _expand_dataset(dataset):
             expanded_data = []
             for example in dataset:
                 rubric = example["rubric"]
-
                 for level, rb in rubric.items():
                     new_example = example.copy()
                     new_example["rubric"] = rb
