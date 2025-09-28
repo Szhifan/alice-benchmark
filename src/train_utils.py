@@ -345,5 +345,6 @@ class AsagTrainer:
         )
         
         trainer.train()
+
         self.model.save_pretrained(self.train_args.save_dir)
         self.tokenizer.save_pretrained(self.train_args.save_dir)

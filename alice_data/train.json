@@ -871,8 +871,7 @@
     },
     "knowledge_elements": {
       "Elektrische Energie": "0",
-      "Umwandlung": "0",
-      "Energieversorgung (Gesellschaft)": null
+      "Umwandlung": "0"
     },
     "skills": {
       "Reasoning": "2"
@@ -4097,8 +4096,7 @@
     "skills": {
       "Reasoning": "0",
       "Claim": "2",
-      "Fassen die Daten zusammen, um die Frage zu beantworten": "2",
-      "Identifizieren relevante Daten für die Erklärung/ Argumentation": null
+      "Fassen die Daten zusammen, um die Frage zu beantworten": "2"
     },
     "id": "76117_physik_6.2.1"
   },
@@ -12545,9 +12543,6 @@
     "learning_performance": {
       "LP_5.6.3": "2"
     },
-    "knowledge_elements": {
-      "Energieversorgung (Ökologie)": null
-    },
     "skills": {
       "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": "2"
     },
@@ -13364,9 +13359,6 @@
     "question_id": "5.6.4",
     "learning_performance": {
       "LP_5.6.4": "2"
-    },
-    "knowledge_elements": {
-      "Energieversorgung (Ökologie)": null
     },
     "skills": {
       "Beziehen die relevanten Aspekte / Werte auf die vorhandenen Informationen": "2"
@@ -30332,7 +30324,6 @@
     "knowledge_elements": {
       "Thermische Energie": "0",
       "Umwandlung": "0",
-      "Elektrische Energie": null,
       "Chemische Energie": "0",
       "Kinetische Energie": "0"
     },
@@ -32895,7 +32886,6 @@
     "knowledge_elements": {
       "Umwandlung": "0",
       "Energieversorgung (Ökologie)": "0",
-      "Elektrische Energie": null,
       "Thermische Energie": "0",
       "Energieversorgung (Gesellschaft)": "3"
     },
@@ -33335,8 +33325,7 @@
       "LP_2.7.1": "2"
     },
     "knowledge_elements": {
-      "Energieversorgung (Ökologie)": "3",
-      "Energieversorgung (Gesellschaft)": null
+      "Energieversorgung (Ökologie)": "3"
     },
     "skills": {
       "Forschungsfragen stellen": "0"
@@ -39059,9 +39048,6 @@
     "question_id": "3.x.3.5",
     "learning_performance": {
       "LP_3.x.3.5": "2"
-    },
-    "knowledge_elements": {
-      "Energieversorgung (Gesellschaft)": null
     },
     "skills": {
       "Formulieren erste Zusammenhänge, Muster und Strukturen in den Daten": "2"

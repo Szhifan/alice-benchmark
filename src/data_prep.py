@@ -424,6 +424,7 @@ class BaseLoader:
             for i, ke in enumerate(entry['knowledge_elements']):
                 fields_to_keep = ["id","question_id","question","answer","sample_solution","rubric","knowledge_element","level"]
                 new_entry = entry.copy()
+
                 new_entry["question"] = meta_info.get("prompt", "")
                 new_entry["sample_solution"] = meta_info.get("solution", "")
                 new_entry["knowledge_element"] = ke
@@ -431,6 +432,7 @@ class BaseLoader:
                 ke_rubric = {k: f"{ke}: {v['description']}" for k, v in ke_rubric.items()}
                 new_entry["rubric"] = ke_rubric
                 new_entry["knowledge_element"] = ke
+       
                 new_entry["level"] = int(entry["knowledge_elements"][ke])
                 new_entry["id"] = f"{entry['id']}_ke{i}"
                 new_entry = {k: new_entry[k] for k in new_entry if k in fields_to_keep}
