@@ -12,24 +12,20 @@ from utils import (
     set_seed,
     eval_report,
     save_report,
-    get_wandb_tag,
     
 )
+from collate import xnet_collate_fn
 from inference import evaluate
 from data_prep import (
     RubricRetrievalLoader,
     encode_fields_special_tokens,
     encode_rubric_pair,
-    encode_dataset,
     group_by_id,
     xnet_collate_fn,
-    encode_with_fields,
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
 import torch.distributed as dist
-import pandas as pd
-import numpy as np
 dist.init_process_group(backend="nccl")
 def is_main_process():
     """Check if the current process is the main process (rank 0)."""
@@ -38,12 +34,13 @@ def is_main_process():
 @dataclass
 class TaskArguments:
     """Task/experiment related arguments dataclass"""
-    base_model: str = field(default='bert-base-uncased', metadata={"help": "base model to use"})
+    base_model: str = field(default='bert-base-multilingual-cased', metadata={"help": "base model to use"})
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
     input_fields: List[str] = field(default=None, 
                                    metadata={"help": "fields to use as input for the model"})
     model_class: str = field(default="xnet", metadata={"help": "model class to use"})
+    mask_prob: float = field(default=0.0, metadata={"help": "probability of random negative masking during training"})
     
     def __post_init__(self):
         """Validation checks after initialization"""
@@ -104,7 +101,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
 
     # Initialize trainer with grouped collate function
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
-    trainer.set_collate_fn(xnet_collate_fn)
+    trainer.set_collate_fn(xnet_collate_fn, fc_kwargs={"mask_prob": task_args.mask_prob})
 
     if not train_args.test_only:
         print("***** Running training *****")
@@ -155,14 +152,6 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
             print(f"***** {test} Results *****")
             for key, value in test_metrics.items():
                 print(f"{key} = {value:.4f}")
-    
-    # Clean up if no-save flag is set
-    if train_args.no_save:
-        print("No-save flag is set. Deleting checkpoint.")
-        checkpoint_dir = os.path.join(train_args.save_dir, "checkpoint")
-        if os.path.exists(checkpoint_dir):
-            import shutil
-            shutil.rmtree(checkpoint_dir)
     
     # Log final metrics
     inference_speed /= 2

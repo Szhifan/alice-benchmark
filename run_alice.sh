@@ -16,7 +16,7 @@ export WANDB_NAME="${EXP_NAME}"
 export WANDB_NOTES=""
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
-accelerate launch src/train_llm_xnet.py --save-dir "${EXP_ROOT}" \
+accelerate launch src/train_xnet_llm.py --save-dir "${EXP_ROOT}" \
     --base-model "meta-llama/Llama-3.2-3B" \
     --batch-size 16 \
     --train-frac 1 \

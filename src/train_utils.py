@@ -13,13 +13,13 @@ from modelling.modelling_xnet import AsagXnet
 import torch
 import os 
 from dataclasses import dataclass, field
-from data_prep import snet_collate_fn, xnet_collate_fn, gen_collate_fn
 from inference import evaluate
 from peft import LoraConfig, get_peft_model, AutoPeftModelForSequenceClassification, AutoPeftModelForCausalLM
 import evaluate
 import numpy as np
 from accelerate import PartialState
 import json
+from functools import partial
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 # logger = logging.getLogger(__name__)
 print("Using device:", DEFAULT_DEVICE)
@@ -75,25 +75,33 @@ class AsagTrainingArguments:
 
 
 def print_trainable_parameters(model, use_4bit=False):
-    """Prints the number of trainable parameters in the model.
-    :param model: PEFT model
-    """
+    """Prints the number of trainable parameters in the model."""
     trainable_params = 0
     all_param = 0
-    for _, param in model.named_parameters():
+    
+    # 添加量化状态检查
+    quantized_layers = 0
+    
+    for name, param in model.named_parameters():
         num_params = param.numel()
         if num_params == 0 and hasattr(param, "ds_numel"):
             num_params = param.ds_numel
         all_param += num_params
         if param.requires_grad:
             trainable_params += num_params
+            
+        # 检查是否量化
+        if hasattr(param, 'quant_state'):
+            quantized_layers += 1
 
     if use_4bit:
         trainable_params /= 2
     trainable_params_int = int(trainable_params)
-    print(
-        f"All Parameters: {all_param:,d} || Trainable Parameters: {trainable_params_int:,d} || Trainable Parameters %: {100 * trainable_params / all_param:.2f}"
-    )
+    
+    print(f"All Parameters: {all_param:,d} || Trainable Parameters: {trainable_params_int:,d} || Trainable Parameters %: {100 * trainable_params / all_param:.2f}")
+    
+    if quantized_layers > 0:
+        print(f"Quantized layers detected: {quantized_layers}")
 class ModelLoader:
     """Model loading and initialization utilities."""
 
@@ -114,7 +122,7 @@ class ModelLoader:
             load_in_4bit = True, # Activate 4-bit precision base model loading
             bnb_4bit_use_double_quant = True, # Activate nested quantization for 4-bit base models (double quantization)
             bnb_4bit_quant_type = "nf4",# Quantization type (fp4 or nf4)
-            bnb_4bit_compute_dtype = torch.float32 if self.train_args.bf16 else torch.bfloat16, 
+            bnb_4bit_compute_dtype = torch.bfloat16, 
             )
         self.use_custom_model = "llama" in self.task_args.base_model
     def _update_with_custom_config(self, config):
@@ -246,8 +254,6 @@ class AsagTrainer:
         self.model_loader = ModelLoader(task_args, train_args, custom_model_args=custom_model_args, device_map=device_map)
         self.model = self.model_loader.init_model()
         self.tokenizer = get_tokenizer(task_args.base_model)
-        self.collate_fn = gen_collate_fn if task_args.model_class == "gen" else \
-                         xnet_collate_fn if task_args.model_class == "xnet" else snet_collate_fn
         self.multi_gpu = multi_gpu
         self.is_llm = "llama" in task_args.base_model
     def load_model(self):
@@ -256,9 +262,11 @@ class AsagTrainer:
             return self.model
         cp_path = self.train_args.cp_dir 
         return self.model_loader(cp_path, use_lora=self.train_args.use_lora)
-    def set_collate_fn(self, collate_fn):
+    def set_collate_fn(self, collate_fn, fc_kwargs=None):
         """Set the data collate function."""
+        collate_fn = partial(collate_fn, **(fc_kwargs or {}))
         self.collate_fn = collate_fn
+        
     def train(self):
         print("Starting training...")
         if self.task_args.model_class == "gen":
@@ -278,7 +286,8 @@ class AsagTrainer:
             lr_scheduler_type="cosine",
             optim="paged_adamw_32bit" if self.is_llm else "adamw_torch",
             remove_unused_columns=False,
-            gradient_checkpointing_kwargs = {"use_reentrant": False} if self.multi_gpu else None,
+            gradient_checkpointing=True if self.is_llm else False,
+            gradient_checkpointing_kwargs = {"use_reentrant": False} if self.is_llm else None,
             # logging and saving parameters
             label_names=["labels"],
             greater_is_better=metric == "eval_accuracy",
@@ -286,7 +295,7 @@ class AsagTrainer:
             load_best_model_at_end=True,
             metric_for_best_model=metric,
             logging_dir=os.path.join(self.train_args.save_dir, "logs"),
-            logging_steps=50,
+            logging_steps=10,
             save_strategy="best",
             eval_strategy="epoch",
             save_total_limit=1,
@@ -309,7 +318,6 @@ class AsagTrainer:
         return
     def train_gen(self):
         from trl import SFTTrainer, SFTConfig
-        collate_fn = gen_collate_fn
         print("Starting generative model training...")
         
         sft_config = SFTConfig(
@@ -326,11 +334,11 @@ class AsagTrainer:
             optim="paged_adamw_32bit" if self.is_llm else "adamw_torch",
             remove_unused_columns=False,
             gradient_checkpointing=True if self.is_llm else False,
-            gradient_checkpointing_kwargs={"use_reentrant": False} if self.multi_gpu else None,
+            gradient_checkpointing_kwargs={"use_reentrant": False} if self.is_llm else None,
             logging_dir=os.path.join(self.train_args.save_dir, "logs"),
-            logging_steps=50,
-            save_strategy="epoch",
-            eval_strategy="epoch" if self.validation_dataset else "no",
+            logging_steps=10,
+            save_strategy="best",
+            eval_strategy="epoch",
             save_total_limit=1,
             packing=False,
         )
@@ -341,7 +349,7 @@ class AsagTrainer:
             args=sft_config,
             train_dataset=self.train_dataset,
             eval_dataset=self.validation_dataset,
-            data_collator=collate_fn,
+            data_collator=self.collate_fn,
         )
         
         trainer.train()

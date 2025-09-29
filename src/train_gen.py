@@ -132,15 +132,6 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         inference_speed += inf_time / test_predictions.shape[0]
         # metrics_wandb = {test: test_metrics}
         # wandb.log(metrics_wandb)
-    if train_args.no_save:
-        print("No-save flag is set. Deleting checkpoint.")
-        for root, dirs, files in os.walk(train_args.save_dir):
-            for dir in dirs:
-                if "checkpoint" in dir:
-                    shutil.rmtree(os.path.join(root, dir))
-            for file in files:
-                if "safetensor" in file:
-                    os.remove(os.path.join(root, file))
     inference_speed /= 2
     wandb.log({"inference_speed_per_sample_sec": inference_speed})
 if __name__ == "__main__":

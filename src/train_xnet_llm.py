@@ -15,14 +15,11 @@ from utils import (
     get_wandb_tag,
     
 )
+from collate import xnet_collate_fn
 from inference import evaluate
 from data_prep import (
     RubricRetrievalLoader,
-    encode_fields_special_tokens,
-    encode_rubric_pair,
-    encode_dataset,
     group_by_id,
-    xnet_collate_fn,
     encode_with_fields,
 )
 from modelling.modelling_utils import BackwardSupportedArguments
@@ -46,6 +43,7 @@ class TaskArguments:
     model_class: str = field(default="xnet", metadata={"help": "model class to use"})
     input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
     add_instruction: bool = field(default=False,metadata={"help":"whether to add instruction to the LLM input"})
+    mask_prob: float = field(default=0.0, metadata={"help": "probability of random negative masking during training"})
 
     def __post_init__(self):
         """Validation checks after initialization"""
@@ -107,7 +105,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
 
     # Initialize trainer with grouped collate function
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
-    trainer.set_collate_fn(xnet_collate_fn)
+    trainer.set_collate_fn(xnet_collate_fn, fc_kwargs={"mask_prob": task_args.mask_prob})
 
     if not train_args.test_only:
         print("***** Running training *****")
@@ -158,15 +156,6 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
             print(f"***** {test} Results *****")
             for key, value in test_metrics.items():
                 print(f"  {key} = {value:.4f}")
-        
-    # Clean up if no-save flag is set
-    if train_args.no_save:
-        print("No-save flag is set. Deleting checkpoint.")
-        checkpoint_dir = os.path.join(train_args.save_dir, "checkpoint")
-        if os.path.exists(checkpoint_dir):
-            import shutil
-            shutil.rmtree(checkpoint_dir)
-    
     # Log final metrics
     inference_speed /= 2
     wandb.log({"inference_speed_per_sample_sec": inference_speed})

@@ -10,6 +10,7 @@ import os
 import logging
 from peft import PeftModel, get_peft_model
 
+
 logger = logging.getLogger(__name__)
 logger.setLevel("INFO")
 
@@ -367,28 +368,3 @@ class Network_Backbone(nn.Module):
             torch.save(full_state, os.path.join(save_path, "non_peft_params.bin"))
         else:
             torch.save(self.state_dict(), os.path.join(save_path, "pytorch_model.bin"))
-    def enable_gradient_checkpointing(self):
-        # 3) The key trio for stable & faster GC
-        if hasattr(self.encoder, "config"):
-            self.encoder.config.use_cache = False
-        # If using LoRA, make sure inputs require grads
-        try:
-            self.encoder.enable_input_require_grads()
-        except AttributeError:
-            pass
-        # Non-reentrant is usually faster/more stable on PT >= 2.0
-        try:
-            self.encoder.gradient_checkpointing_enable(
-                gradient_checkpointing_kwargs={"use_reentrant": False}
-            )
-        except TypeError:
-            # Older transformers/pytorch fallback
-            self.encoder.gradient_checkpointing_enable()
-
-    def disable_gradient_checkpointing(self):
-        try:
-            self.encoder.gradient_checkpointing_disable()
-        except AttributeError:
-            pass
-        if hasattr(self.encoder, "config"):
-            self.encoder.config.use_cache = True

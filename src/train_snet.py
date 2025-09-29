@@ -16,8 +16,9 @@ from utils import (
     
 )
 from inference import evaluate
+from collate import snet_collate_fn
 from data_prep import (
-    RubricRetrievalLoader,
+    BaseLoader,
     encode_special_tokens_snet
 )
 from modelling.modelling_utils import BackwardSupportedArguments
@@ -67,7 +68,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         wandb.init(mode="disabled")
     print("Training arguments: %s", train_args)
     # Load the dataset
-    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
+    dts_loader = BaseLoader(train_frac=task_args.train_frac)
     tokenizer = get_tokenizer(task_args.base_model)
     dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_special_tokens_snet, fields=convert_field(task_args.input_fields))
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args)
@@ -99,19 +100,12 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
             pred_dir = os.path.join(train_args.save_dir, "predictions")
             if not os.path.exists(pred_dir):
                 os.makedirs(pred_dir)
-            test_predictions.to_csv(os.path.join(pred_dir, f"{test}_raw_predictions.csv"), index=False)
-            test_predictions = transform_for_inference(test_predictions)
             test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
             test_metrics = eval_report(test_predictions)
             save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
             inference_speed += inf_time / test_predictions.shape[0]
             metrics_wandb = {test: test_metrics}
             wandb.log(metrics_wandb)
-    if train_args.no_save:
-        print("No-save flag is set. Deleting checkpoint.")
-        checkpoint_dir = os.path.join(train_args.save_dir, "checkpoint")
-        if os.path.exists(checkpoint_dir):
-            os.remove(checkpoint_dir)
     inference_speed /= 2
     wandb.log({"inference_speed_per_sample_sec": inference_speed})
 if __name__ == "__main__":
