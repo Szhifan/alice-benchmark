@@ -26,6 +26,7 @@ from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
 import shutil
 import torch.distributed as dist
+from collate import gen_collate_fn
 dist.init_process_group(backend='nccl')
 def is_main_process():
     """Check if the current process is the main process (rank 0)."""
@@ -90,8 +91,8 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         train=False,
         additional_fields=input_fields
     )
-    trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args)
-
+    trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
+    trainer.set_collate_fn(lambda x: gen_collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=False))
     if not train_args.test_only:
         print("***** Running training *****")
         print("Num examples = %d", len(dts_loader.train))
@@ -115,12 +116,12 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         print(f"***** Running evaluation on {test} *****")
         print("  Num examples = %d", len(test_ds))
         time_start = time.time()
-        test_predictions, test_loss = evaluate_gen(
+        test_predictions = evaluate_gen(
             test_model,
             test_ds,
             batch_size=train_args.batch_size,
             tokenizer=tokenizer,
-            collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
+            collate_fn=lambda x: gen_collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
         )
         inf_time = time.time() - time_start
         pred_dir = os.path.join(train_args.save_dir, "predictions")

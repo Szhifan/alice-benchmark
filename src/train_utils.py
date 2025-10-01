@@ -116,7 +116,7 @@ class ModelLoader:
             lora_dropout=0.1,
             bias='none',
             target_modules="all-linear",
-            task_type="SEQ_CLS" if self.task_args.model_class != "gen" else "CAUSAL_LM",
+            task_type=None if self.task_args.model_class != "gen" else "CAUSAL_LM",
         )
         self.bnb_config = BitsAndBytesConfig(
             load_in_4bit = True, # Activate 4-bit precision base model loading

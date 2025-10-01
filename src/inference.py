@@ -57,7 +57,7 @@ def evaluate_gen(model, dataset, batch_size, tokenizer, collate_fn=None):
     predictions = defaultdict(list)
     for step, (batch, meta) in enumerate(data_iterator):
         batch = batch_to_device(batch, device)
-        model_output = model.generate(**batch, max_length=10)
+        model_output = model.generate(**batch, max_new_tokens=10)
         llm_output_text = tokenizer.batch_decode(model_output, skip_special_tokens=True)
         predictions["pred_text"].extend(llm_output_text) 
         for key, value in meta.items():
