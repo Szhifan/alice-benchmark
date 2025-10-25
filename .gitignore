@@ -1,4 +1,4 @@
-results/* 
+results* 
 wandb/*
 asap-sas-data/raw/* 
 asap-sas-data/rubrics/*pdf
