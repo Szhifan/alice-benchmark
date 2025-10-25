@@ -272,7 +272,6 @@ class AsagTrainer:
         if self.task_args.model_class == "gen":
             self.train_gen()
             return 
-        metric = "eval_accuracy" if self.task_args.model_class in ["snet", "xnet"] else "eval_loss"
         train_args = TrainingArguments(
             # optimization parameters
             num_train_epochs=self.train_args.max_epoch,
@@ -290,10 +289,10 @@ class AsagTrainer:
             gradient_checkpointing_kwargs = {"use_reentrant": False} if self.is_llm else None,
             # logging and saving parameters
             label_names=["labels"],
-            greater_is_better=metric == "eval_accuracy",
+            greater_is_better="eval_accuracy",
             save_only_model=True,
             load_best_model_at_end=True,
-            metric_for_best_model=metric,
+            metric_for_best_model="eval_accuracy",
             logging_dir=os.path.join(self.train_args.save_dir, "logs"),
             logging_steps=10,
             save_strategy="best",
@@ -338,7 +337,11 @@ class AsagTrainer:
             logging_dir=os.path.join(self.train_args.save_dir, "logs"),
             logging_steps=10,
             save_strategy="best",
+            eval_metric="eval_loss",
+            load_best_model_at_end=True,
+            greater_is_better=False,
             eval_strategy="epoch",
+            metric_for_best_model="eval_loss",
             save_total_limit=1,
             packing=False,
         )

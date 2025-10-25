@@ -4,7 +4,7 @@ import logging
 import random
 import numpy as np
 import torch
-
+import re 
 import torch 
 from sklearn.metrics import f1_score, accuracy_score
 from sklearn.metrics import cohen_kappa_score
@@ -95,7 +95,24 @@ def eval_report(pred_df, group_by=None):
             group_metrics = metrics_calc(group_df["labels"].values, group_df["pred_id"].values)
             results[f"{group}_qwk"] = group_metrics["qwk"]
     return results
+def eval_report_gen(pred_df, group_by=None):
+    def extract_ans(pred_df):
+        answers = []
+        for output in pred_df["pred_text"].tolist():
+            output = str(output)
+            match = re.search(r'\d', output)
+            if match:
+                answers.append(match.group())
+            else:
+                answers.append("NA")
 
+        pred_df["pred_id"] = answers 
+    extract_ans(pred_df)
+    pred_df["labels"] = pred_df["level"].astype(str)
+    answer_rate = sum(1 for ans in pred_df["pred_id"] if ans != "NA") / len(pred_df)
+    results = eval_report(pred_df, group_by)
+    results["answer_rate"] = answer_rate
+    return results
 def save_report(metrics, path):
     """
     Save the metrics to a JSON file.
@@ -145,17 +162,9 @@ def get_wandb_tag(task_args):
     return tag 
 
 if __name__ == "__main__":
+    path = "results_gen/llama3.2-1b-instruct-gen/predictions/test_ua_predictions.csv"
     import pandas as pd
-    def transform_for_inference(pred_df, other_filds=None):
-        # Convert string logits to lists first
-        pred_df["logits"] = pred_df["logits"].apply(lambda x: json.loads(x) if isinstance(x, str) else x)
-        pred_df["logit_label"] = pred_df['logits'].apply(lambda x: float(x[1]) if len(x) > 1 else float(x))
-        final_fields = ["id", "rubric_level", "level", "logit_label"] + (other_filds if other_filds else [])
-        final_df = pred_df.loc[pred_df.groupby('id')['logit_label'].idxmax()][final_fields]
-
-        final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'labels'})
-        return final_df 
-    path_dr = "results/gbert/test_ua_raw_predictions.csv"
-    df = pd.read_csv(path_dr)
-    df = transform_for_inference(df)
-    df.to_csv("test.csv", index=False)
+    pred_df = pd.read_csv(path)
+    results = eval_report_gen(pred_df)
+    print(results)
+    

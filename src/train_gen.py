@@ -45,6 +45,8 @@ class TaskArguments:
         """Validation checks after initialization"""
         assert self.n_labels > 0, "n_labels must be positive"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
+        assert self.input_fields is None or all(f in ['q', 's'] for f in self.input_fields), \
+            "input_fields must be a subset of ['q', 's'] or None"
 def convert_field(fields_input_list):
     if not fields_input_list:
         return None
@@ -104,37 +106,38 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     # Evaluate on test dataset
     test_model = trainer.load_model()
     inference_speed = 0
-    for test in ["test_ua", "test_uq"]:
-        test_ds = getattr(dts_loader, test)
-        test_ds = encode_dataset(
-            test_ds,
-            tokenizer=tokenizer,
-            enc_fn=encode_generation,
-            train=False,
-            additional_fields=input_fields
-        )
-        print(f"***** Running evaluation on {test} *****")
-        print("  Num examples = %d", len(test_ds))
-        time_start = time.time()
-        test_predictions = evaluate_gen(
-            test_model,
-            test_ds,
-            batch_size=train_args.batch_size,
-            tokenizer=tokenizer,
-            collate_fn=lambda x: gen_collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
-        )
-        inf_time = time.time() - time_start
-        pred_dir = os.path.join(train_args.save_dir, "predictions")
-        if not os.path.exists(pred_dir):
-            os.makedirs(pred_dir)
-        test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
-        # test_metrics = eval_report(test_predictions)
-        # save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
-        inference_speed += inf_time / test_predictions.shape[0]
-        # metrics_wandb = {test: test_metrics}
-        # wandb.log(metrics_wandb)
-    inference_speed /= 2
-    wandb.log({"inference_speed_per_sample_sec": inference_speed})
+    if is_main_process():
+        for test in ["test_ua", "test_uq"]:
+            test_ds = getattr(dts_loader, test)
+            test_ds = encode_dataset(
+                test_ds,
+                tokenizer=tokenizer,
+                enc_fn=encode_generation,
+                train=False,
+                additional_fields=input_fields
+            )
+            print(f"***** Running evaluation on {test} *****")
+            print("  Num examples = %d", len(test_ds))
+            time_start = time.time()
+            test_predictions = evaluate_gen(
+                test_model,
+                test_ds,
+                batch_size=train_args.batch_size,
+                tokenizer=tokenizer,
+                collate_fn=lambda x: gen_collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
+            )
+            inf_time = time.time() - time_start
+            pred_dir = os.path.join(train_args.save_dir, "predictions")
+            if not os.path.exists(pred_dir):
+                os.makedirs(pred_dir)
+            test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
+            # test_metrics = eval_report(test_predictions)
+            # save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
+            inference_speed += inf_time / test_predictions.shape[0]
+            # metrics_wandb = {test: test_metrics}
+            # wandb.log(metrics_wandb)
+        inference_speed /= 2
+        wandb.log({"inference_speed_per_sample_sec": inference_speed})
 if __name__ == "__main__":
     parser = HfArgumentParser((TaskArguments, AsagTrainingArguments, BackwardSupportedArguments))
     task_args, train_args, custom_model_args = parser.parse_args_into_dataclasses()

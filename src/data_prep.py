@@ -135,6 +135,7 @@ def encode_with_fields_snet(
         example[f"rubric_{field}"] = rubric_encoded[field]
     return example
 
+
 def encode_generation(example, tokenizer, train=True, additional_fields=None):
     """
     Encode text for generation task
@@ -142,19 +143,29 @@ def encode_generation(example, tokenizer, train=True, additional_fields=None):
     rubric = example["rubric"]
     addition_input_text = ""
     if additional_fields is not None:
-        
         for field in additional_fields:
             if field not in example:
                 raise ValueError(f"Field '{field}' not found in the example.")
             addition_input_text += f"{FIELD_EN2DE[field]}: {example[field]}\n"
-    rubric_text = [f"Score: {key} Rubric: {value}" for key, value in rubric.items()]
-    text2encode = f"Welche der folgenden Rubriken erfüllen die Schülerantwort: {example['answer']}?" + "\n".join(rubric_text) + "\n" \
-    + addition_input_text
+    
+    rubric_text = [f"Niveau {key}: {value}" for key, value in rubric.items()]
+    
+    text2encode = f"""Aufgabe: Bewerten Sie die folgende Schülerantwort anhand der gegebenen Bewertungskriterien.
+    {addition_input_text}
+    Schülerantwort: {example['answer']}
+    
+    Bewertungskriterien:
+    {chr(10).join(rubric_text)}
+    Welches Bewertungsniveau entspricht dieser Antwort am besten?
+    """
+        
     if train:
-        response = f"Antwort: {example['level']}"
+        response = f"Antwort: Niveau {example['level']} {tokenizer.eos_token}"
         text2encode += response
+        text2encode += tokenizer.eos_token
+    
     encoded = tokenizer(text2encode, max_length=1024, truncation=True)
-
+    
     for field in encoded:
         example[field] = encoded[field]
     example["text"] = text2encode
@@ -377,7 +388,12 @@ class RubricRetrievalLoader(BaseLoader):
 
 if __name__ == "__main__":
     from torch.utils.data import DataLoader
+    from collate import gen_collate_fn
     loader = BaseLoader(train_frac=0.1, task_type="lp")
-    tokenizer = AutoTokenizer.from_pretrained("bert-base-multilingual-cased")
-    loader.train = encode_dataset(loader.train, tokenizer, encode_special_tokens_snet, fields=["answer","question"])
-    print(loader.train[0])
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+    tokenizer.pad_token = tokenizer.eos_token
+    loader.test_ua = encode_dataset(loader.test_ua, tokenizer, encode_generation, train=False, additional_fields=["question","sample_solution"])
+    train_dataloader = DataLoader(loader.test_ua, batch_size=2, shuffle=True, collate_fn=lambda x: gen_collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=False))
+    for batch in train_dataloader:
+        print(tokenizer.batch_decode(batch["input_ids"], skip_special_tokens=False))
+        break

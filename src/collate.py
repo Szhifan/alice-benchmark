@@ -219,7 +219,8 @@ def gen_collate_fn(input_batch, pad_id=0, return_meta=False):
     } 
     meta = {
         "id": [x["id"] for x in input_batch],
-        "level": [x["level"] for x in input_batch]
+        "level": [x["level"] for x in input_batch],
+        "text": [x["text"] for x in input_batch],
     }
     if return_meta:
         return batch, meta

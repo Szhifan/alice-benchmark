@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from utils import batch_to_device, mean_dequeue
-
+from transformers import pipeline
 
 @torch.no_grad() 
 def evaluate(model, dataset, batch_size, collate_fn=None,): 
@@ -46,7 +46,6 @@ def evaluate(model, dataset, batch_size, collate_fn=None,):
 def evaluate_gen(model, dataset, batch_size, tokenizer, collate_fn=None):
     def extract_ans(pred_text:str):
         import re 
-
     dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
 
     data_iterator = tqdm(dataloader, desc="Evaluating", position=0)
@@ -57,8 +56,9 @@ def evaluate_gen(model, dataset, batch_size, tokenizer, collate_fn=None):
     predictions = defaultdict(list)
     for step, (batch, meta) in enumerate(data_iterator):
         batch = batch_to_device(batch, device)
-        model_output = model.generate(**batch, max_new_tokens=10)
-        llm_output_text = tokenizer.batch_decode(model_output, skip_special_tokens=True)
+        generation_pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer)
+        llm_output = generation_pipeline(meta["text"], max_new_tokens=10, return_full_text=False)
+        llm_output_text = [output[0]["generated_text"] for output in llm_output]
         predictions["pred_text"].extend(llm_output_text) 
         for key, value in meta.items():
             predictions[key].extend(value)
