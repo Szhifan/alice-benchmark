@@ -162,7 +162,6 @@ def encode_generation(example, tokenizer, train=True, additional_fields=None):
     if train:
         response = f"Antwort: Niveau {example['level']} {tokenizer.eos_token}"
         text2encode += response
-        text2encode += tokenizer.eos_token
     
     encoded = tokenizer(text2encode, max_length=1024, truncation=True)
     
