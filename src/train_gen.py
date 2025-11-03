@@ -3,30 +3,28 @@ import os
 import wandb
 from dataclasses import dataclass, field
 from typing import List
-from train_utils import (
+from utils.train_utils import (
     AsagTrainer,
     AsagTrainingArguments,
     get_tokenizer
 )
-from utils import (
+from utils.utils import (
     set_seed,
-    eval_report,
-    save_report,
-    transform_for_inference,
+    eval_report_gen,
     get_wandb_tag,
+    save_report,
     
 )
-from inference import evaluate_gen
-from data_prep import (
+from utils.inference import evaluate_gen
+from utils.data_prep import (
     BaseLoader,
     encode_generation, 
     encode_dataset
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
-import shutil
 import torch.distributed as dist
-from collate import gen_collate_fn
+from utils.collate import gen_collate_fn
 dist.init_process_group(backend='nccl')
 def is_main_process():
     """Check if the current process is the main process (rank 0)."""
@@ -131,11 +129,11 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
             if not os.path.exists(pred_dir):
                 os.makedirs(pred_dir)
             test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
-            # test_metrics = eval_report(test_predictions)
-            # save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
+            test_metrics = eval_report_gen(test_predictions)
+            save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
             inference_speed += inf_time / test_predictions.shape[0]
-            # metrics_wandb = {test: test_metrics}
-            # wandb.log(metrics_wandb)
+            metrics_wandb = {test: test_metrics}
+            wandb.log(metrics_wandb)
         inference_speed /= 2
         wandb.log({"inference_speed_per_sample_sec": inference_speed})
 if __name__ == "__main__":

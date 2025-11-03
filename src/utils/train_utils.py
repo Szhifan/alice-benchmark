@@ -13,7 +13,7 @@ from modelling.modelling_xnet import AsagXnet
 import torch
 import os 
 from dataclasses import dataclass, field
-from inference import evaluate
+from utils.inference import evaluate
 from peft import LoraConfig, get_peft_model, AutoPeftModelForSequenceClassification, AutoPeftModelForCausalLM
 import evaluate
 import numpy as np
@@ -47,7 +47,7 @@ class AsagTrainingArguments:
     clip_norm: float = field(default=1.0, metadata={"help": "clip threshold of gradients"})
     lr: float = field(default=5e-5, metadata={"help": "learning rate"})
     patience: int = field(default=3, metadata={"help": "number of epochs without improvement on validation set before early stopping"})
-    grad_accumulation_steps: int = field(default=1, metadata={"help": "number of updates steps to accumulate before performing a backward/update pass"})
+    gradient_accumulation_steps: int = field(default=1, metadata={"help": "number of updates steps to accumulate before performing a backward/update pass"})
     weight_decay: float = field(default=0.01, metadata={"help": "weight decay for Adam"})
     adam_epsilon: float = field(default=1e-8, metadata={"help": "epsilon for Adam optimizer"})
     warmup_ratio: float = field(default=0.01, metadata={"help": "proportion of warmup steps"})
@@ -68,9 +68,11 @@ class AsagTrainingArguments:
         assert self.max_epoch > 0, "max_epoch must be positive" 
         assert self.lr > 0, "learning rate must be positive"
         assert self.patience >= 0, "patience must be non-negative"
-        assert self.grad_accumulation_steps > 0, "grad_accumulation_steps must be positive"
+        assert self.gradient_accumulation_steps > 0, "gradient_accumulation_steps must be positive"
         assert 0 <= self.dropout <= 1, "dropout must be between 0 and 1"
         assert 0 <= self.warmup_ratio <= 1, "warmup_ratio must be between 0 and 1"
+        if self.test_only:
+            assert self.cp_dir is not None, "cp_dir must be specified in test_only mode"
 
 
 
@@ -258,9 +260,9 @@ class AsagTrainer:
         self.is_llm = "llama" in task_args.base_model
     def load_model(self):
         """Load the model for inference or evaluation."""
-        if not self.train_args.cp_dir and not self.train_args.test_only:
+        if not self.train_args.test_only:
             return self.model
-        cp_path = self.train_args.cp_dir 
+        cp_path = self.train_args.cp_dir if self.train_args.cp_dir else self.train_args.save_dir
         return self.model_loader(cp_path, use_lora=self.train_args.use_lora)
     def set_collate_fn(self, collate_fn, fc_kwargs=None):
         """Set the data collate function."""
@@ -276,7 +278,7 @@ class AsagTrainer:
             # optimization parameters
             num_train_epochs=self.train_args.max_epoch,
             per_device_train_batch_size=self.train_args.batch_size,
-            gradient_accumulation_steps=self.train_args.grad_accumulation_steps,
+            gradient_accumulation_steps=self.train_args.gradient_accumulation_steps,
             learning_rate=self.train_args.lr,
             weight_decay=self.train_args.weight_decay,
             max_grad_norm=self.train_args.clip_norm,
@@ -323,7 +325,7 @@ class AsagTrainer:
             output_dir=self.train_args.save_dir,
             num_train_epochs=self.train_args.max_epoch,
             per_device_train_batch_size=self.train_args.batch_size,
-            gradient_accumulation_steps=self.train_args.grad_accumulation_steps,
+            gradient_accumulation_steps=self.train_args.gradient_accumulation_steps,
             learning_rate=self.train_args.lr,
             weight_decay=self.train_args.weight_decay,
             max_grad_norm=self.train_args.clip_norm,
@@ -337,7 +339,6 @@ class AsagTrainer:
             logging_dir=os.path.join(self.train_args.save_dir, "logs"),
             logging_steps=10,
             save_strategy="best",
-            eval_metric="eval_loss",
             load_best_model_at_end=True,
             greater_is_better=False,
             eval_strategy="epoch",

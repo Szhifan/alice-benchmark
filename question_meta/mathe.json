@@ -30,7 +30,7 @@
                     "rule": "zielgerichtete Verwendung",
                     "description": "Nutzen durchschnittliche Änderungsrate und Sekante, um die Genauigkeit der durchschnittlichen Steigung zu beschreiben."
                 },
-                "?": {
+                "3": {
                     "rule": "Inhaltsleere Wortnutzung",
                     "description": "Nutzen durchschnittliche Änderungsrate und Sekante ohne einen sinnvollen Zusammenhang zur Aufgabe."
                 }

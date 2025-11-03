@@ -3,21 +3,21 @@ import os
 import wandb
 from dataclasses import dataclass, field
 from typing import List
-from train_utils import (
+from utils.train_utils import (
     AsagTrainer,
     AsagTrainingArguments,
     get_tokenizer
 )
-from utils import (
+from utils.utils import (
     set_seed,
     eval_report,
     save_report,
     transform_for_inference,
     
 )
-from inference import evaluate
-from collate import snet_collate_fn
-from data_prep import (
+from utils.inference import evaluate
+from utils.collate import snet_collate_fn
+from utils.data_prep import (
     BaseLoader,
     encode_with_fields_snet
 )

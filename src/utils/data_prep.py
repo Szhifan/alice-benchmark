@@ -4,13 +4,13 @@ import json
 import torch
 from transformers import AutoTokenizer
 import random
+disable_caching()
 """
 Dataprep pipeline: 
 1. Load the Alice dataset from json files.
 2. Encode the dataset using the provided encoding functions for different model settings.
 3. Provide collate functions for batching the dataset.
 """
-enable_caching()
 path_train = "alice_data/train.json"
 path_ua = "alice_data/test_ua.json"
 path_uq = "alice_data/test_uq.json"
@@ -107,7 +107,6 @@ def encode_special_tokens_snet(example, tokenizer, fields: list[str] = ["answer"
     other_output = tokenizer(text2encode, max_length=512, truncation=True, add_special_tokens=True)
     for field in other_output:
         example[field] = other_output[field]
-    
     return example
 
 def encode_with_fields_snet(
@@ -199,14 +198,12 @@ def group_by_id(dataset):
     regrouped_examples = []
     
     for base_id, examples in grouped_data.items():
-        # Sort examples by rubric_level to ensure consistent ordering
-        examples = sorted(examples, key=lambda x: x["rubric_level"])
-        
         # Create the new grouped example
         grouped_example = {
             "id": base_id,
             "question_id": examples[0]["question_id"],
             "level": examples[0]["level"],  # Original level
+            "num_rubrics": examples[0]["num_rubrics"]
         }
         
         # Stack the encoded fields
@@ -219,12 +216,6 @@ def group_by_id(dataset):
         
         # Keep labels and rubric levels for each rubric
         grouped_example["labels"] = examples[0]["level"]
-        grouped_example["num_rubrics"] = len(examples)
-        # Keep other metadata from first example
-        for key in examples[0]:
-            if key not in ["input_ids", "attention_mask", "token_type_ids", "labels", "num_rubrics"]:
-                grouped_example[key] = examples[0][key]
-        
         regrouped_examples.append(grouped_example)
     
     return Dataset.from_list(regrouped_examples)
@@ -250,14 +241,14 @@ class BaseLoader:
         else:
             raise ValueError(f"Unknown subject in id {entry['id']}")
         meta_info = meta[entry["question_id"]]
-
+        fields_to_keep = ["id","question_id","question","answer","sample_solution","rubric","level", "num_rubrics"]
         if self.task_type == "lp":
-            fields_to_keep = ["id","question_id","question","answer","sample_solution","rubric","level"]
             entry["question"] = meta_info.get("prompt", "")
             entry["sample_solution"] = meta_info.get("solution", "")
             rubric = meta_info["learning_performance"]
-            entry["rubric"] = {k: v['rule'] for k, v in rubric.items()}
+            entry["rubric"] = [v['rule'] for v in rubric.values()]
             entry["level"] = int(next(iter(entry["learning_performance"].values())))
+            entry["num_rubrics"] = len(rubric)
             new_entry = {k: entry[k] for k in entry if k in fields_to_keep}
             return new_entry
         elif self.task_type == "ke":
@@ -265,20 +256,26 @@ class BaseLoader:
             if not entry.get("knowledge_elements"):
                 return []
             for i, ke in enumerate(entry['knowledge_elements']):
-                fields_to_keep = ["id","question_id","question","answer","sample_solution","rubric","knowledge_element","level"]
                 new_entry = entry.copy()
-
+                new_entry["id"] = f"{entry['id']}_ke{i}"
                 new_entry["question"] = meta_info.get("prompt", "")
                 new_entry["sample_solution"] = meta_info.get("solution", "")
-                new_entry["knowledge_element"] = ke
                 ke_rubric  = meta_info.get("knowledge_elements", {}).get(ke, {})
-                ke_rubric = {k: f"{ke}: {v['description']}" for k, v in ke_rubric.items()}
+                if len(ke_rubric) == 0:
+                    continue    
+                level_range = set(ke_rubric.keys())
+                
+                if str(entry["knowledge_elements"][ke]) not in level_range:
+                    continue
+                # in some rubrics, levels are not continuous. {0,1,3} -> {0,1,2}
+                level_remap = {k:i for i,k in enumerate(sorted(level_range, key=float))} 
+                level = level_remap[str(entry["knowledge_elements"][ke])]
+                ke_rubric = [f"{ke}: {v['description']}" for v in ke_rubric.values()]
                 new_entry["rubric"] = ke_rubric
-                new_entry["knowledge_element"] = ke
-       
-                new_entry["level"] = int(entry["knowledge_elements"][ke])
-                new_entry["id"] = f"{entry['id']}_ke{i}"
+                new_entry["level"] = level
+                new_entry["num_rubrics"] = len(ke_rubric)
                 new_entry = {k: new_entry[k] for k in new_entry if k in fields_to_keep}
+
                 expending_entries.append(new_entry)
             return expending_entries
         elif self.task_type == "sk":
@@ -286,7 +283,7 @@ class BaseLoader:
                 return []
             expending_entries = []
             for i, sk in enumerate(entry['skills']):
-                fields_to_keep = ["id","question_id","question","answer","sample_solution","rubric","skill_element","level"]
+                
                 new_entry = entry.copy()
                 new_entry["question"] = meta_info.get("prompt", "")
                 new_entry["sample_solution"] = meta_info.get("solution", "")
@@ -294,8 +291,8 @@ class BaseLoader:
                 sk_rubric  = meta_info.get("skills", {}).get(sk, {})
                 sk_rubric = {k: f"{sk}: {v['description']}" for k, v in sk_rubric.items()}
                 new_entry["rubric"] = sk_rubric
-                new_entry["skills"] = sk
                 new_entry["level"] = int(entry["skills"][sk])
+                new_entry["num_rubrics"] = len(sk_rubric)
                 new_entry["id"] = f"{entry['id']}_sk{i}"
                 new_entry = {k: new_entry[k] for k in new_entry if k in fields_to_keep}
                 expending_entries.append(new_entry)
@@ -370,11 +367,11 @@ class RubricRetrievalLoader(BaseLoader):
             expanded_data = []
             for example in dataset:
                 rubric = example["rubric"]
-                for level, rb in rubric.items():
+                for i, rb in enumerate(rubric):
                     new_example = example.copy()
                     new_example["rubric"] = rb
-                    new_example["rubric_level"] = int(level)
-                    new_example["labels"] = 1 if int(new_example["level"]) == int(level) else 0
+                    new_example["rubric_level"] = i
+                    new_example["labels"] = 1 if int(new_example["level"]) == i else 0
                     expanded_data.append(new_example)
             expanded_data = Dataset.from_list(expanded_data)
             return expanded_data
@@ -382,17 +379,12 @@ class RubricRetrievalLoader(BaseLoader):
         self.val = _expand_dataset(self.val)
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
-
-
-
 if __name__ == "__main__":
-    from torch.utils.data import DataLoader
-    from collate import gen_collate_fn
-    loader = BaseLoader(train_frac=0.1, task_type="lp")
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-    tokenizer.pad_token = tokenizer.eos_token
-    loader.test_ua = encode_dataset(loader.test_ua, tokenizer, encode_generation, train=False, additional_fields=["question","sample_solution"])
-    train_dataloader = DataLoader(loader.test_ua, batch_size=2, shuffle=True, collate_fn=lambda x: gen_collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=False))
-    for batch in train_dataloader:
-        print(tokenizer.batch_decode(batch["input_ids"], skip_special_tokens=False))
-        break
+    loader = RubricRetrievalLoader(train_frac=0.01, task_type="ke")
+    loader.expand_with_rubric()
+    loader.encode_all_splits(
+        AutoTokenizer.from_pretrained("bert-base-multilingual-cased"),
+        encode_with_fields
+    )
+    loader.test_ua = group_by_id(loader.test_ua)
+    print(loader.test_ua[-5:])

@@ -9,3 +9,6 @@ wandb*
 test.py
 *.log
 eval_openai.ipynb
+alice_data/
+asap-sas-data/
+question_meta/

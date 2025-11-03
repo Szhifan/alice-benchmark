@@ -1,7 +1,7 @@
 {
     "3.11.2": {
         "solution": "ηPV = Wel / Wsolar = 200 kWh / 1000 kWh = 0,20 = 20%",
-        "prompt": "In Deutschland scheint die Sonne mit einer durchschnittlichen Strahlungsenergie von 1000 kWh/m² auf die Erdoberfläche.\nEine PV-Zelle, der Größe 1 m², wandelt die Strahlungsenergie in 200 kWh Elektrische Energie um.\nBerechne den Wirkungsgrad der PV-Zelle.",
+        "prompt": "In Deutschland scheint die Sonne mit einer durchschnittlichen Strahlungsenergie von 1000 kWh/m² auf die Erdoberfläche.\nEine PVzelle, der Größe 1 m², wandelt die Strahlungsenergie in 200 kWh Elektrische Energie um.\nBerechne den Wirkungsgrad der PVzelle.",
         "learning_performance": {
             "0": {
                 "rule": "Die SuS geben kein korrektes Ergebnis an.",
@@ -585,8 +585,7 @@
                     "description": "Die SuS nennen Faktoren wie Größe,Flügelzahl oder Standort für die Energieumwandlung in einem Windrad."
                 }
             }
-        },
-        "skills": {}
+        }
     },
     "2.5.3": {
         "solution": "Das Verhältnis von Strahlungsleistung zu elektrischer Leistung kannst du mit folgender Formel berechnen:η = Psl/Pel; η = WirkungsgradEnergiesparlampe: ηEsl = Psl/Pel = 4 W / 27,6 W = 0,145 = 14,5%,Glühlampe: ηGL = Psl/Pel = 4 W / 80,5 W = 0,050 = 5%,LED: ηLED = Psl/Pel = 4 W / 9,2 W = 0,435 = 43,5%",
@@ -811,8 +810,7 @@
                     "description": "Die SuS notieren Informationen zu Energieumwandlung im Zusammenhang mit der Energieversorgung."
                 }
             }
-        },
-        "skills": {}
+        }
     },
     "3.1.1": {
         "solution": "Die Solaranlagen befinden sich an unterschiedlichen Standorten. Auf dem ersten Bild befinden sie sich auf dem Dach eines Hauses, im zweiten an einer Böschung und auf dem dritten Bild in einer Wüste. Die Solarzellen auf den Bildern unterscheiden sich in der Fläche: Auf dem Dach sind nur wenige angebaut, an der Böschung bereits mehr und in der Wüste sind es sehr viele. Alle Solarzellen sind zur Sonne geneigt, also schräg. Zudem sind sie so aufgebaut, dass möglichst nichts einen Schatten auf sie wirft.",
@@ -846,8 +844,7 @@
                     "description": "Die SuS nennen Ausrichtung, Verschattung oder Fläche für die Energieumwandlung in einer Solarzelle."
                 }
             }
-        },
-        "skills": {}
+        }
     },
     "5.5.3": {
         "solution": null,
@@ -956,7 +953,7 @@
         }
     },
     "3.7.7": {
-        "solution": "Man soll darauf achten, dass die PV-Zellen einerseits zur Sonne ausgerichtet sind, das heißt, sie sollte am besten Richtung Süden zeigen und geneigt sein. Andererseits sollten die PV-Zellen durch nichts verschattet werden.",
+        "solution": "Man soll darauf achten, dass die PVzellen einerseits zur Sonne ausgerichtet sind, das heißt, sie sollte am besten Richtung Süden zeigen und geneigt sein. Andererseits sollten die PVzellen durch nichts verschattet werden.",
         "prompt": "Erläutert, auf Grundlage eurer Messwerte und den \"Je - desto\" Aussagen, auf welche Kriterien geachtet werden muss, wenn die Schule mit Strahlungsenergie versorgt werden soll.",
         "learning_performance": {
             "0": {
@@ -1164,7 +1161,6 @@
                 "rule": "Die SuS füllen den Steckbrief vollständig aus, mindestens 4 von 5 Feldern."
             }
         },
-        "knowledge_elements": {},
         "skills": {
             "Beschreiben die vorliegenden Daten": {
                 "0": {
@@ -1202,7 +1198,7 @@
                     "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
                 },
                 "1": {
-                    "rule": "nicht-zielgerichtete Wortnutzung",
+                    "rule": "nichtzielgerichtete Wortnutzung",
                     "description": "SuS nutzen Elektrische Energie nicht im Zusammenhang einer Versorgungssicherheit"
                 },
                 "3": {
@@ -1216,7 +1212,7 @@
                     "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
                 },
                 "1": {
-                    "rule": "nicht-zielgerichtete Wortnutzung",
+                    "rule": "nichtzielgerichtete Wortnutzung",
                     "description": "SuS nutzen thermische Energie nicht im Zusammenhang einer Versorgungssicherheit"
                 },
                 "3": {
@@ -1230,7 +1226,7 @@
                     "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
                 },
                 "1": {
-                    "rule": "nicht-zielgerichtete Wortnutzung",
+                    "rule": "nichtzielgerichtete Wortnutzung",
                     "description": "SuS nutzen gesellschaftliche Aspekte, für etwas anderes als ihre Argumente zu stützen."
                 },
                 "3": {
@@ -1244,7 +1240,7 @@
                     "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
                 },
                 "1": {
-                    "rule": "nicht-zielgerichtete Wortnutzung",
+                    "rule": "nichtzielgerichtete Wortnutzung",
                     "description": "SuS nutzen ökologische Aspekte wie CO2-Äquivalent, Belastung für die Umwelt, etc. nicht korrekt in der Argumentation"
                 },
                 "3": {
@@ -1258,7 +1254,7 @@
                     "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
                 },
                 "1": {
-                    "rule": "nicht-zielgerichtete Wortnutzung",
+                    "rule": "nichtzielgerichtete Wortnutzung",
                     "description": "Bei der Energieumwandlung im \"Kraftwerk XY\"wird Elektrische Energie erzeugt."
                 },
                 "3": {
@@ -1312,8 +1308,8 @@
         }
     },
     "3.6.2": {
-        "solution": "Je senkrechter die PV-Zelle zur Strahlungsquelle ausgerichtet ist, desto höher ist die Elektrische Energie. Je mehr Licht die PV-Zelle erreicht (je geringer die PV-Zelle verschattet ist), desto höher ist die Elektrische Energie.",
-        "prompt": "Leitet auf Grundlage der Muster und der Messwerte zwei \"Je - desto\" Aussagen für die Ausrichtung der PV-Zelle ab.",
+        "solution": "Je senkrechter die PVzelle zur Strahlungsquelle ausgerichtet ist, desto höher ist die Elektrische Energie. Je mehr Licht die PVzelle erreicht (je geringer die PVzelle verschattet ist), desto höher ist die Elektrische Energie.",
+        "prompt": "Leitet auf Grundlage der Muster und der Messwerte zwei \"Je - desto\" Aussagen für die Ausrichtung der PVzelle ab.",
         "learning_performance": {
             "0": {
                 "rule": "Die SuS formulieren keine je-desto-Aussagen zum Einstrahlungswinkel und beschienenen Fläche. ",
@@ -1483,7 +1479,7 @@
                     "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
                 },
                 "1": {
-                    "rule": "nicht -zielgerichtete Wortnutzung",
+                    "rule": "nicht zielgerichtete Wortnutzung",
                     "description": "SuS nutzen Elektrische Energie nicht im Zusammenhang einer Energieversorgung."
                 },
                 "3": {
@@ -1497,7 +1493,7 @@
                     "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
                 },
                 "1": {
-                    "rule": "nicht -zielgerichtete Wortnutzung",
+                    "rule": "nicht zielgerichtete Wortnutzung",
                     "description": "SuS nutzen thermische Energie nicht im Zusammenhang einer Energieversorgung."
                 },
                 "3": {
@@ -1511,7 +1507,7 @@
                     "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
                 },
                 "1": {
-                    "rule": "nicht -zielgerichtete Wortnutzung",
+                    "rule": "nicht zielgerichtete Wortnutzung",
                     "description": "SuS nutzen gesellschaftliche Aspekte nicht im Zusammenhang mit Energieversorgung."
                 },
                 "3": {
@@ -1525,7 +1521,7 @@
                     "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
                 },
                 "1": {
-                    "rule": "nicht -zielgerichtete Wortnutzung",
+                    "rule": "nicht zielgerichtete Wortnutzung",
                     "description": "SuS nutzen ökologische Aspekte nicht im Zusammenhang einer Energieversorgung."
                 },
                 "3": {
@@ -1539,7 +1535,7 @@
                     "description": "Begriff oder ähnliche Bedeutungen werden nicht genannt."
                 },
                 "1": {
-                    "rule": "nicht -zielgerichtete Wortnutzung",
+                    "rule": "nicht zielgerichtete Wortnutzung",
                     "description": "SuS nutzen Energieumwandlung nicht im Zusammenhang mit Energieversorgung."
                 },
                 "3": {
@@ -1911,7 +1907,7 @@
         }
     },
     "3.10.3": {
-        "solution": "Die Schwankungen in der Strahlung über das Jahr führen zu einem höheren Strahlungswert im Sommer und damit zu einer vermehrten Umwandlung in den Solarzellen. In den Wintermonaten nimmt die Strahlung je m² bis auf den Tiefstwert ab, wodurch weniger Strahlungsenergie in den Photovoltaik-Zellen in Elektrische Energie umgewandelt wird. Im Winter, wenn also grundsätzlich mehr Elektrische Energie für Heizen und Licht notwendig ist, wandeln die Solarzellen aufgrund geringerer Einstrahlung weniger Energie um.",
+        "solution": "Die Schwankungen in der Strahlung über das Jahr führen zu einem höheren Strahlungswert im Sommer und damit zu einer vermehrten Umwandlung in den Solarzellen. In den Wintermonaten nimmt die Strahlung je m² bis auf den Tiefstwert ab, wodurch weniger Strahlungsenergie in den Photovoltaikzellen in Elektrische Energie umgewandelt wird. Im Winter, wenn also grundsätzlich mehr Elektrische Energie für Heizen und Licht notwendig ist, wandeln die Solarzellen aufgrund geringerer Einstrahlung weniger Energie um.",
         "prompt": "Erläutere die Auswirkungen der jahreszeitabhängigen Strahlungsenergie auf die Gewinnung von elektrischer Energie durch Photovoltaik.",
         "learning_performance": {
             "0": {
@@ -2120,7 +2116,7 @@
         }
     },
     "3.11.7": {
-        "solution": "Ein Teil der Strahlungsenergie wird von den PV-Zellen reflektiert (bleibt Strahlungsenergie) und ein Teil wird in thermische Energie umgewandelt.",
+        "solution": "Ein Teil der Strahlungsenergie wird von den PVzellen reflektiert (bleibt Strahlungsenergie) und ein Teil wird in thermische Energie umgewandelt.",
         "prompt": "Erläutere, was mit der Energie geschehen ist, die nicht in Elektrische Energie umgewandelt wurde.",
         "learning_performance": {
             "0": {
@@ -2309,7 +2305,7 @@
         }
     },
     "2.1.3": {
-        "solution": "Auch hier gibt es kein richtig oder falsch, es soll gezeigt werden, dass wir eineUntersuchung zur Beantwortung der Frage benötigen.",
+        "solution": "Auch hier gibt es kein richtig oder falsch, es soll gezeigt werden, dass wir eine Untersuchung zur Beantwortung der Frage benötigen.",
         "prompt": "Erkläre, in eigenen Worten, warum du dich für diese Lampe entschieden hast.",
         "learning_performance": {
             "0": {
@@ -3188,7 +3184,7 @@
     },
     "5.6.3": {
         "solution": "PV: 121 g/kWhWind: 36 g/kWhGas: 605 g/kWh",
-        "prompt": "Berechne die Emission, in Gramm CO2 - Äquivalenten, für die betrachteten Energieformen Photovoltaik, Windenergie und Gaskraftwerk.Nehmt als Energiebedarf weiterhin die ca. 400 kWh Elektrische Energie an. (Übertragt die Werte, aus der Grafik von der Website, in die anderen Steckbriefe unter 3.9 Steckbrief PV-Zelle und 4.8 Steckbrief Windrad)",
+        "prompt": "Berechne die Emission, in Gramm CO2 - Äquivalenten, für die betrachteten Energieformen Photovoltaik, Windenergie und Gaskraftwerk.Nehmt als Energiebedarf weiterhin die ca. 400 kWh Elektrische Energie an. (Übertragt die Werte, aus der Grafik von der Website, in die anderen Steckbriefe unter 3.9 Steckbrief PVzelle und 4.8 Steckbrief Windrad)",
         "learning_performance": {
             "0": {
                 "rule": "Die SuS berechnen keine Emissionen von Kraftwerken.",
@@ -3301,7 +3297,6 @@
                 "description": "Beschreiben die unterschiedlichen Lampen (mit Messwerten für Spannung und Stromstärke)"
             }
         },
-        "knowledge_elements": {},
         "skills": {
             "Beschreiben die vorliegenden Daten": {
                 "0": {
@@ -3530,7 +3525,7 @@
                 },
                 "1": {
                     "rule": "nicht zielgerichtete Verwendung",
-                    "description": "Nutzen Elektrische Energie nicht für die Versuchsksizze/ als etwas anderes als das Outcome der PV-Zelle"
+                    "description": "Nutzen Elektrische Energie nicht für die Versuchsksizze/ als etwas anderes als das Outcome der PVzelle"
                 },
                 "3": {
                     "rule": "zielgerichtete Verwendung",
@@ -3544,7 +3539,7 @@
                 },
                 "1": {
                     "rule": "nicht zielgerichtete Verwendung",
-                    "description": "Nutzen Strahlungsenergie nicht für die Versuchsksizze/ als etwas anderes als den Input in die PV-Zelle"
+                    "description": "Nutzen Strahlungsenergie nicht für die Versuchsksizze/ als etwas anderes als den Input in die PVzelle"
                 },
                 "3": {
                     "rule": "zielgerichtete Verwendung",

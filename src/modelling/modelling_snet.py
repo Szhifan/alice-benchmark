@@ -1,36 +1,130 @@
 # Built upon the huggingface implementation 
 
 from typing import List, Optional, Tuple, Union
-from transformers import AutoModel
+from transformers import AutoModel, PreTrainedModel
 import torch
 from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 from transformers.modeling_outputs import SequenceClassifierOutput
-from .modelling_utils import Pooler, Network_Backbone
+from .modelling_utils import Pooler
 from transformers.utils import logging
+import os
 
 logger = logging.get_logger(__name__)
 _CONFIG_FOR_DOC = "LlamaConfig"
 
 
-class AsagSNet(Network_Backbone):
+class AsagSNet(PreTrainedModel):
     def __init__(self, config, lora_config=None, emb_type=None, bnb_config=None):
-        super().__init__(config=config, lora_config=lora_config, bnb_config=bnb_config)
+        super().__init__(config)
         self.config = config
         self.num_labels = config.num_labels
         self.emb_type = emb_type if emb_type is not None else 'diffABS'
         self.pooler = Pooler(pool_type=config.pool_type)
+        self.use_token_type_ids = getattr(config, 'use_token_type_ids', True)
         config.emb_type = self.emb_type
-        if self.emb_type in['diff','diffABS']:
+
+        # Scorer input dimension depends on emb_type
+        if self.emb_type in ['diff', 'diffABS']:
             input_size = config.hidden_size
-        elif self.emb_type in ['n-o','n-diffABS']:
-            input_size = config.hidden_size*2
+        elif self.emb_type in ['n-o', 'n-diffABS']:
+            input_size = config.hidden_size * 2
         elif self.emb_type in ['n-diffABS-o']:
-            input_size = config.hidden_size*3
+            input_size = config.hidden_size * 3
         else:
             raise ValueError("invalid emb_type")
-        self.score = nn.Linear(input_size, 1, bias=False)  # Change to output 1 score per comparison
-        self.use_token_type_ids = getattr(config, 'use_token_type_ids', True)
+        self.score = nn.Linear(input_size, 1, bias=False)
+
+        # Backbone init (align with XNet)
+        self.lora_config = lora_config
+        self.bnb_config = bnb_config
+        if bnb_config is not None:
+            self.encoder = AutoModel.from_pretrained(
+                config.base_model_name_or_path,
+                quantization_config=bnb_config,
+                config=config
+            )
+        else:
+            self.encoder = AutoModel.from_pretrained(
+                config.base_model_name_or_path,
+                config=config
+            )
+
+    def init_peft(self):
+        """Initialize PEFT model"""
+        from peft import get_peft_model
+        self.encoder = get_peft_model(self.encoder, self.lora_config)
+
+    def _load_peft_adapter(self, ckpt_dir: str):
+        """Load PEFT adapter weights"""
+        from peft import PeftModel
+        self.encoder = PeftModel.from_pretrained(self.encoder, ckpt_dir)
+
+    @classmethod
+    def from_pretrained(cls, model_path, config=None, lora_config=None, bnb_config=None, **kwargs):
+        """
+        Custom model loading logic that supports:
+        1) Pure model (pytorch_model.bin)
+        2) LoRA: adapter_model + non_peft_params.bin
+        """
+        model = cls(config, lora_config=lora_config, emb_type=getattr(config, "emb_type", None), bnb_config=bnb_config)
+
+        adapter_file_pt = os.path.join(model_path, "adapter_model.bin")
+        adapter_file_st = os.path.join(model_path, "adapter_model.safetensors")
+        has_adapter = os.path.exists(adapter_file_pt) or os.path.exists(adapter_file_st)
+
+        non_peft_file = os.path.join(model_path, "non_peft_params.bin")
+        full_file = os.path.join(model_path, "pytorch_model.bin")
+
+        if lora_config:
+            if has_adapter:
+                model._load_peft_adapter(model_path)
+                logger.info(f"[LoRA Load] Successfully loaded LoRA adapter from {model_path}")
+            else:
+                logger.warning(f"[LoRA Load] Adapter model not found in {model_path}")
+
+            if os.path.exists(non_peft_file):
+                non_peft_state = torch.load(non_peft_file, map_location="cpu")
+                missing, unexpected = model.load_state_dict(non_peft_state, strict=False)
+                if missing:
+                    logger.warning(f"[LoRA Load] Missing non_peft parameters: {missing}")
+                if unexpected:
+                    logger.warning(f"[LoRA Load] Unexpected non_peft parameters: {unexpected}")
+            else:
+                logger.warning(f"[LoRA Load] non_peft_params.bin not found in {model_path}")
+        else:
+            if os.path.exists(full_file):
+                full_state = torch.load(full_file, map_location="cpu")
+                missing, unexpected = model.load_state_dict(full_state, strict=False)
+                if missing:
+                    logger.warning(f"[Full Load] Missing parameters: {missing}")
+                if unexpected:
+                    logger.warning(f"[Full Load] Unexpected parameters: {unexpected}")
+            else:
+                logger.error(f"[Full Load] {full_file} not found")
+
+        return model
+
+    def save_pretrained(self, save_path, **kwargs):
+        """
+        Custom save logic that handles both LoRA and full model saving
+        """
+        os.makedirs(save_path, exist_ok=True)
+        self.config.save_pretrained(save_path)
+
+        if hasattr(self.encoder, 'save_pretrained') and hasattr(self.encoder, 'peft_config'):
+            # Save PEFT adapter
+            self.encoder.save_pretrained(save_path)
+            # Save non-PEFT parameters (this module only)
+            full_state = self.state_dict()
+            to_remove = [k for k in full_state.keys() if k.startswith("encoder.")]
+            for k in to_remove:
+                full_state.pop(k, None)
+            torch.save(full_state, os.path.join(save_path, "non_peft_params.bin"))
+            logger.info(f"Saved LoRA adapter and non-PEFT parameters to {save_path}")
+        else:
+            torch.save(self.state_dict(), os.path.join(save_path, "pytorch_model.bin"))
+            logger.info(f"Saved full model to {save_path}")
 
     def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs=None):
         self.encoder.gradient_checkpointing_enable(gradient_checkpointing_kwargs=gradient_checkpointing_kwargs)
@@ -51,27 +145,19 @@ class AsagSNet(Network_Backbone):
         if num_rubrics is None:
             mask = torch.ones(B, R, device=device, dtype=dtype)
         else:
-            # num_rubrics may come as int64 on CPU; ensure device/dtype
             nr = num_rubrics.to(device=device)
-            # [B, R] where j < nr[i]
             ar = torch.arange(R, device=device).unsqueeze(0).expand(B, R)
             mask = (ar < nr.unsqueeze(1)).to(dtype)
         
-        # Apply random negative masking with specified probability
         if mask_prob > 0.0 and labels is not None:
-            # Generate random decisions for each sample
             random_decisions = torch.rand(B, device=device) < mask_prob
-            
             for i in range(B):
                 if random_decisions[i]:
-                    # Find valid negative rubrics (valid but not the correct one)
                     valid_mask = mask[i] == 1
                     negative_indices = torch.where(valid_mask & (torch.arange(R, device=device) != labels[i]))[0]
-                    
                     if len(negative_indices) > 0:
                         random_idx = negative_indices[torch.randint(len(negative_indices), (1,))]
                         mask[i, random_idx] = 0
-        
         return mask
 
     def forward(
@@ -86,15 +172,14 @@ class AsagSNet(Network_Backbone):
         labels: Optional[torch.LongTensor] = None,             # [B] for batch format or [B] for pair format
         tau: float = 1.0,                                      # only used in batch format
         mask_prob: float = 0.0,                                # only used in batch format
+        **kwargs
     ) -> Union[Tuple, SequenceClassifierOutput]:
-        
-        # Check if we're using the new batch format [B, R, S] or old pair format [B, S]
         if input_ids_a.dim() == 3:  # Batch format: [B, R, S]
             return self._forward_batch(
                 input_ids_a, input_ids_b, attention_mask_a, attention_mask_b,
-                token_type_ids_a, token_type_ids_b, num_rubrics, labels, tau
+                token_type_ids_a, token_type_ids_b, num_rubrics, labels, tau, mask_prob
             )
-        else:  # Pair format: [B, S] - backward compatibility
+        else:  # Pair format: [B, S]
             return self._forward_pair(
                 input_ids_a, input_ids_b, attention_mask_a, attention_mask_b,
                 token_type_ids_a, token_type_ids_b, labels
@@ -115,10 +200,15 @@ class AsagSNet(Network_Backbone):
     ) -> SequenceClassifierOutput:
         B, R, S = input_ids_a.shape
 
-        # Build rubric mask (vectorized)
-        rubric_mask = self._build_rubric_mask(num_rubrics, B, R, input_ids_a.device, dtype=torch.long)
+        # Build rubric mask; only apply random masking during training
+        rubric_mask = self._build_rubric_mask(
+            num_rubrics, B, R, input_ids_a.device,
+            labels=labels if self.training else None,
+            mask_prob=mask_prob if self.training else 0.0,
+            dtype=torch.long
+        )
 
-        # Flatten batch+rubric for the encoder: [B*R, S]
+        # Flatten for encoder: [B*R, S]
         flat_inputs_a = {
             "input_ids": input_ids_a.reshape(B * R, S),
             "attention_mask": attention_mask_a.reshape(B * R, S),
@@ -127,29 +217,28 @@ class AsagSNet(Network_Backbone):
             "input_ids": input_ids_b.reshape(B * R, S),
             "attention_mask": attention_mask_b.reshape(B * R, S),
         }
-        
         if self.use_token_type_ids:
             if token_type_ids_a is not None:
                 flat_inputs_a["token_type_ids"] = token_type_ids_a.reshape(B * R, S)
             if token_type_ids_b is not None:
                 flat_inputs_b["token_type_ids"] = token_type_ids_b.reshape(B * R, S)
 
-        # ---- Encode both sequences ----
+        # Encode
         transformer_outputs_a = self.encoder(**flat_inputs_a)
         transformer_outputs_b = self.encoder(**flat_inputs_b)
 
-        # ---- Pool ----
+        # Pool with fallback to model's pooler_output if available
         if hasattr(transformer_outputs_a, "pooler_output") and transformer_outputs_a.pooler_output is not None:
-            pooled_a = transformer_outputs_a.pooler_output  # [B*R, H]
+            pooled_a = transformer_outputs_a.pooler_output
         else:
-            pooled_a = self.pooler(transformer_outputs_a.last_hidden_state, flat_inputs_a["attention_mask"])  # [B*R, H]
-            
-        if hasattr(transformer_outputs_b, "pooler_output") and transformer_outputs_b.pooler_output is not None:
-            pooled_b = transformer_outputs_b.pooler_output  # [B*R, H]
-        else:
-            pooled_b = self.pooler(transformer_outputs_b.last_hidden_state, flat_inputs_b["attention_mask"])  # [B*R, H]
+            pooled_a = self.pooler(transformer_outputs_a.last_hidden_state, flat_inputs_a["attention_mask"])
 
-        # ---- Combine embeddings based on emb_type ----
+        if hasattr(transformer_outputs_b, "pooler_output") and transformer_outputs_b.pooler_output is not None:
+            pooled_b = transformer_outputs_b.pooler_output
+        else:
+            pooled_b = self.pooler(transformer_outputs_b.last_hidden_state, flat_inputs_b["attention_mask"])
+
+        # Combine embeddings per emb_type
         if self.emb_type == 'diff':
             hidden_states = torch.as_tensor(pooled_a - pooled_b)
         elif self.emb_type == 'diffABS':
@@ -162,9 +251,11 @@ class AsagSNet(Network_Backbone):
             hidden_states = torch.cat((pooled_a, diff, pooled_b), 1)
         elif self.emb_type == 'n-o':
             hidden_states = torch.cat((pooled_a, pooled_b), 1)
+        else:
+            raise ValueError("invalid emb_type")
 
-        # ---- Score ----
-        logits = self.score(hidden_states).squeeze(-1).reshape(B, R)  # [B, R]
+        # Score and reshape to [B, R]
+        logits = self.score(hidden_states).squeeze(-1).reshape(B, R)
 
         loss = None
         if labels is not None:
@@ -182,9 +273,9 @@ class AsagSNet(Network_Backbone):
         token_type_ids_b: Optional[torch.Tensor] = None,
         labels: Optional[torch.LongTensor] = None,
     ) -> SequenceClassifierOutput:
-        """Original pair-wise forward method for backward compatibility"""
-        # for paired input, the labels are expected to be binary (0/1)
+        """Pair-wise forward method for backward compatibility"""
         assert labels is None or ((labels == 0) | (labels == 1)).all(), "For pair format, labels must be binary (0/1)."
+
         inputs_a = {
             "input_ids": input_ids_a,
             "attention_mask": attention_mask_a,
@@ -193,7 +284,6 @@ class AsagSNet(Network_Backbone):
             "input_ids": input_ids_b,
             "attention_mask": attention_mask_b,
         }
-        
         if self.use_token_type_ids and token_type_ids_a is not None:
             inputs_a["token_type_ids"] = token_type_ids_a
         if self.use_token_type_ids and token_type_ids_b is not None:
@@ -201,10 +291,19 @@ class AsagSNet(Network_Backbone):
 
         transformer_outputs_a = self.encoder(**inputs_a)
         transformer_outputs_b = self.encoder(**inputs_b)
-        
-        pooled_a = self.pooler(transformer_outputs_a.last_hidden_state, attention_mask_a)
-        pooled_b = self.pooler(transformer_outputs_b.last_hidden_state, attention_mask_b)
 
+        # Pool with fallback to model's pooler_output if available
+        if hasattr(transformer_outputs_a, "pooler_output") and transformer_outputs_a.pooler_output is not None:
+            pooled_a = transformer_outputs_a.pooler_output
+        else:
+            pooled_a = self.pooler(transformer_outputs_a.last_hidden_state, attention_mask_a)
+
+        if hasattr(transformer_outputs_b, "pooler_output") and transformer_outputs_b.pooler_output is not None:
+            pooled_b = transformer_outputs_b.pooler_output
+        else:
+            pooled_b = self.pooler(transformer_outputs_b.last_hidden_state, attention_mask_b)
+
+        # Combine embeddings per emb_type
         if self.emb_type == 'diff':
             hidden_states = torch.as_tensor(pooled_a - pooled_b)
         elif self.emb_type == 'diffABS':
@@ -217,10 +316,12 @@ class AsagSNet(Network_Backbone):
             hidden_states = torch.cat((pooled_a, diff, pooled_b), 1)
         elif self.emb_type == 'n-o':
             hidden_states = torch.cat((pooled_a, pooled_b), 1)
+        else:
+            raise ValueError("invalid emb_type")
 
         logits = self.score(hidden_states)
         pooled_logits = logits
-        
+
         loss = None
         if labels is not None:
             labels = labels.to(logits.device)
@@ -257,16 +358,11 @@ class AsagSNet(Network_Backbone):
         """
         Listwise loss for ranking rubrics.
         """
-        # Sanity: at least one valid rubric per example
         assert (rubric_mask.sum(dim=1) > 0).all(), "Every sample needs at least one valid rubric."
 
-        # Temperature scaling
         scaled_logits = logits / tau
-
-        # Mask invalid rubrics. Use a large negative (not -inf) to avoid NaNs in mixed precision.
         masked_logits = scaled_logits.masked_fill(rubric_mask == 0, -1e9)
 
-        # Ensure pos_idx refers to valid rubrics
         pos_mask = rubric_mask.gather(1, pos_idx.view(-1, 1)).squeeze(1)
         assert (pos_mask == 1).all(), "pos_idx must refer to valid rubrics."
 

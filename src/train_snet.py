@@ -3,21 +3,20 @@ import os
 import wandb
 from dataclasses import dataclass, field
 from typing import List
-from train_utils import (
+from utils.train_utils import (
     AsagTrainer,
     AsagTrainingArguments,
     get_tokenizer
 )
-from utils import (
+from utils.utils import (
     set_seed,
     eval_report,
     save_report,
-    transform_for_inference,
     
 )
-from inference import evaluate
-from collate import snet_collate_fn
-from data_prep import (
+from utils.inference import evaluate
+from utils.collate import snet_collate_fn
+from utils.data_prep import (
     BaseLoader,
     encode_special_tokens_snet
 )
@@ -72,7 +71,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     tokenizer = get_tokenizer(task_args.base_model)
     dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_special_tokens_snet, fields=convert_field(task_args.input_fields))
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args)
-
+    trainer.set_collate_fn(snet_collate_fn)
     if not train_args.test_only:
         print("***** Running training *****")
         print("Num examples = %d", len(dts_loader.train))

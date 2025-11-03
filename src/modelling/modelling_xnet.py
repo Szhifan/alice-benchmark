@@ -1,23 +1,125 @@
 from typing import List, Optional, Tuple, Union
-from transformers import AutoModel
+from transformers import AutoModel, PreTrainedModel
 import torch
 from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 from transformers.modeling_outputs import SequenceClassifierOutput
 from .modelling_utils import Pooler, Network_Backbone
 from transformers.utils import logging
+import os
 
 logger = logging.get_logger(__name__)
 
 
-class AsagXnet(Network_Backbone):
+class AsagXnet(PreTrainedModel):
     def __init__(self, config, lora_config=None, bnb_config=None):
-        super().__init__(config=config, lora_config=lora_config, bnb_config=bnb_config)
+        super().__init__(config)
         self.config = config
         self.num_labels = config.num_labels
         self.pooler = Pooler(pool_type=config.pool_type)
         self.use_token_type_ids = getattr(config, 'use_token_type_ids', True)
         self.score = nn.Linear(config.hidden_size, 1, bias=False)
+        
+        # Initialize the backbone
+        self.lora_config = lora_config
+        self.bnb_config = bnb_config
+        
+        # Initialize encoder using the backbone logic
+        if bnb_config is not None:
+            self.encoder = AutoModel.from_pretrained(
+                config.base_model_name_or_path, 
+                quantization_config=bnb_config, 
+                config=config
+            )
+        else:
+            self.encoder = AutoModel.from_pretrained(
+                config.base_model_name_or_path, 
+                config=config
+            )
+    def init_peft(self):
+        """Initialize PEFT model"""
+        from peft import get_peft_model
+        self.encoder = get_peft_model(self.encoder, self.lora_config)
+
+    def _load_peft_adapter(self, ckpt_dir: str):
+        """Load PEFT adapter weights"""
+        from peft import PeftModel
+        self.encoder = PeftModel.from_pretrained(self.encoder, ckpt_dir)
+
+    @classmethod
+    def from_pretrained(cls, model_path, config=None, lora_config=None, bnb_config=None, **kwargs):
+        """
+        Custom model loading logic that supports:
+        1) Pure model (pytorch_model.bin)
+        2) LoRA: adapter_model + non_peft_params.bin
+        """
+        # Create model instance
+        model = cls(config, lora_config=lora_config, bnb_config=bnb_config)
+
+        # Check for adapter files
+        adapter_file_pt = os.path.join(model_path, "adapter_model.bin")
+        adapter_file_st = os.path.join(model_path, "adapter_model.safetensors")
+        has_adapter = os.path.exists(adapter_file_pt) or os.path.exists(adapter_file_st)
+
+        non_peft_file = os.path.join(model_path, "non_peft_params.bin")
+        full_file = os.path.join(model_path, "pytorch_model.bin")
+
+        if lora_config:
+            # LoRA model loading
+            if has_adapter:
+                model._load_peft_adapter(model_path)
+                logger.info(f"[LoRA Load] Successfully loaded LoRA adapter from {model_path}")
+            else:
+                logger.warning(f"[LoRA Load] Adapter model not found in {model_path}")
+            
+            # Load non-PEFT parameters
+            if os.path.exists(non_peft_file):
+                non_peft_state = torch.load(non_peft_file, map_location="cpu")
+                missing, unexpected = model.load_state_dict(non_peft_state, strict=False)
+                if missing:
+                    logger.warning(f"[LoRA Load] Missing non_peft parameters: {missing}")
+                if unexpected:
+                    logger.warning(f"[LoRA Load] Unexpected non_peft parameters: {unexpected}")
+            else:
+                logger.warning(f"[LoRA Load] non_peft_params.bin not found in {model_path}")
+        else:
+            # Non-LoRA: Load the full state dict
+            if os.path.exists(full_file):
+                full_state = torch.load(full_file, map_location="cpu")
+                missing, unexpected = model.load_state_dict(full_state, strict=False)
+                if missing:
+                    logger.warning(f"[Full Load] Missing parameters: {missing}")
+                if unexpected:
+                    logger.warning(f"[Full Load] Unexpected parameters: {unexpected}")
+            else:
+                logger.error(f"[Full Load] {full_file} not found")
+                
+        return model
+
+    def save_pretrained(self, save_path, **kwargs):
+        """
+        Custom save logic that handles both LoRA and full model saving
+        """
+        os.makedirs(save_path, exist_ok=True)
+        
+        # Save config
+        self.config.save_pretrained(save_path)
+
+        if hasattr(self.encoder, 'save_pretrained') and hasattr(self.encoder, 'peft_config'):
+            # This is a PEFT model
+            self.encoder.save_pretrained(save_path)
+            
+            # Save non-PEFT parameters
+            full_state = self.state_dict()
+            to_remove = [k for k in full_state.keys() if k.startswith("encoder.")]
+            for k in to_remove:
+                full_state.pop(k, None)
+            torch.save(full_state, os.path.join(save_path, "non_peft_params.bin"))
+            logger.info(f"Saved LoRA adapter and non-PEFT parameters to {save_path}")
+        else:
+            # Save full model
+            torch.save(self.state_dict(), os.path.join(save_path, "pytorch_model.bin"))
+            logger.info(f"Saved full model to {save_path}")
         
     def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs=None):
         self.encoder.gradient_checkpointing_enable(gradient_checkpointing_kwargs=gradient_checkpointing_kwargs)
@@ -70,6 +172,7 @@ class AsagXnet(Network_Backbone):
         labels: Optional[torch.LongTensor] = None,              # [B] for batch format (rubric index) or [B] for pair format (binary)
         tau: float = 1.0,                                       # only used in batch format
         mask_prob: float = 0.0,                                 # only used in batch format,
+        **kwargs  # Accept additional kwargs for compatibility
     ) -> Union[Tuple, SequenceClassifierOutput]:
         
         # Check if we're using the new batch format [B, R, S] or old pair format [B, S]

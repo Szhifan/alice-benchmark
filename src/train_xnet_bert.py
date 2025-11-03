@@ -3,20 +3,20 @@ import os
 import wandb
 from dataclasses import dataclass, field
 from typing import List
-from train_utils import (
+from utils.train_utils import (
     AsagTrainer,
     AsagTrainingArguments,
     get_tokenizer
 )
-from utils import (
+from utils.utils import (
     set_seed,
     eval_report,
     save_report,
     
 )
-from collate import xnet_collate_fn
-from inference import evaluate
-from data_prep import (
+from utils.collate import xnet_collate_fn
+from utils.inference import evaluate
+from utils.data_prep import (
     RubricRetrievalLoader,
     encode_fields_special_tokens,
     encode_rubric_pair,
@@ -31,23 +31,24 @@ def is_main_process():
     """Check if the current process is the main process (rank 0)."""
     return not dist.is_available() or not dist.is_initialized() or dist.get_rank() == 0
 
-@dataclass
 class TaskArguments:
     """Task/experiment related arguments dataclass"""
-    base_model: str = field(default='bert-base-multilingual-cased', metadata={"help": "base model to use"})
+    base_model: str = field(default='bert-base-uncased', metadata={"help": "base model to use"})
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
-    input_fields: List[str] = field(default=None, 
+    input_fields: List[str] = field(default_factory=None,
                                    metadata={"help": "fields to use as input for the model"})
     model_class: str = field(default="xnet", metadata={"help": "model class to use"})
+    input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
+    add_instruction: bool = field(default=False,metadata={"help":"whether to add instruction to the LLM input"})
     mask_prob: float = field(default=0.0, metadata={"help": "probability of random negative masking during training"})
-    
+    task_name: str = field(default="lp", metadata={"help": "name of the task"})
     def __post_init__(self):
         """Validation checks after initialization"""
-        assert self.model_class in ['xnet', 'snet', 'gen'], f"model_class must be one of ['xnet', 'snet','gen'], got {self.model_class}"
+        assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
-        assert not self.input_fields or all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
-
+        assert self.input_format in ['structured', 'natural_language'], "input_format must be one of ['structured', 'natural_language']"
+        assert self.task_name in ["lp", "ke", "sk"]  
 def convert_field(fields_input_list):
     map = {
         "a": "answer",
@@ -76,7 +77,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     print(f"Task arguments: {task_args}")
     
     # Load the dataset
-    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
+    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac, task_type=task_args.task_name)
     dts_loader.expand_with_rubric()
     tokenizer = get_tokenizer(task_args.base_model)
     if task_args.input_fields:

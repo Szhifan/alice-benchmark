@@ -3,21 +3,20 @@ import os
 import wandb
 from dataclasses import dataclass, field
 from typing import List
-from train_utils import (
+from utils.train_utils import (
     AsagTrainer,
     AsagTrainingArguments,
     get_tokenizer
 )
-from utils import (
+from utils.utils import (
     set_seed,
     eval_report,
-    save_report,
-    get_wandb_tag,
+    save_report
     
 )
-from collate import xnet_collate_fn
-from inference import evaluate
-from data_prep import (
+from utils.collate import xnet_collate_fn
+from utils.inference import evaluate
+from utils.data_prep import (
     RubricRetrievalLoader,
     group_by_id,
     encode_with_fields,
@@ -44,14 +43,14 @@ class TaskArguments:
     input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
     add_instruction: bool = field(default=False,metadata={"help":"whether to add instruction to the LLM input"})
     mask_prob: float = field(default=0.0, metadata={"help": "probability of random negative masking during training"})
-
+    task_name: str = field(default="lp", metadata={"help": "name of the task"})
     def __post_init__(self):
         """Validation checks after initialization"""
         assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
         assert all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
         assert self.input_format in ['structured', 'natural_language'], "input_format must be one of ['structured', 'natural_language']"
-                        
+        assert self.task_name in ["lp", "ke", "sk"]         
 def convert_field(fields_input_list):
     map = {
         "a": "answer",
@@ -80,7 +79,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     print(f"Task arguments: {task_args}")
     
     # Load the dataset
-    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
+    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac, task_type=task_args.task_name)
     dts_loader.expand_with_rubric()
     tokenizer = get_tokenizer(task_args.base_model)
 
@@ -105,6 +104,8 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
 
     # Initialize trainer with grouped collate function
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
+    if not train_args.test_only and train_args.cp_dir: 
+        trainer.model = trainer.load_model(train_args.cp_dir)
     trainer.set_collate_fn(xnet_collate_fn, fc_kwargs={"mask_prob": task_args.mask_prob})
 
     if not train_args.test_only:

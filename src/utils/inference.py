@@ -5,7 +5,7 @@ from tqdm import tqdm
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
-from utils import batch_to_device, mean_dequeue
+from utils.utils import batch_to_device, mean_dequeue
 from transformers import pipeline
 
 @torch.no_grad() 
