@@ -1,4 +1,24 @@
 import torch
+def base_collate_fn(input_batch, pad_id=0, return_meta=False):
+    """
+    Basic collate function for batching the input batch.
+    Mode: controls whether to return meta information or not.
+    """
+    input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["input_ids"]) for x in input_batch], batch_first=True, padding_value=pad_id)
+    attention_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(x["attention_mask"]) for x in input_batch], batch_first=True, padding_value=0)
+    labels = torch.tensor([x["labels"] for x in input_batch])
+    batch = {
+        "input_ids": input_ids,
+        "labels": labels,
+        "attention_mask": attention_mask,
+    } 
+    meta = {
+        "id": [x["id"] for x in input_batch],
+        "level": [x["level"] for x in input_batch],
+    }
+    if return_meta:
+        return batch, meta
+    return batch
 
 def snet_collate_fn(input_batch, pad_id=0, return_meta=False, mask_prob=0.0):
     """
@@ -51,7 +71,7 @@ def snet_collate_fn(input_batch, pad_id=0, return_meta=False, mask_prob=0.0):
         padded_rubric_token_type_ids = None
         
         if "token_type_ids" in example and example["token_type_ids"] is not None:
-            answer_token_type_ids = torch.tensor(example["token_type_ids"][0])
+            answer_token_type_ids = torch.tensor(example["token_type_ids"])
         
         if "rubric_token_type_ids" in example and example["rubric_token_type_ids"] is not None:
             rubric_token_type_ids_tensors = [torch.tensor(seq) for seq in example["rubric_token_type_ids"]]

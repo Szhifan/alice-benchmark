@@ -4,7 +4,7 @@ import torch
 from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 from transformers.modeling_outputs import SequenceClassifierOutput
-from .modelling_utils import Pooler, Network_Backbone
+from .modelling_utils import Pooler
 from transformers.utils import logging
 import os
 

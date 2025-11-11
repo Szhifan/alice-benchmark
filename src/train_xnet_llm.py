@@ -50,7 +50,8 @@ class TaskArguments:
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
         assert all(field in ['a', 'r', 'q', 's'] for field in self.input_fields), "input_fields must be a subset of ['a', 'r', 'q', 's']"
         assert self.input_format in ['structured', 'natural_language'], "input_format must be one of ['structured', 'natural_language']"
-        assert self.task_name in ["lp", "ke", "sk"]         
+        assert self.task_name in ["lp", "ke", "sk"]   
+      
 def convert_field(fields_input_list):
     map = {
         "a": "answer",
@@ -104,8 +105,6 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
 
     # Initialize trainer with grouped collate function
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
-    if not train_args.test_only and train_args.cp_dir: 
-        trainer.model = trainer.load_model(train_args.cp_dir)
     trainer.set_collate_fn(xnet_collate_fn, fc_kwargs={"mask_prob": task_args.mask_prob})
 
     if not train_args.test_only:
@@ -131,7 +130,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
                 test_model,
                 test_ds,
                 batch_size=train_args.batch_size,
-                collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
+                collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True, mask_prob=0.0),
             )
             
             inf_time = time.time() - time_start

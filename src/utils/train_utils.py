@@ -1,4 +1,4 @@
-from torch.optim import AdamW
+
 from transformers import (
     AutoTokenizer, 
     BitsAndBytesConfig, 
@@ -14,7 +14,7 @@ import torch
 import os 
 from dataclasses import dataclass, field
 from utils.inference import evaluate
-from peft import LoraConfig, get_peft_model, AutoPeftModelForSequenceClassification, AutoPeftModelForCausalLM
+from peft import LoraConfig, get_peft_model, PeftModelForSequenceClassification, PeftModelForCausalLM
 import evaluate
 import numpy as np
 from accelerate import PartialState
@@ -112,13 +112,14 @@ class ModelLoader:
         self.train_args = train_args
         self.custom_model_args = custom_model_args
         self.device_map = device_map
+        lora_task_type = "CAUSAL_LM" if self.task_args.model_class == "gen" else "SEQ_CLS" if self.task_args.model_class == "ref-bsl" else None
         self.lora_config = LoraConfig(
             r=self.train_args.lora_rank,
             lora_alpha=self.train_args.lora_alpha,
             lora_dropout=0.1,
             bias='none',
             target_modules="all-linear",
-            task_type=None if self.task_args.model_class != "gen" else "CAUSAL_LM",
+            task_type=lora_task_type,
         )
         self.bnb_config = BitsAndBytesConfig(
             load_in_4bit = True, # Activate 4-bit precision base model loading
@@ -139,9 +140,9 @@ class ModelLoader:
         """Map model class string to actual model class."""
         mapping = {
             "snet": AsagSNet,
-            # 'xnet' is the canonical name for the softmax-based Xnet implementation.
             "xnet": AsagXnet,
             "gen": AutoModelForCausalLM,
+            "ref-bsl": AutoModelForSequenceClassification,
         }
         if model_class not in mapping:
             raise ValueError(f"Unsupported model class: {model_class}")
@@ -181,6 +182,15 @@ class ModelLoader:
                 quantization_config=self.bnb_config if self.train_args.use_bnb else None,
                 device_map=self.device_map,
             )
+        elif self.task_args.model_class == "ref-bsl":
+            print("Loading with AutoModelForSequenceClassification...")
+            config.num_labels = 3  
+            model = AutoModelForSequenceClassification.from_pretrained(
+                self.task_args.base_model,
+                config=config,
+                quantization_config=self.bnb_config if self.train_args.use_bnb else None,
+                device_map=self.device_map,
+            )
         model = self._init_peft_model(model)
         with open(os.path.join(self.train_args.save_dir, 'config.json'), 'w') as f:
             json.dump(config.to_dict(), f, indent=4)
@@ -196,18 +206,26 @@ class ModelLoader:
             model = get_peft_model(model, self.lora_config)
         print_trainable_parameters(model, use_4bit=self.train_args.use_bnb)
         return model
-    def _load_peft_model(self, cp_path: str):
+    def _load_peft_model(self, model ,cp_path: str):
         # Only support loading PEFT-wrapped causal LM checkpoints here (used for 'gen').
         if self.task_args.model_class == "gen":
-            model = AutoPeftModelForCausalLM.from_pretrained(
+            model = PeftModelForCausalLM.from_pretrained(
+                model, 
                 str(cp_path) + '/',
                 torch_dtype=torch.float16,
                 device_map=self.device_map,
             )
+        elif self.task_args.model_class == "ref-bsl":
+            model = PeftModelForSequenceClassification.from_pretrained(
+                model,
+                str(cp_path) + '/',
+                torch_dtype=torch.float16,
+                device_map=self.device_map,
+            )
+            
         else:
             raise ValueError(f"Unsupported model class for PEFT in _load_peft_model: {self.task_args.model_class}")
-        
-        model = model.merge_and_unload()
+          # Set model to evaluation mode
         return model
     def __call__(self, cp_path: str, use_lora=False):
         """
@@ -230,10 +248,14 @@ class ModelLoader:
                 bnb_config=bnb_config
             )
         elif self.task_args.model_class == "gen":
+     
+            model = AutoModelForCausalLM.from_pretrained(self.task_args.base_model, config=config)
             if use_lora:
-                model = self._load_peft_model(cp_path)
-            else:
-                model = AutoModelForCausalLM.from_pretrained(cp_path, config=config)
+                model = self._load_peft_model(model, cp_path)
+        elif self.task_args.model_class == "ref-bsl":
+            model = AutoModelForSequenceClassification.from_pretrained(self.task_args.base_model, config=config)
+            if use_lora:
+                model = self._load_peft_model(model, cp_path)
         else:
             raise ValueError(f"Unknown model_class: {self.task_args.model_class}")
         model = model.to(dtype=torch.float32)
@@ -259,10 +281,9 @@ class AsagTrainer:
         self.multi_gpu = multi_gpu
         self.is_llm = "llama" in task_args.base_model
     def load_model(self):
-        """Load the model for inference or evaluation."""
-        if not self.train_args.test_only:
-            return self.model
         cp_path = self.train_args.cp_dir if self.train_args.cp_dir else self.train_args.save_dir
+        if not cp_path:
+            return self.model
         return self.model_loader(cp_path, use_lora=self.train_args.use_lora)
     def set_collate_fn(self, collate_fn, fc_kwargs=None):
         """Set the data collate function."""
@@ -357,6 +378,3 @@ class AsagTrainer:
         )
         
         trainer.train()
-
-        self.model.save_pretrained(self.train_args.save_dir)
-        self.tokenizer.save_pretrained(self.train_args.save_dir)

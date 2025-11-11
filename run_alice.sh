@@ -10,7 +10,7 @@ echo "Experiment root: ${EXP_ROOT}"
 # mkdir -p ${EXP_ROOT}
 # #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
 # accelerate launch src/train_xnet_llm.py --save-dir "${EXP_ROOT}" \
-#     --base-model "meta-llama/Llama-3.2-3B" \
+#     --base-model "    " \
 #     --batch-size 4 \
 #     --train-frac 1 \
 #     --gradient-accumulation-steps 8 \

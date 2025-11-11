@@ -41,7 +41,6 @@ def basic_encode(example, tokenizer):
     return example
 
 def encode_solution_pair(example, tokenizer):
-    # encode answer and sample solution as a sequence pair
     output = tokenizer(example["sample_solution"], example["answer"], max_length=512, truncation=True) 
     for field in output:
         example[field] = output[field]
@@ -49,6 +48,7 @@ def encode_solution_pair(example, tokenizer):
     return example
 def encode_rubric_pair(example, tokenizer):
     """
+    For bert-like models.
     Encode rubric and answer as a sequence pair.
     """
     output = tokenizer(example["answer"], example["rubric"], max_length=512, truncation=True)
@@ -57,7 +57,8 @@ def encode_rubric_pair(example, tokenizer):
     return example
 def encode_fields_special_tokens(example, tokenizer, fields: list[str] = ["answer","rubric"]): 
     """
-    Encode fields with special tokens.
+    For bert-like models.
+    Encode multiple fields with special tokens.
     """
     text2encode = []
     for field in fields: 
@@ -70,6 +71,7 @@ def encode_fields_special_tokens(example, tokenizer, fields: list[str] = ["answe
     return output
 def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric"], add_instruction: bool = False, format: Literal["natural_lang", "structured"] = "natural_lang"):
     """
+    For LLM models.
     Encode the fields of the example using the tokenizer with natural language.
     Available fields: answer, question, sample_solution, rubric.
     """
@@ -89,10 +91,11 @@ def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric
     return example
 def encode_special_tokens_snet(example, tokenizer, fields: list[str] = ["answer"]):
     """
+    For Bert models.
     Encode rubric as one encoding and other fields as another encoding for SNet.
     """
     # Encode rubric separately
-    rubric_output = tokenizer([rub for rub in example["rubric"].values()], max_length=512, truncation=True, add_special_tokens=True)
+    rubric_output = tokenizer([rub for rub in example["rubric"]], max_length=512, truncation=True, add_special_tokens=True)
     for field in rubric_output:
         example[f"rubric_{field}"] = rubric_output[field]
     
@@ -107,6 +110,7 @@ def encode_special_tokens_snet(example, tokenizer, fields: list[str] = ["answer"
     other_output = tokenizer(text2encode, max_length=512, truncation=True, add_special_tokens=True)
     for field in other_output:
         example[field] = other_output[field]
+    example["labels"] = int(example["level"])
     return example
 
 def encode_with_fields_snet(
@@ -114,9 +118,10 @@ def encode_with_fields_snet(
     add_instruction: bool = False, format: Literal["natural_lang", "structured"] = "structured"
 ):
     """
+    For LLM models.
     Encoding function for snet llm architecture.
     """
-    rubric_encoded = tokenizer([rub for rub in example["rubric"].values()], max_length=512, truncation=True)
+    rubric_encoded = tokenizer([rub for rub in example["rubric"]], max_length=512, truncation=True)
     query2encode = ""
     for field in fields:
         if field not in example:
@@ -132,6 +137,7 @@ def encode_with_fields_snet(
         example[field] = query_output[field]
     for field in rubric_encoded:
         example[f"rubric_{field}"] = rubric_encoded[field]
+    example["labels"] = int(example["level"])
     return example
 
 
@@ -226,9 +232,11 @@ class BaseLoader:
     def __init__(self, train_frac=1, task_type="lp"):
         assert train_frac <= 1 and train_frac > 0, "train_frac must be in (0, 1]"
         assert task_type in ["lp","ke","sk"] , "task_type must be one of ['lp','ke','sk']"
+        self.problematic_ids = []
         self.task_type = task_type
         self.train_frac = train_frac
         self.format_dataset()
+        
     def retrieve_metadata(self,entry:dict):
         if "bio" in entry["id"]:
             meta = meta_bio
@@ -266,8 +274,16 @@ class BaseLoader:
                 level_range = set(ke_rubric.keys())
                 
                 if str(entry["knowledge_elements"][ke]) not in level_range:
+                    self.problematic_ids.append({
+                        "id": new_entry["id"],
+                        "type": "knowledge_elements",
+                        "name": ke,
+                        "field": "level",
+                        "value": entry["knowledge_elements"][ke],
+                        "range": level_range
+                    })
                     continue
-                # in some rubrics, levels are not continuous. {0,1,3} -> {0,1,2}
+                # in some rubrics, levels are not continuous and should be normalized during training {0,1,3} -> {0,1,2}
                 level_remap = {k:i for i,k in enumerate(sorted(level_range, key=float))} 
                 level = level_remap[str(entry["knowledge_elements"][ke])]
                 ke_rubric = [f"{ke}: {v['description']}" for v in ke_rubric.values()]
@@ -285,16 +301,26 @@ class BaseLoader:
             for i, sk in enumerate(entry['skills']):
                 
                 new_entry = entry.copy()
+                new_entry["id"] = f"{entry['id']}_sk{i}"
                 new_entry["question"] = meta_info.get("prompt", "")
                 new_entry["sample_solution"] = meta_info.get("solution", "")
-                new_entry["skills"] = sk
                 sk_rubric  = meta_info.get("skills", {}).get(sk, {})
-                sk_rubric = {k: f"{sk}: {v['description']}" for k, v in sk_rubric.items()}
+                if len(sk_rubric) == 0:
+                    continue
+                level_range = set(sk_rubric.keys())
+
+                if str(entry["skills"][sk]) not in level_range:
+                    self.problematic_ids.append({"id": new_entry["id"], "type": "skills", "name": sk, "field": "level", "value": entry["skills"][sk], "range": level_range})
+                    continue
+                # in some rubrics, levels are not continuous and should be normalized during training {0,1,3} -> {0,1,2}
+                level_remap = {k:i for i,k in enumerate(sorted(level_range, key=float))} 
+                level = level_remap[str(entry["skills"][sk])]
+                sk_rubric = [f"{sk}: {v['description']}" for v in sk_rubric.values()]
                 new_entry["rubric"] = sk_rubric
-                new_entry["level"] = int(entry["skills"][sk])
+                new_entry["level"] = level
                 new_entry["num_rubrics"] = len(sk_rubric)
-                new_entry["id"] = f"{entry['id']}_sk{i}"
                 new_entry = {k: new_entry[k] for k in new_entry if k in fields_to_keep}
+
                 expending_entries.append(new_entry)
             return expending_entries
 
@@ -380,11 +406,7 @@ class RubricRetrievalLoader(BaseLoader):
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
 if __name__ == "__main__":
-    loader = RubricRetrievalLoader(train_frac=0.01, task_type="ke")
-    loader.expand_with_rubric()
-    loader.encode_all_splits(
-        AutoTokenizer.from_pretrained("bert-base-multilingual-cased"),
-        encode_with_fields
-    )
-    loader.test_ua = group_by_id(loader.test_ua)
-    print(loader.test_ua[-5:])
+    loader = BaseLoader(task_type="ke")
+    for item in loader.problematic_ids:
+        if len(item["range"]) <= 2:
+            print(item)

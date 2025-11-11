@@ -162,24 +162,23 @@ class AsagSNet(PreTrainedModel):
 
     def forward(
         self,
-        input_ids_a: Optional[torch.LongTensor] = None,        # [B, R, S] for batch format or [B, S] for pair format
+        input_ids_a: Optional[torch.LongTensor] = None,        # [B, S]
         input_ids_b: Optional[torch.LongTensor] = None,        # [B, R, S] for batch format or [B, S] for pair format  
-        attention_mask_a: Optional[torch.Tensor] = None,       # [B, R, S] or [B, S]
+        attention_mask_a: Optional[torch.Tensor] = None,       # [B, S]
         attention_mask_b: Optional[torch.Tensor] = None,       # [B, R, S] or [B, S]
-        token_type_ids_a: Optional[torch.Tensor] = None,       # [B, R, S] or [B, S]
+        token_type_ids_a: Optional[torch.Tensor] = None,       # [B, S]
         token_type_ids_b: Optional[torch.Tensor] = None,       # [B, R, S] or [B, S]
         num_rubrics: Optional[torch.Tensor] = None,            # [B] - only used in batch format
         labels: Optional[torch.LongTensor] = None,             # [B] for batch format or [B] for pair format
         tau: float = 1.0,                                      # only used in batch format
         mask_prob: float = 0.0,                                # only used in batch format
-        **kwargs
     ) -> Union[Tuple, SequenceClassifierOutput]:
-        if input_ids_a.dim() == 3:  # Batch format: [B, R, S]
+        if input_ids_b.dim() == 3:  # Batch format: input_ids_b is [B, R, S]
             return self._forward_batch(
                 input_ids_a, input_ids_b, attention_mask_a, attention_mask_b,
                 token_type_ids_a, token_type_ids_b, num_rubrics, labels, tau, mask_prob
             )
-        else:  # Pair format: [B, S]
+        else:  # Pair format: input_ids_b is [B, S]
             return self._forward_pair(
                 input_ids_a, input_ids_b, attention_mask_a, attention_mask_b,
                 token_type_ids_a, token_type_ids_b, labels
@@ -187,56 +186,60 @@ class AsagSNet(PreTrainedModel):
 
     def _forward_batch(
         self,
-        input_ids_a: torch.LongTensor,        # [B, R, S]
+        input_ids_a: torch.LongTensor,        # [B, S]
         input_ids_b: torch.LongTensor,        # [B, R, S]
-        attention_mask_a: torch.Tensor,       # [B, R, S]
+        attention_mask_a: torch.Tensor,       # [B, S]
         attention_mask_b: torch.Tensor,       # [B, R, S]
-        token_type_ids_a: Optional[torch.Tensor] = None,  # [B, R, S]
+        token_type_ids_a: Optional[torch.Tensor] = None,  # [B, S]
         token_type_ids_b: Optional[torch.Tensor] = None,  # [B, R, S]
         num_rubrics: Optional[torch.Tensor] = None,       # [B]
         labels: Optional[torch.LongTensor] = None,        # [B] - index of correct rubric
         tau: float = 1.0,
         mask_prob: float = 0.0,
     ) -> SequenceClassifierOutput:
-        B, R, S = input_ids_a.shape
+        B, R, S = input_ids_b.shape
 
         # Build rubric mask; only apply random masking during training
         rubric_mask = self._build_rubric_mask(
-            num_rubrics, B, R, input_ids_a.device,
+            num_rubrics, B, R, input_ids_b.device,
             labels=labels if self.training else None,
             mask_prob=mask_prob if self.training else 0.0,
             dtype=torch.long
         )
 
-        # Flatten for encoder: [B*R, S]
-        flat_inputs_a = {
-            "input_ids": input_ids_a.reshape(B * R, S),
-            "attention_mask": attention_mask_a.reshape(B * R, S),
+        # Prepare inputs for encoder
+        inputs_a = {
+            "input_ids": input_ids_a,
+            "attention_mask": attention_mask_a,
         }
+        if self.use_token_type_ids and token_type_ids_a is not None:
+            inputs_a["token_type_ids"] = token_type_ids_a
+
+        # Flatten for encoder: [B*R, S]
         flat_inputs_b = {
             "input_ids": input_ids_b.reshape(B * R, S),
             "attention_mask": attention_mask_b.reshape(B * R, S),
         }
-        if self.use_token_type_ids:
-            if token_type_ids_a is not None:
-                flat_inputs_a["token_type_ids"] = token_type_ids_a.reshape(B * R, S)
-            if token_type_ids_b is not None:
-                flat_inputs_b["token_type_ids"] = token_type_ids_b.reshape(B * R, S)
+        if self.use_token_type_ids and token_type_ids_b is not None:
+            flat_inputs_b["token_type_ids"] = token_type_ids_b.reshape(B * R, S)
 
         # Encode
-        transformer_outputs_a = self.encoder(**flat_inputs_a)
+        transformer_outputs_a = self.encoder(**inputs_a)
         transformer_outputs_b = self.encoder(**flat_inputs_b)
 
         # Pool with fallback to model's pooler_output if available
         if hasattr(transformer_outputs_a, "pooler_output") and transformer_outputs_a.pooler_output is not None:
             pooled_a = transformer_outputs_a.pooler_output
         else:
-            pooled_a = self.pooler(transformer_outputs_a.last_hidden_state, flat_inputs_a["attention_mask"])
+            pooled_a = self.pooler(transformer_outputs_a.last_hidden_state, attention_mask_a)
 
         if hasattr(transformer_outputs_b, "pooler_output") and transformer_outputs_b.pooler_output is not None:
             pooled_b = transformer_outputs_b.pooler_output
         else:
             pooled_b = self.pooler(transformer_outputs_b.last_hidden_state, flat_inputs_b["attention_mask"])
+
+        # Expand pooled_a to match rubrics: [B, hidden_size] -> [B, R, hidden_size]
+        pooled_a = pooled_a.unsqueeze(1).expand(B, R, -1).reshape(B * R, -1)
 
         # Combine embeddings per emb_type
         if self.emb_type == 'diff':

@@ -16,11 +16,10 @@ from utils.utils import (
 )
 from utils.collate import xnet_collate_fn
 from utils.inference import evaluate
-from utils.data_prep import (
+from utils.data_prep_asap import (
     RubricRetrievalLoader,
-    encode_fields_special_tokens,
-    encode_rubric_pair,
-    group_by_id
+    encode_with_fields,
+    group_by_id,
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
@@ -79,15 +78,15 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac, task_type=task_args.task_name)
     dts_loader.expand_with_rubric()
     tokenizer = get_tokenizer(task_args.base_model)
-    if task_args.input_fields:
-        input_fields = convert_field(task_args.input_fields)
-        dts_loader.encode_all_splits(
-            tokenizer=tokenizer,
-            enc_fn=encode_fields_special_tokens,
-            fields=input_fields,
-        )
-    else:
-        dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
+
+        
+    dts_loader.encode_all_splits(
+        tokenizer=tokenizer, 
+        enc_fn=encode_with_fields,
+        input_fields=convert_field(task_args.input_fields),
+        input_format=task_args.input_format,
+        add_instruction=task_args.add_instruction
+    )
 
     # Group datasets by ID for batch processing
     print("Grouping datasets by ID...")
@@ -115,46 +114,44 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     test_model = trainer.load_model()
     inference_speed = 0
     if is_main_process():
-        for test in ["test_ua", "test_uq"]:
-            test_ds = getattr(dts_loader, test)
-            print(f"***** Running evaluation on {test} *****")
-            print(f"Num examples = {len(test_ds)}")
-            
-            time_start = time.time()
-            
-            test_predictions, test_loss = evaluate(
-                test_model,
-                test_ds,
-                batch_size=train_args.batch_size,
-                collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True, mask_prob=0.0)
-            )
-            
-            inf_time = time.time() - time_start
-            
-            # Save predictions
-            pred_dir = os.path.join(train_args.save_dir, "predictions")
-            if not os.path.exists(pred_dir):
-                os.makedirs(pred_dir)
-            
+        test_ds = dts_loader.test
+        print(f"***** Running evaluation on test set *****")
+        print(f"Num examples = {len(test_ds)}")
+        
+        time_start = time.time()
+        
+        test_predictions, test_loss = evaluate(
+            test_model,
+            test_ds,
+            batch_size=train_args.batch_size,
+            collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True, mask_prob=0.0)
+        )
+        
+        inf_time = time.time() - time_start
+        
+        # Save predictions
+        pred_dir = os.path.join(train_args.save_dir, "predictions")
+        if not os.path.exists(pred_dir):
+            os.makedirs(pred_dir)
+        
 
-            test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
-            
-            # Calculate and save metrics
-            test_metrics = eval_report(test_predictions)
-            save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
-            
-            inference_speed += inf_time / test_predictions.shape[0]
-            
-            # Log metrics to wandb
-            metrics_wandb = {f"{test}": test_metrics}
-            wandb.log(metrics_wandb)
-            
-            print(f"***** {test} Results *****")
-            for key, value in test_metrics.items():
-                print(f"{key} = {value:.4f}")
+        test_predictions.to_csv(os.path.join(pred_dir, "test_predictions.csv"), index=False)
+        
+        # Calculate and save metrics
+        test_metrics = eval_report(test_predictions)
+        save_report(test_metrics, os.path.join(pred_dir, "test_metrics.json"))
+
+        inference_speed += inf_time / test_predictions.shape[0]
+        
+        # Log metrics to wandb
+        metrics_wandb = {"test": test_metrics}
+        wandb.log(metrics_wandb)
+        
+        print("***** test Results *****")
+        for key, value in test_metrics.items():
+            print(f"{key} = {value:.4f}")
     
     # Log final metrics
-    inference_speed /= 2
     wandb.log({"inference_speed_per_sample_sec": inference_speed})
     
     print("***** Training and evaluation completed *****")

@@ -48,7 +48,7 @@ def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric
         elif format == "structured":
             text2encode += f"<{field}>{example[field]}</{field}>\n"
     if add_instruction:
-        text2encode = "Bestimmen Sie, ob die Rubrik durch die Antwort erfüllt wird:\n" + text2encode
+        text2encode = "Determine whether the rubric is satisfied by the answer:\n" + text2encode
     output = tokenizer(text2encode, max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]

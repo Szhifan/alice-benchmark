@@ -1,3 +1,4 @@
+# training scripts for the ref-answer baseline model
 import time 
 import os
 import wandb
@@ -12,14 +13,12 @@ from utils.utils import (
     set_seed,
     eval_report,
     save_report,
-    
 )
-from utils.collate import xnet_collate_fn
 from utils.inference import evaluate
+from utils.collate import base_collate_fn
 from utils.data_prep import (
-    RubricRetrievalLoader,
-    encode_fields_special_tokens,
-    encode_rubric_pair,
+    BaseLoader,
+    encode_solution_pair,
     group_by_id
 )
 from modelling.modelling_utils import BackwardSupportedArguments
@@ -32,30 +31,13 @@ def is_main_process():
 @dataclass
 class TaskArguments:
     """Task/experiment related arguments dataclass"""
-    base_model: str = field(default='bert-base-uncased', metadata={"help": "base model to use"})
+    base_model: str = field(default='bert-base-multilingual-cased', metadata={"help": "base model to use"})
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
-    input_fields: List[str] = field(default_factory=lambda: [],
-                                   metadata={"help": "fields to use as input for the model"})
-    model_class: str = field(default="xnet", metadata={"help": "model class to use"})
-    input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
-    add_instruction: bool = field(default=False,metadata={"help":"whether to add instruction to the LLM input"})
-    mask_prob: float = field(default=0.0, metadata={"help": "probability of random negative masking during training"})
+    model_class: str = field(default="ref-bsl", metadata={"help": "model class to use"})
     task_name: str = field(default="lp", metadata={"help": "name of the task"})
-    def __post_init__(self):
-        """Validation checks after initialization"""
-        assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
-        assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
-        assert self.input_format in ['structured', 'natural_language'], "input_format must be one of ['structured', 'natural_language']"
-        assert self.task_name in ["lp", "ke", "sk"]  
-def convert_field(fields_input_list):
-    map = {
-        "a": "answer",
-        "r": "rubric",
-        "q": "question",
-        "s": "sample_solution",
-    }
-    return [map[field] for field in fields_input_list if field in map]
+
+
 
 def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_model_args: BackwardSupportedArguments):
     set_seed(task_args.seed)
@@ -76,32 +58,17 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     print(f"Task arguments: {task_args}")
     
     # Load the dataset
-    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac, task_type=task_args.task_name)
-    dts_loader.expand_with_rubric()
+    dts_loader = BaseLoader(train_frac=task_args.train_frac, task_type=task_args.task_name)
     tokenizer = get_tokenizer(task_args.base_model)
-    if task_args.input_fields:
-        input_fields = convert_field(task_args.input_fields)
-        dts_loader.encode_all_splits(
-            tokenizer=tokenizer,
-            enc_fn=encode_fields_special_tokens,
-            fields=input_fields,
-        )
-    else:
-        dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
 
-    # Group datasets by ID for batch processing
-    print("Grouping datasets by ID...")
-    dts_loader.train = group_by_id(dts_loader.train)
-    dts_loader.val = group_by_id(dts_loader.val)
-    dts_loader.test_ua = group_by_id(dts_loader.test_ua)
-    dts_loader.test_uq = group_by_id(dts_loader.test_uq)
-    
-    print(f"Grouped train dataset size: {len(dts_loader.train)}")
-    print(f"Grouped val dataset size: {len(dts_loader.val)}")
+    dts_loader.encode_all_splits(
+        tokenizer=tokenizer,
+        enc_fn=encode_solution_pair,
+    )
 
     # Initialize trainer with grouped collate function
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
-    trainer.set_collate_fn(xnet_collate_fn, fc_kwargs={"mask_prob": task_args.mask_prob})
+    trainer.set_collate_fn(base_collate_fn)
 
     if not train_args.test_only:
         print("***** Running training *****")
@@ -126,7 +93,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
                 test_model,
                 test_ds,
                 batch_size=train_args.batch_size,
-                collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True, mask_prob=0.0)
+                collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
             )
             
             inf_time = time.time() - time_start
