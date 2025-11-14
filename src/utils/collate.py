@@ -318,6 +318,7 @@ def xnet_collate_fn(input_batch, pad_id=0, return_meta=False, mask_prob=0.0):
         "id": [x["id"] for x in input_batch],
         "level": [x["level"] for x in input_batch],
         "question_id": [x["question_id"] for x in input_batch],
+        "rubric_level": [x["rubric_level"] for x in input_batch],
     }
     
     if return_meta:

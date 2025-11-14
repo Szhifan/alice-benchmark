@@ -112,7 +112,7 @@ class ModelLoader:
         self.train_args = train_args
         self.custom_model_args = custom_model_args
         self.device_map = device_map
-        lora_task_type = "CAUSAL_LM" if self.task_args.model_class == "gen" else "SEQ_CLS" if self.task_args.model_class == "ref-bsl" else None
+        lora_task_type = "CAUSAL_LM" if self.task_args.model_class == "gen" else "SEQ_CLS" if self.task_args.model_class in ["ref-bsl","xnet-contrastive"] else None
         self.lora_config = LoraConfig(
             r=self.train_args.lora_rank,
             lora_alpha=self.train_args.lora_alpha,
@@ -143,6 +143,7 @@ class ModelLoader:
             "xnet": AsagXnet,
             "gen": AutoModelForCausalLM,
             "ref-bsl": AutoModelForSequenceClassification,
+            "xnet-contrastive": AutoModelForSequenceClassification,
         }
         if model_class not in mapping:
             raise ValueError(f"Unsupported model class: {model_class}")
@@ -191,6 +192,15 @@ class ModelLoader:
                 quantization_config=self.bnb_config if self.train_args.use_bnb else None,
                 device_map=self.device_map,
             )
+        elif self.task_args.model_class == "xnet-contrastive":
+            print("Loading with AutoModelForSequenceClassification for xnet-contrastive...")
+            config.num_labels = 2  
+            model = AutoModelForSequenceClassification.from_pretrained(
+                self.task_args.base_model,
+                config=config,
+                quantization_config=self.bnb_config if self.train_args.use_bnb else None,
+                device_map=self.device_map,
+            )
         model = self._init_peft_model(model)
         with open(os.path.join(self.train_args.save_dir, 'config.json'), 'w') as f:
             json.dump(config.to_dict(), f, indent=4)
@@ -215,7 +225,7 @@ class ModelLoader:
                 torch_dtype=torch.float16,
                 device_map=self.device_map,
             )
-        elif self.task_args.model_class == "ref-bsl":
+        elif self.task_args.model_class in ["ref-bsl", "xnet-contrastive"]:
             model = PeftModelForSequenceClassification.from_pretrained(
                 model,
                 str(cp_path) + '/',
@@ -252,13 +262,13 @@ class ModelLoader:
             model = AutoModelForCausalLM.from_pretrained(self.task_args.base_model, config=config)
             if use_lora:
                 model = self._load_peft_model(model, cp_path)
-        elif self.task_args.model_class == "ref-bsl":
+        elif self.task_args.model_class in ["ref-bsl", "xnet-contrastive"]:
             model = AutoModelForSequenceClassification.from_pretrained(self.task_args.base_model, config=config)
             if use_lora:
                 model = self._load_peft_model(model, cp_path)
         else:
             raise ValueError(f"Unknown model_class: {self.task_args.model_class}")
-        model = model.to(dtype=torch.float32)
+        model = model.to(dtype=torch.float16)
         return model
 
 class AsagTrainer:
@@ -281,7 +291,12 @@ class AsagTrainer:
         self.multi_gpu = multi_gpu
         self.is_llm = "llama" in task_args.base_model
     def load_model(self):
-        cp_path = self.train_args.cp_dir if self.train_args.cp_dir else self.train_args.save_dir
+        best_cp = max(
+            (os.path.join(self.train_args.save_dir, d) for d in os.listdir(self.train_args.save_dir) if "checkpoint" in d),
+            key=os.path.getmtime,
+            default=self.train_args.save_dir
+        )
+        cp_path = self.train_args.cp_dir if self.train_args.cp_dir else best_cp
         if not cp_path:
             return self.model
         return self.model_loader(cp_path, use_lora=self.train_args.use_lora)

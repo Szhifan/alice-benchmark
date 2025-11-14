@@ -90,7 +90,8 @@ def group_by_id(dataset):
             "id": base_id,
             "question_id": examples[0]["question_id"],
             "level": examples[0]["level"],  # Original level
-            "num_rubrics": examples[0]["num_rubrics"]
+            "num_rubrics": examples[0]["num_rubrics"],
+            "rubric_level": examples[0]["rubric_level"]
         }
         
         # Stack the encoded fields

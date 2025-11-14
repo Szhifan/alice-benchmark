@@ -10,8 +10,8 @@ from utils.train_utils import (
 from utils.utils import (
     set_seed,
     eval_report,
-    save_report,
-    
+    save_report,  
+    transform_for_inference
 )
 from utils.collate import xnet_collate_fn
 from utils.inference import evaluate
@@ -37,13 +37,11 @@ class TaskArguments:
     input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
     add_instruction: bool = field(default=False,metadata={"help":"whether to add instruction to the LLM input"})
     mask_prob: float = field(default=0.0, metadata={"help": "probability of random negative masking during training"})
-    task_name: str = field(default="lp", metadata={"help": "name of the task"})
     def __post_init__(self):
         """Validation checks after initialization"""
-        assert self.model_class in ['xnet', 'snet'], f"model_class must be one of ['xnet', 'snet'], got {self.model_class}"
+        assert self.model_class in ['xnet', 'snet',"xnet-contrastive"], f"model_class must be one of ['xnet', 'snet', 'xnet-contrastive'], got {self.model_class}"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
         assert self.input_format in ['structured', 'natural_language'], "input_format must be one of ['structured', 'natural_language']"
-        assert self.task_name in ["lp", "ke", "sk"]  
 def convert_field(fields_input_list):
     map = {
         "a": "answer",
@@ -80,9 +78,10 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
 
     # Group datasets by ID for batch processing
     print("Grouping datasets by ID...")
-    dts_loader.train = group_by_id(dts_loader.train)
-    dts_loader.val = group_by_id(dts_loader.val)
-    dts_loader.test = group_by_id(dts_loader.test)
+    if task_args.model_class == "xnet":
+        dts_loader.train = group_by_id(dts_loader.train)
+        dts_loader.val = group_by_id(dts_loader.val)
+        dts_loader.test = group_by_id(dts_loader.test)
     
     print(f"Grouped train dataset size: {len(dts_loader.train)}")
     print(f"Grouped val dataset size: {len(dts_loader.val)}")
@@ -123,7 +122,8 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         if not os.path.exists(pred_dir):
             os.makedirs(pred_dir)
         
-
+        if task_args.model_class == "xnet-contrastive":
+            test_predictions = transform_for_inference(test_predictions)
         test_predictions.to_csv(os.path.join(pred_dir, "test_predictions.csv"), index=False)
         
         # Calculate and save metrics

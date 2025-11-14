@@ -209,7 +209,8 @@ def group_by_id(dataset):
             "id": base_id,
             "question_id": examples[0]["question_id"],
             "level": examples[0]["level"],  # Original level
-            "num_rubrics": examples[0]["num_rubrics"]
+            "num_rubrics": examples[0]["num_rubrics"],
+            "rubric_level": examples[0]["rubric_level"]
         }
         
         # Stack the encoded fields
@@ -406,7 +407,13 @@ class RubricRetrievalLoader(BaseLoader):
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
 if __name__ == "__main__":
-    loader = BaseLoader(task_type="ke")
-    for item in loader.problematic_ids:
-        if len(item["range"]) <= 2:
-            print(item)
+    from collections import Counter
+    lp_loader = BaseLoader(task_type="lp")
+    ke_loader = BaseLoader(task_type="ke")
+    sk_loader = BaseLoader(task_type="sk")
+    dist_rub_lp = Counter([ex["num_rubrics"] for ex in lp_loader.train]) + Counter([ex["num_rubrics"] for ex in lp_loader.val]) + Counter([ex["num_rubrics"] for ex in lp_loader.test_ua]) + Counter([ex["num_rubrics"] for ex in lp_loader.test_uq])
+    dist_rub_ke = Counter([ex["num_rubrics"] for ex in ke_loader.train]) + Counter([ex["num_rubrics"] for ex in ke_loader.val]) + Counter([ex["num_rubrics"] for ex in ke_loader.test_ua]) + Counter([ex["num_rubrics"] for ex in ke_loader.test_uq])
+    dist_rub_sk = Counter([ex["num_rubrics"] for ex in sk_loader.train]) + Counter([ex["num_rubrics"] for ex in sk_loader.val]) + Counter([ex["num_rubrics"] for ex in sk_loader.test_ua]) + Counter([ex["num_rubrics"] for ex in sk_loader.test_uq])
+    print("Learning Performance Rubric Distribution:", dist_rub_lp)
+    print("Knowledge Elements Rubric Distribution:", dist_rub_ke)
+    print("Skills Rubric Distribution:", dist_rub_sk)

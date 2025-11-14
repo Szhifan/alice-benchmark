@@ -5226,7 +5226,7 @@
             "Reaktionsgeschwindigkeit": "2"
         },
         "skills": {
-            "Nutzen die Manipulation zur Erkl\u00e4rung des Ph\u00e4nomens": "3"
+            "Nutzen die Manipulation zur Erkl\u00e4rung des Ph\u00e4nomens": "2"
         },
         "id": "28108_chemie_cck02-60"
     },
@@ -6948,7 +6948,7 @@
             "Temperatur": "2"
         },
         "skills": {
-            "Stellen Ver\u00e4nderungen der Modellkomponenten angemessen dar": "1"
+            "Stellen Ver\u00e4nderungen der Modellkomponenten angemessen dar": "2"
         },
         "id": "43110_chemie_cck02-42"
     },
@@ -13636,7 +13636,7 @@
             "Katalysatorr\u00fcckbildung": "3"
         },
         "skills": {
-            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": "1",
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": "2",
             "Beschreiben die vorliegenden Daten": "2"
         },
         "id": "29109_chemie_cck02-71"
@@ -24403,7 +24403,7 @@
         },
         "skills": {
             "Formulieren erste Zusammenh\u00e4nge, Muster und Strukturen in den Daten": "0",
-            "Beschreiben die vorliegenden Daten": "3",
+            "Beschreiben die vorliegenden Daten": "2",
             "Beschreiben den Experimentieraufbau": "2"
         },
         "id": "92122_physik_2.3.1"
@@ -25007,7 +25007,7 @@
             "Teilcheninteraktion": "2"
         },
         "skills": {
-            "Erl\u00e4utern die Erkl\u00e4rungskraft eines Modells": "1"
+            "Erl\u00e4utern die Erkl\u00e4rungskraft eines Modells": "2"
         },
         "id": "38109_chemie_cck02-09"
     },
@@ -29231,7 +29231,7 @@
             "Gasentwicklung": "2"
         },
         "skills": {
-            "Auseinandersetzung mit dem Ph\u00e4nomen": "3"
+            "Auseinandersetzung mit dem Ph\u00e4nomen": "2"
         },
         "id": "28110_chemie_cck02-01"
     },
@@ -39827,7 +39827,7 @@
             "Konzentration": "3"
         },
         "skills": {
-            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": "3"
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": "2"
         },
         "id": "27133_chemie_cck02-27"
     },
@@ -42406,7 +42406,7 @@
             "Tangentensteigung": "3"
         },
         "skills": {
-            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": "1"
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": "2"
         },
         "id": "27142_chemie_cck01-42"
     },

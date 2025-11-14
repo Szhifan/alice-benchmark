@@ -8,7 +8,7 @@ import re
 import torch 
 from sklearn.metrics import f1_score, accuracy_score
 from sklearn.metrics import cohen_kappa_score
-
+from sklearn.metrics import confusion_matrix
 
 def set_seed(seed=42):
     random.seed(seed)
@@ -65,11 +65,13 @@ def metrics_calc(labels, pred_id):
     qwk = cohen_kappa_score(labels, pred_id, weights="quadratic")
     f1 = f1_score(labels, pred_id, average='weighted')
     acc = accuracy_score(labels, pred_id)
+    conf_matrix = confusion_matrix(labels, pred_id)
     
     metrics = {
         "qwk": qwk,
         "f1": f1, 
-        "accuracy": acc
+        "accuracy": acc,
+        "confusion_matrix": conf_matrix.tolist()
     }
     return metrics
 
@@ -164,6 +166,7 @@ def get_wandb_tag(task_args):
 if __name__ == "__main__":
     path = "results_gen/llama3.2-1b-instruct-gen/predictions/test_ua_predictions.csv"
     import pandas as pd
+
     pred_df = pd.read_csv(path)
     results = eval_report_gen(pred_df)
     print(results)

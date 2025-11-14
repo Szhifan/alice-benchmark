@@ -18590,7 +18590,7 @@
         },
         "skills": {
             "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": "0",
-            "Beschreiben die vorliegenden Daten": "1"
+            "Beschreiben die vorliegenden Daten": "2"
         },
         "id": "34103_chemie_cck02-68"
     },
@@ -19520,7 +19520,7 @@
             "Einflussfaktor Temperatur": "2"
         },
         "skills": {
-            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": "1"
+            "Bestimmen mithilfe der Daten relevante Aspekte / Werte (durch Berechnung)": "2"
         },
         "id": "27117_chemie_cce02-46"
     },
@@ -29305,7 +29305,7 @@
             "Stoffumsatz": "2"
         },
         "skills": {
-            "Fassen Erkenntnisse der Modellierung zusammen": "1"
+            "Fassen Erkenntnisse der Modellierung zusammen": "2"
         },
         "id": "31111_chemie_cck02-21"
     },
