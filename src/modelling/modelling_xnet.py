@@ -163,30 +163,8 @@ class AsagXnet(PreTrainedModel):
         
         return mask
 
-    def forward(
-        self,
-        input_ids: Optional[torch.LongTensor] = None,           # [B, R, S] for batch format or [B, S] for pair format
-        attention_mask: Optional[torch.Tensor] = None,          # [B, R, S] or [B, S]
-        token_type_ids: Optional[torch.Tensor] = None,          # [B, R, S] or [B, S]
-        num_rubrics: Optional[torch.Tensor] = None,             # [B] - only used in batch format
-        labels: Optional[torch.LongTensor] = None,              # [B] for batch format (rubric index) or [B] for pair format (binary)
-        tau: float = 1.0,                                       # only used in batch format
-        mask_prob: float = 0.0,                                 # only used in batch format,
-        **kwargs  # Accept additional kwargs for compatibility
-    ) -> Union[Tuple, SequenceClassifierOutput]:
-        
-        # Check if we're using the new batch format [B, R, S] or old pair format [B, S]
-        if input_ids.dim() == 3:  # Batch format: [B, R, S]
-            return self._forward_batch(
-                input_ids, attention_mask, token_type_ids, 
-                num_rubrics, labels, tau, mask_prob
-            )
-        else:  # Pair format: [B, S] - backward compatibility
-            return self._forward_pair(
-                input_ids, attention_mask, token_type_ids, labels
-            )
 
-    def _forward_batch(
+    def forward(
         self,
         input_ids: torch.LongTensor,        # [B, R, S]
         attention_mask: torch.Tensor,       # [B, R, S]
@@ -232,63 +210,6 @@ class AsagXnet(PreTrainedModel):
             loss = self.listwise_loss(logits, rubric_mask, labels, tau=tau)
 
         return SequenceClassifierOutput(loss=loss, logits=logits)
-
-    def _forward_pair(
-        self,
-        input_ids: torch.LongTensor,
-        attention_mask: torch.Tensor,
-        token_type_ids: Optional[torch.Tensor] = None,
-        labels: Optional[torch.LongTensor] = None,
-    ) -> SequenceClassifierOutput:
-        """Pair-wise forward method for backward compatibility"""
-        # For paired input, the labels are expected to be binary (0/1)
-        assert labels is None or ((labels == 0) | (labels == 1)).all(), "For pair format, labels must be binary (0/1)."
-        
-        inputs = {
-            "input_ids": input_ids,
-            "attention_mask": attention_mask,
-        }
-        
-        if self.use_token_type_ids and token_type_ids is not None:
-            inputs["token_type_ids"] = token_type_ids
-
-        transformer_outputs = self.encoder(**inputs)
-        
-        # ---- Pool ----
-        if hasattr(transformer_outputs, "pooler_output") and transformer_outputs.pooler_output is not None:
-            pooled_output = transformer_outputs.pooler_output
-        else:
-            pooled_output = self.pooler(transformer_outputs.last_hidden_state, attention_mask)
-
-        # ---- Score ----
-        logits = self.score(pooled_output)
-        
-        loss = None
-        if labels is not None:
-            labels = labels.to(logits.device)
-            if self.config.problem_type is None:
-                if self.num_labels == 1:
-                    self.config.problem_type = "regression"
-                elif self.num_labels > 1 and (labels.dtype == torch.long or labels.dtype == torch.int):
-                    self.config.problem_type = "single_label_classification"
-                else:
-                    self.config.problem_type = "multi_label_classification"
-
-            if self.config.problem_type == "regression":
-                loss_fct = MSELoss()
-                if self.num_labels == 1:
-                    loss = loss_fct(logits.squeeze(), labels.squeeze())
-                else:
-                    loss = loss_fct(logits, labels)
-            elif self.config.problem_type == "single_label_classification":
-                loss_fct = CrossEntropyLoss()
-                loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
-            elif self.config.problem_type == "multi_label_classification":
-                loss_fct = BCEWithLogitsLoss()
-                loss = loss_fct(logits, labels)
-
-        return SequenceClassifierOutput(loss=loss, logits=logits)
-
     def listwise_loss(
         self,
         logits: torch.Tensor,          # [B, R]
