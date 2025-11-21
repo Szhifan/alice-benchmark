@@ -85,6 +85,7 @@ def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric
             text2encode += f"<{FIELD_EN2DE[field]}>{example[field]}</{FIELD_EN2DE[field]}>\n"
     if add_instruction:
         text2encode = "Bestimmen Sie, ob die Rubrik durch die Antwort erfüllt wird:\n" + text2encode
+    print(text2encode)
     output = tokenizer(text2encode, max_length=512, truncation=True)
     for field in output:
         example[field] = output[field]
@@ -408,12 +409,10 @@ class RubricRetrievalLoader(BaseLoader):
         self.test_uq = _expand_dataset(self.test_uq)
 if __name__ == "__main__":
     from collections import Counter
-    lp_loader = BaseLoader(task_type="lp")
-    ke_loader = BaseLoader(task_type="ke")
-    sk_loader = BaseLoader(task_type="sk")
-    dist_rub_lp = Counter([ex["num_rubrics"] for ex in lp_loader.train]) + Counter([ex["num_rubrics"] for ex in lp_loader.val]) + Counter([ex["num_rubrics"] for ex in lp_loader.test_ua]) + Counter([ex["num_rubrics"] for ex in lp_loader.test_uq])
-    dist_rub_ke = Counter([ex["num_rubrics"] for ex in ke_loader.train]) + Counter([ex["num_rubrics"] for ex in ke_loader.val]) + Counter([ex["num_rubrics"] for ex in ke_loader.test_ua]) + Counter([ex["num_rubrics"] for ex in ke_loader.test_uq])
-    dist_rub_sk = Counter([ex["num_rubrics"] for ex in sk_loader.train]) + Counter([ex["num_rubrics"] for ex in sk_loader.val]) + Counter([ex["num_rubrics"] for ex in sk_loader.test_ua]) + Counter([ex["num_rubrics"] for ex in sk_loader.test_uq])
-    print("Learning Performance Rubric Distribution:", dist_rub_lp)
-    print("Knowledge Elements Rubric Distribution:", dist_rub_ke)
-    print("Skills Rubric Distribution:", dist_rub_sk)
+    lp_loader = RubricRetrievalLoader(task_type="lp")
+    lp_loader.expand_with_rubric()
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-v0.1")
+
+    for item in lp_loader.train:
+        encode_with_fields(item, tokenizer, format="structured", fields=["question","answer","rubric"], add_instruction=True)
+        break 
