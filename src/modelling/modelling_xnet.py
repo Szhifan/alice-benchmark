@@ -36,9 +36,11 @@ class AsagXnet(PreTrainedModel):
                 config.base_model_name_or_path, 
                 config=config
             )
-    def init_peft(self):
+    def init_peft(self, lora_config):
         """Initialize PEFT model"""
         from peft import get_peft_model
+        if lora_config and not self.lora_config:
+            self.lora_config = lora_config
         self.encoder = get_peft_model(self.encoder, self.lora_config)
 
     def _load_peft_adapter(self, ckpt_dir: str):

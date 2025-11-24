@@ -1,4 +1,3 @@
-
 from transformers import (
     AutoTokenizer, 
     BitsAndBytesConfig, 
@@ -198,25 +197,25 @@ class ModelLoader:
             print("Detected Llama model - preparing custom configuration...")
             config = self._update_with_custom_config(config)
         
-        # save config for future reference
-        os.makedirs(self.train_args.save_dir, exist_ok=True)
-        with open(os.path.join(self.train_args.save_dir, 'config.json'), 'w') as f:
-            json.dump(config.to_dict(), f, indent=4)
+
 
         self.train_args.use_bnb = (self.train_args.use_bnb and torch.cuda.is_available()) 
         self.train_args.use_lora = (self.train_args.use_lora and torch.cuda.is_available()) 
         
         if self.train_args.cp_dir_init:
             print(f"Initializing model from checkpoint: {self.train_args.cp_dir_init}")
-            model = self._init_model_from_cp(self.train_args.cp_dir_init, config)
-            return model
-        model = self._init_model(
-            use_lora=self.train_args.use_lora,
-            use_bnb=self.train_args.use_bnb,
-            config=config
-        )
+            config = AutoConfig.from_pretrained(self.train_args.cp_dir_init)
+            model = self._init_model_from_cp(self.train_args.cp_dir_init)
+        else:
+            model = self._init_model(
+                use_lora=self.train_args.use_lora,
+                use_bnb=self.train_args.use_bnb,
+                config=config
+            )
+        # save config for future reference
+        os.makedirs(self.train_args.save_dir, exist_ok=True)
+        model.config.save_pretrained(self.train_args.save_dir)
         model = self._init_peft_model(model)
-
         return model
             
     def _init_peft_model_from_cp(self, cp_path: str):
@@ -227,7 +226,6 @@ class ModelLoader:
         3. If quantization is requested:
             3a. Save the full merged model in a temporary directory.
             3b. Reload the model with quantization.
-        4. Add the new PEFT adapter layers.
         """
         print(f"Initializing quantized PEFT model from checkpoint: {cp_path}")
         
@@ -245,9 +243,9 @@ class ModelLoader:
         
         # Merge the adapter weights with the base model
         if self.task_args.model_class in ["snet", "xnet"]:
-            merged_model = peft_model.encoder.merge_and_unload()
+            peft_model.encoder = peft_model.encoder.merge_and_unload()
         else:
-            merged_model = peft_model.merge_and_unload()
+            peft_model = peft_model.merge_and_unload()
         
         # Step 3: If quantization is requested, save and reload with quantization
         if self.train_args.use_bnb:
@@ -257,7 +255,7 @@ class ModelLoader:
             temp_dir = tempfile.mkdtemp()
             try:
                 # Save the merged model temporarily
-                merged_model.save_pretrained(temp_dir)
+                peft_model.save_pretrained(temp_dir)
                 # Also save the config
                 config.save_pretrained(temp_dir)
                 
@@ -272,26 +270,15 @@ class ModelLoader:
                 # Clean up temporary directory
                 shutil.rmtree(temp_dir)
         else:
-            final_model = merged_model
-        
-        # Step 4: Add new PEFT adapter layers
-        print("Adding new PEFT adapter layers...")
-        if self.task_args.model_class in ["snet", "xnet"]:
-            # Use internal init_peft method for custom models
-            final_model.lora_config = self.lora_config
-            final_model.init_peft()
-        else:
-            # Use get_peft_model for HuggingFace models
-            final_model = get_peft_model(final_model, self.lora_config)
-        
-        print_trainable_parameters(final_model, use_4bit=self.train_args.use_bnb)
+            final_model = peft_model
+
         return final_model
        
     def _init_model_from_cp(self, cp_path: str):
         """Initialize model from checkpoint path."""
-        if self.train_args.use_lora:
+        is_peft = os.path.exists(os.path.join(cp_path, "adapter_config.json")) 
+        if is_peft:
             model = self._init_peft_model_from_cp(
-                model=None,
                 cp_path=cp_path
             )
         else:
@@ -303,25 +290,28 @@ class ModelLoader:
             return model
         # For our custom snet and xnet implementations use their internal init_peft if available.
         if self.task_args.model_class in ["snet", "xnet"]:
-            model.init_peft()
+
+            model.init_peft(self.lora_config)
         else:
             model = get_peft_model(model, self.lora_config)
         print_trainable_parameters(model, use_4bit=self.train_args.use_bnb)
         return model
-    def _load_peft_model(self, model ,cp_path: str):
+    def _load_peft_model(self, model, cp_path: str):
+        # 根据训练配置决定数据类型
+        dtype = torch.float16 if self.train_args.bf16 or self.train_args.use_bnb else torch.float32
+    
         if self.task_args.model_class in ["ref-bsl", "xnet-contrastive"]:
             model = PeftModelForSequenceClassification.from_pretrained(
                 model,
                 str(cp_path) + '/',
-                torch_dtype=torch.float16,
+                torch_dtype=dtype,  # 使用一致的数据类型
                 device_map=self.device_map,
             )
         elif self.task_args.model_class in ["snet", "xnet"]:
-            # For custom models, use internal method to load PEFT adapter
             model._load_peft_adapter(str(cp_path) + '/')
         else:
             raise ValueError(f"Unsupported model class for PEFT in _load_peft_model: {self.task_args.model_class}")
-          # Set model to evaluation mode
+    
         return model
     def load_model(self, cp_path: str, use_lora=False):
         """
@@ -349,7 +339,6 @@ class ModelLoader:
                 model = self._load_peft_model(model, cp_path)
         else:
             raise ValueError(f"Unknown model_class: {self.task_args.model_class}")
-        model = model.to(dtype=torch.float32)
         return model
 
 class AsagTrainer:
@@ -378,6 +367,7 @@ class AsagTrainer:
             default=self.train_args.save_dir
         )
         cp_path = self.train_args.cp_dir if self.train_args.cp_dir else best_cp
+        print(f"Loading model from checkpoint: {cp_path}")
         if not cp_path:
             return self.model
         return self.model_loader.load_model(cp_path, use_lora=self.train_args.use_lora)
