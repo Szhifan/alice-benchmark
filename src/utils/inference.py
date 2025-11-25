@@ -18,6 +18,7 @@ def evaluate(model, dataset, batch_size, collate_fn=None,):
     eval_loss = []
     acc_history = deque(maxlen=10)
     predictions = defaultdict(list)
+    model = model.to(torch.float32)
     for step, (batch, meta) in enumerate(data_iterator):
         batch = batch_to_device(batch, device)
         model_output = model(**batch)

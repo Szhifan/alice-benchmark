@@ -186,25 +186,6 @@ class LlamaModel(LlamaPreTrainedModel):
 
         )
 
-    
-    def freeze_model(self, config=None):
-        if config.freeze_type == "all":
-            for param in self.parameters():
-                param.requires_grad = False
-
-        elif config.freeze_type == "backbone":
-            self.embed_tokens.weight.requires_grad = False
-
-            for param in self.layers[:self.num_hidden_layers - config.num_unfreeze_layers].parameters():
-                param.requires_grad = False
-
-            if config.num_unfreeze_layers == 0:
-                self.norm.weight.requires_grad = False
-
-    def model_init(self):
-        first_new_layer = self.config.num_hidden_layers
-        for layer in range(first_new_layer, len(self.layers)):
-            self.layers[layer].load_state_dict(self.layers[first_new_layer - 1].state_dict())
 
 
 class LlamaForSequenceClassification(LlamaPreTrainedModel):

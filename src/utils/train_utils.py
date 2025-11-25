@@ -318,7 +318,7 @@ class ModelLoader:
         Load a model from a checkpoint path, with or without LoRA (PEFT).
         :param cp_path: Path to the model checkpoint.
         :param use_lora: Whether to load the model with LoRA (PEFT).
-        :return: Loaded model.ß
+        :return: Loaded model.
         """
         cp_path = str(cp_path)
         config = AutoConfig.from_pretrained(cp_path + "/")
@@ -334,9 +334,17 @@ class ModelLoader:
                 bnb_config=bnb_config
             )
         elif self.task_args.model_class in ["ref-bsl", "xnet-contrastive"]:
-            model = AutoModelForSequenceClassification.from_pretrained(self.task_args.base_model, config=config)
+            
             if use_lora:
+                model = AutoModelForSequenceClassification.from_pretrained(self.task_args.base_model, config=config)
                 model = self._load_peft_model(model, cp_path)
+            else:
+                model = AutoModelForSequenceClassification.from_pretrained(
+                    cp_path,
+                    config=config,
+                    quantization_config=bnb_config,
+                    device_map=self.device_map,
+                )
         else:
             raise ValueError(f"Unknown model_class: {self.task_args.model_class}")
         return model
@@ -361,12 +369,7 @@ class AsagTrainer:
         self.multi_gpu = multi_gpu
         self.is_llm = "llama" in task_args.base_model or "mistral" in task_args.base_model
     def load_model(self):
-        best_cp = max(
-            (os.path.join(self.train_args.save_dir, d) for d in os.listdir(self.train_args.save_dir) if "checkpoint" in d),
-            key=os.path.getmtime,
-            default=self.train_args.save_dir
-        )
-        cp_path = self.train_args.cp_dir if self.train_args.cp_dir else best_cp
+        cp_path = self.train_args.cp_dir if self.train_args.cp_dir else self.train_args.save_dir
         print(f"Loading model from checkpoint: {cp_path}")
         if not cp_path:
             return self.model
@@ -416,6 +419,5 @@ class AsagTrainer:
         )
         trainer.train()
 
-        self.model.save_pretrained(self.train_args.save_dir)
-        self.tokenizer.save_pretrained(self.train_args.save_dir)
+        trainer.save_model(self.train_args.save_dir)
         return

@@ -8,7 +8,7 @@ __pycache__/
 wandb*
 test.py
 *.log
-eval_openai.ipynb
+*.ipynb
 alice_data/
 asap-sas-data/
 question_meta/

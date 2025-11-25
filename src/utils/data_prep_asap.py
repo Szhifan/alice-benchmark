@@ -121,9 +121,12 @@ class BaseLoader:
         self.train_frac = train_frac
         self.train = Dataset.from_pandas(pd.read_csv(path_train))
         self.test = Dataset.from_pandas(pd.read_csv(path_test))
-        self.val = self.train.train_test_split(test_size=0.1, seed=42)['test']
+        train_val_split = self.train.train_test_split(test_size=0.1, seed=42)
+        self.val = train_val_split['test']
         if train_frac < 1:
-            self.train = self.train.train_test_split(test_size=1 - train_frac, seed=42)['train']
+            self.train = train_val_split['train'].train_test_split(test_size=1 - train_frac, seed=42)['train']
+        else:
+            self.train = train_val_split['train']
         self.train = self.train.map(self.retrieve_rubric)
         self.val = self.val.map(self.retrieve_rubric)
         self.test = self.test.map(self.retrieve_rubric)
