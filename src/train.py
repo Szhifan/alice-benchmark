@@ -15,18 +15,16 @@ from utils.utils import (
     transform_for_inference
     
 )
-from utils.collate import xnet_collate_fn
+from utils.data_prep import xnet_collate_fn, base_collate_fn, encode_sequence_bert, encode_sequence_llm
 from utils.inference import evaluate
-from utils.data_prep import (
+from utils.data_loader import (
     RubricRetrievalLoader,
-    encode_fields_special_tokens,
-    encode_rubric_pair,
-    group_by_id
+    group_by_id, 
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
 import torch.distributed as dist
-dist.init_process_group(backend="nccl")
+# dist.init_process_group(backend="nccl")
 def is_main_process():
     """Check if the current process is the main process (rank 0)."""
     return not dist.is_available() or not dist.is_initialized() or dist.get_rank() == 0
@@ -36,12 +34,11 @@ class TaskArguments:
     base_model: str = field(default='bert-base-uncased', metadata={"help": "base model to use"})
     seed: int = field(default=114514, metadata={"help": "random seed for reproducibility"})
     train_frac: float = field(default=1.0, metadata={"help": "fraction of training data to use"})
-    input_fields: List[str] = field(default_factory=lambda: [],
+    input_fields: List[str] = field(default_factory=lambda: ["a","r"],
                                    metadata={"help": "fields to use as input for the model"})
     model_class: str = field(default="xnet", metadata={"help": "model class to use"})
     input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
     add_instruction: bool = field(default=False,metadata={"help":"whether to add instruction to the LLM input"})
-    mask_prob: float = field(default=0.0, metadata={"help": "probability of random negative masking during training"})
     task_name: str = field(default="lp", metadata={"help": "name of the task"})
     def __post_init__(self):
         """Validation checks after initialization"""
@@ -80,30 +77,37 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac, task_type=task_args.task_name)
     dts_loader.expand_with_rubric()
     tokenizer = get_tokenizer(task_args.base_model)
-    if task_args.input_fields:
-        input_fields = convert_field(task_args.input_fields)
-        dts_loader.encode_all_splits(
-            tokenizer=tokenizer,
-            enc_fn=encode_fields_special_tokens,
-            fields=input_fields,
+    is_llm = "llama" in task_args.base_model.lower() or "mistral" in task_args.base_model.lower() or "gpt" in task_args.base_model.lower()
+    if is_llm:
+        enc_fn = lambda examples: encode_sequence_llm(
+            examples,
+            tokenizer,
+            convert_field(task_args.input_fields),
+            add_instruction=task_args.add_instruction,
         )
-    else:
-        dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
 
+        
+    else:
+        enc_fn = lambda examples: encode_sequence_bert(
+            examples,
+            tokenizer,
+            convert_field(task_args.input_fields),
+        )
+    dts_loader.train = dts_loader.train.map(lambda x: enc_fn(x)) 
+    dts_loader.val = dts_loader.val.map(lambda x: enc_fn(x))
     # Group datasets by ID for batch processing
     print("Grouping datasets by ID...")
     if task_args.model_class == "xnet":
         dts_loader.train = group_by_id(dts_loader.train)
         dts_loader.val = group_by_id(dts_loader.val)
-        dts_loader.test_ua = group_by_id(dts_loader.test_ua)
-        dts_loader.test_uq = group_by_id(dts_loader.test_uq)
     
     print(f"Grouped train dataset size: {len(dts_loader.train)}")
     print(f"Grouped val dataset size: {len(dts_loader.val)}")
 
     # Initialize trainer with grouped collate function
+    collate_fn = base_collate_fn if task_args.model_class == "xnet-contrastive" else xnet_collate_fn
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
-    trainer.set_collate_fn(xnet_collate_fn, fc_kwargs={"mask_prob": task_args.mask_prob})
+    trainer.set_collate_fn(collate_fn, fc_kwargs={"pad_id": tokenizer.pad_token_id})
 
     if not train_args.test_only:
         print("***** Running training *****")
@@ -116,6 +120,12 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     # Evaluate on test datasets
     test_model = trainer.load_model()
     inference_speed = 0
+    if task_args.model_class == "xnet":
+        dts_loader.test_ua = group_by_id(dts_loader.test_ua)
+        dts_loader.test_uq = group_by_id(dts_loader.test_uq)
+    dts_loader.test_ua = dts_loader.test_ua.map(lambda x: enc_fn(x))
+    dts_loader.test_uq = dts_loader.test_uq.map(lambda x: enc_fn(x))
+
     if is_main_process():
         for test in ["test_ua", "test_uq"]:
             test_ds = getattr(dts_loader, test)
@@ -128,7 +138,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
                 test_model,
                 test_ds,
                 batch_size=train_args.batch_size,
-                collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True, mask_prob=0.0)
+                collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
             )
             
             inf_time = time.time() - time_start

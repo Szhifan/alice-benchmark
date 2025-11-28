@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-EXP_NAME="llama3.2-1b-ke"
+EXP_NAME="mbert"
 ROOT=$(git rev-parse --show-toplevel)
 ## Local variables for current experiment
 EXP_ROOT="${ROOT}/results/${EXP_NAME}"
@@ -9,16 +9,14 @@ export WANDB_NOTES=""
 echo "Experiment root: ${EXP_ROOT}"
 mkdir -p ${EXP_ROOT}
 #Train model. Defaults are used for any argument not specified here. Use "\" to add arguments over multiple lines.
-accelerate launch src/train_xnet_llm.py --save-dir "${EXP_ROOT}" \
-    --base-model "meta-llama/Llama-3.2-1b" \
+python src/train.py --save-dir "${EXP_ROOT}" \
+    --base-model "bert-base-multilingual-cased" \
     --batch-size 4 \
-    --train-frac 1 \
+    --train-frac 0.01 \
     --gradient-accumulation-steps 8 \
     --lr 1e-4 \
     --max-epoch 5 \
-    --use-bnb  \
-    --task-name "ke" \
-    --bf16 \
+    --lora-rank 8 \
     --use-lora 2>&1 | tee "out.log"
 
             

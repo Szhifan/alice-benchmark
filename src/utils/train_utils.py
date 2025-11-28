@@ -414,7 +414,7 @@ class AsagTrainer:
             args=train_args,
             train_dataset=self.train_dataset,
             eval_dataset=self.validation_dataset,
-            data_collator=lambda batch: self.collate_fn(batch, self.tokenizer.pad_token_id),
+            data_collator=self.collate_fn,
             compute_metrics=compute_metrics,
         )
         trainer.train()

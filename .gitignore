@@ -1,7 +1,5 @@
 results* 
 wandb/*
-asap-sas-data/raw/* 
-asap-sas-data/rubrics/*pdf
 move.sh
 __pycache__/
 *.DS_Store
@@ -10,7 +8,5 @@ test.py
 *.log
 *.ipynb
 alice_data/
-asap-sas-data/
-question_meta/
 *png
 get_stats.py

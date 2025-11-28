@@ -1,8 +1,7 @@
-from typing import Literal
-from datasets import enable_caching, Dataset
+
+from datasets import Dataset
 import json
 import pandas as pd
-from transformers import AutoTokenizer
 """
 Dataprep pipeline: 
 1. Load the Alice dataset from csv files.
@@ -18,41 +17,7 @@ for i in range(1,11):
     with open(path_rub, "r") as f:
         RUBRICS[i] = json.load(f)["rubrics"]
 # encoding functions 
-def get_tokenizer(base_model: str) -> AutoTokenizer:
-    tok = AutoTokenizer.from_pretrained(base_model)
-    if "llama" in base_model.lower():
-        tok.padding_side = "right"  
-        tok.pad_token = tok.eos_token  # Ensure pad_token is set
-    tok.sep_token = tok.sep_token or tok.eos_token  # Ensure sep_token is set
-    return tok
-def encode_rubric_pair(example, tokenizer):
-    """
-    Encode rubric and answer as a sequence pair.
-    """
-    output = tokenizer(example["answer"], example["rubric"], max_length=512, truncation=True)
-    for field in output:
-        example[field] = output[field]
-    return example
 
-def encode_with_fields(example, tokenizer, fields: list[str] = ["answer","rubric"], add_instruction: bool = False, format: Literal["natural_lang", "structured"] = "natural_lang"):
-    """
-    Encode the fields of the example using the tokenizer with natural language.
-    Available fields: answer, question, sample_solution, rubric.
-    """
-    text2encode = ""
-    for field in fields:
-        if field not in example:
-            raise ValueError(f"Field '{field}' not found in the example.")
-        if format == "natural_lang":
-            text2encode += f"{field}: {example[field]}\n"
-        elif format == "structured":
-            text2encode += f"<{field}>{example[field]}</{field}>\n"
-    if add_instruction:
-        text2encode = "Determine whether the rubric is satisfied by the answer:\n" + text2encode
-    output = tokenizer(text2encode, max_length=512, truncation=True)
-    for field in output:
-        example[field] = output[field]
-    return example
 def encode_dataset(dataset, tokenizer, enc_fn, *args, **kwargs):
     dataset = dataset.map(lambda x: enc_fn(x, tokenizer, *args, **kwargs))
     return dataset
@@ -170,16 +135,3 @@ class RubricRetrievalLoader(BaseLoader):
         self.val = _expand_dataset(self.val)
         self.test = _expand_dataset(self.test)
 
-if __name__ == "__main__":
-    from collate import xnet_collate_fn
-    from torch.utils.data import DataLoader
-    loader = RubricRetrievalLoader(train_frac=0.01) 
-    loader.expand_with_rubric()
-    tokenizer = get_tokenizer("bert-base-uncased")
-    loader.encode_all_splits(tokenizer, encode_rubric_pair)
-    loader.train = group_by_id(loader.train)
-
-    train_dataloader = DataLoader(loader.train, batch_size=2, collate_fn=lambda x: xnet_collate_fn(x, pad_id=tokenizer.pad_token_id))
-    for batch in train_dataloader:
-        print(batch["input_ids"].shape)  # Should be [B, R, S]
-        break

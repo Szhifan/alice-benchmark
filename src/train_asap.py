@@ -13,9 +13,9 @@ from utils.utils import (
     save_report,  
     transform_for_inference
 )
-from utils.collate import xnet_collate_fn
+from utils.data_prep import xnet_collate_fn, base_collate_fn, encode_sequence_bert, encode_sequence_llm
 from utils.inference import evaluate
-from utils.data_prep_asap import (
+from utils.data_loader_asap import (
     RubricRetrievalLoader,
     encode_rubric_pair,
     group_by_id,
@@ -36,7 +36,6 @@ class TaskArguments:
     model_class: str = field(default="xnet", metadata={"help": "model class to use"})
     input_format:str = field(default="structured",metadata={"help":"type of input to use, structured or natural language"})
     add_instruction: bool = field(default=False,metadata={"help":"whether to add instruction to the LLM input"})
-    mask_prob: float = field(default=0.0, metadata={"help": "probability of random negative masking during training"})
     def __post_init__(self):
         """Validation checks after initialization"""
         assert self.model_class in ['xnet', 'snet',"xnet-contrastive"], f"model_class must be one of ['xnet', 'snet', 'xnet-contrastive'], got {self.model_class}"
@@ -73,8 +72,25 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac)
     dts_loader.expand_with_rubric()
     tokenizer = get_tokenizer(task_args.base_model)
-
-    dts_loader.encode_all_splits(tokenizer=tokenizer, enc_fn=encode_rubric_pair)
+    is_llm = "llama" in task_args.base_model.lower() or "mistral" in task_args.base_model.lower() or "gpt" in task_args.base_model.lower()
+    if is_llm:
+        encode_fn = lambda example: encode_sequence_llm(
+            example,
+            tokenizer,
+            fields=["answer", "rubric"],
+            add_instruction=task_args.add_instruction,
+            format=task_args.input_format
+        )
+    else:
+        encode_fn = lambda example: encode_sequence_bert(
+            example,
+            tokenizer,
+            fields=["answer", "rubric"],
+        )
+    dts_loader.encode_all_splits(
+        tokenizer=tokenizer, 
+        enc_fn=encode_fn
+    )
 
     # Group datasets by ID for batch processing
     print("Grouping datasets by ID...")
@@ -87,8 +103,9 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     print(f"Grouped val dataset size: {len(dts_loader.val)}")
 
     # Initialize trainer with grouped collate function
+    collate_fn = base_collate_fn if task_args.model_class == "xnet-contrastive" else xnet_collate_fn
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
-    trainer.set_collate_fn(xnet_collate_fn, fc_kwargs={"mask_prob": task_args.mask_prob})
+    trainer.set_collate_fn(collate_fn)
 
     if not train_args.test_only:
         print("***** Running training *****")
