@@ -1,15 +1,15 @@
-import os
 import json
 import logging
 import random
 import numpy as np
 import torch
 import re 
-import torch 
-from sklearn.metrics import f1_score, accuracy_score
-from sklearn.metrics import cohen_kappa_score
-from sklearn.metrics import confusion_matrix
-
+from tqdm import tqdm
+from torch.utils.data import DataLoader
+from sklearn.metrics import f1_score, accuracy_score, cohen_kappa_score, confusion_matrix
+from collections import defaultdict
+import pandas as pd
+from collections import deque
 def set_seed(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -147,27 +147,41 @@ def transform_for_inference(pred_df, other_filds=None):
     final_df = pred_df.loc[pred_df.groupby('id')['logit_label'].idxmax()][final_fields]
     final_df = final_df.rename(columns={'rubric_level': 'pred_id', 'level': 'labels'})
     return final_df 
-def get_wandb_tag(task_args):
-    ignore = ["n_labels", "use_label_weights", "seed"]
-    tag = []
-    for key, value in task_args.items():
-        if key in ignore:
-            continue
-        if key == "base_model":
-            tag.append(value.split("/")[-1])
-        elif key == "input_fields" and value:
-            tag.append("+".join(value))
-        if isinstance(value, bool):
-            tag.append(f"{key}={value}")
-        else:
-            tag.append(value)
-    return tag 
 
-if __name__ == "__main__":
-    path = "results_gen/llama3.2-1b-instruct-gen/predictions/test_ua_predictions.csv"
-    import pandas as pd
 
-    pred_df = pd.read_csv(path)
-    results = eval_report_gen(pred_df)
-    print(results)
-    
+
+@torch.no_grad() 
+def evaluate(model, dataset, batch_size, collate_fn=None,): 
+    dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False) 
+    data_iterator = tqdm(dataloader, desc="Evaluating", position=0)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = model.to(device)
+    model.eval()
+    eval_loss = []
+    acc_history = deque(maxlen=10)
+    predictions = defaultdict(list)
+    model = model.to(torch.float32)
+    for step, (batch, meta) in enumerate(data_iterator):
+        batch = batch_to_device(batch, device)
+        model_output = model(**batch)
+        loss = model_output.loss
+        logits = model_output.logits.detach().cpu()
+        eval_loss.append(loss.item())
+        pred_id = np.argmax(logits, axis=1)
+        # collect data to put in the prediction dict
+        predictions["pred_id"].extend(pred_id.tolist())
+        predictions["labels"].extend(batch["labels"].detach().cpu().numpy().tolist())
+        predictions["logits"].extend(logits.tolist())
+        acc = accuracy_score(batch["labels"].detach().cpu().numpy(), pred_id)
+        acc_history.append(acc)
+        data_iterator.set_description(
+            "Evaluating: loss {:.4f} acc {:.4f} ≈".format(
+                mean_dequeue(eval_loss),
+                mean_dequeue(acc_history),
+            )
+        )
+        for key, value in meta.items():
+            predictions[key].extend(value)
+    pred_df = pd.DataFrame(predictions)
+    eval_loss = np.mean(eval_loss)
+    return pred_df, eval_loss 

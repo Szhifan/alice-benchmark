@@ -1,6 +1,5 @@
 import logging
 from typing import List, Optional, Tuple, Union
-
 import torch
 from torch import nn
 
@@ -169,8 +168,6 @@ class LlamaModel(LlamaPreTrainedModel):
             )
             fuse_layers = fuse_layers + (hidden_states,) if i in self.fuse_layers else fuse_layers
             hidden_states = flip_tensor(hidden_states, reverse_flag)
-
-
         hidden_states = self.norm(hidden_states)
         # add hidden states from the last decoder layer
         if fuse_layers and self.fuse_type == "avg":

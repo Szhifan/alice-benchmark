@@ -11,7 +11,6 @@ from modelling.modelling_xnet import AsagXnet
 import torch
 import os 
 from dataclasses import dataclass, field
-from utils.inference import evaluate
 from peft import LoraConfig, get_peft_model, PeftModelForSequenceClassification, PeftModelForCausalLM
 import evaluate
 import numpy as np
@@ -418,6 +417,5 @@ class AsagTrainer:
             compute_metrics=compute_metrics,
         )
         trainer.train()
-
         trainer.save_model(self.train_args.save_dir)
         return

@@ -11,13 +11,12 @@ from utils.utils import (
     set_seed,
     eval_report,
     save_report,  
-    transform_for_inference
+    transform_for_inference,
+    evaluate,
 )
 from utils.data_prep import xnet_collate_fn, base_collate_fn, encode_sequence_bert, encode_sequence_llm
-from utils.inference import evaluate
 from utils.data_loader_asap import (
     RubricRetrievalLoader,
-    encode_rubric_pair,
     group_by_id,
 )
 from modelling.modelling_utils import BackwardSupportedArguments
@@ -87,17 +86,14 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
             tokenizer,
             fields=["answer", "rubric"],
         )
-    dts_loader.encode_all_splits(
-        tokenizer=tokenizer, 
-        enc_fn=encode_fn
-    )
+    dts_loader.train = dts_loader.train.map(lambda x: encode_fn(x)) 
+    dts_loader.val = dts_loader.val.map(lambda x: encode_fn(x))
 
     # Group datasets by ID for batch processing
     print("Grouping datasets by ID...")
     if task_args.model_class == "xnet":
         dts_loader.train = group_by_id(dts_loader.train)
         dts_loader.val = group_by_id(dts_loader.val)
-        dts_loader.test = group_by_id(dts_loader.test)
     
     print(f"Grouped train dataset size: {len(dts_loader.train)}")
     print(f"Grouped val dataset size: {len(dts_loader.val)}")
@@ -118,6 +114,9 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     # Evaluate on test datasets
     test_model = trainer.load_model()
     inference_speed = 0
+    dts_loader.test = dts_loader.test.map(lambda x: encode_fn(x))
+    if task_args.model_class == "xnet":
+        dts_loader.test = group_by_id(dts_loader.test)
     if is_main_process():
         test_ds = dts_loader.test
         print(f"***** Running evaluation on test set *****")

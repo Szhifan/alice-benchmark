@@ -12,12 +12,12 @@ from utils.utils import (
     set_seed,
     eval_report,
     save_report,
+    evaluate,
 )
-from utils.inference import evaluate
-from utils.data_prep import base_collate_fn
+
+from utils.data_prep import base_collate_fn, encode_solution_pair
 from utils.data_loader import (
-    BaseLoader,
-    encode_solution_pair,
+    BaseLoader
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
@@ -59,10 +59,9 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     dts_loader = BaseLoader(train_frac=task_args.train_frac, task_type=task_args.task_name)
     tokenizer = get_tokenizer(task_args.base_model)
 
-    dts_loader.encode_all_splits(
-        tokenizer=tokenizer,
-        enc_fn=encode_solution_pair,
-    )
+    dts_loader.train = dts_loader.train.map(lambda x: encode_solution_pair(x, tokenizer))
+    dts_loader.val = dts_loader.val.map(lambda x: encode_solution_pair(x, tokenizer))
+
 
     # Initialize trainer with grouped collate function
     trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
@@ -79,6 +78,8 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     # Evaluate on test datasets
     test_model = trainer.load_model()
     inference_speed = 0
+    dts_loader.test_ua = dts_loader.test_ua.map(lambda x: encode_solution_pair(x, tokenizer))
+    dts_loader.test_uq = dts_loader.test_uq.map(lambda x: encode_solution_pair(x, tokenizer))
     if is_main_process():
         for test in ["test_ua", "test_uq"]:
             test_ds = getattr(dts_loader, test)

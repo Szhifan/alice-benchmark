@@ -3,7 +3,7 @@ import os
 import wandb
 from dataclasses import dataclass, field
 from typing import List
-from utils.train_utils import (
+from trainer import (
     AsagTrainer,
     AsagTrainingArguments,
     get_tokenizer
@@ -12,11 +12,11 @@ from utils.utils import (
     set_seed,
     eval_report,
     save_report,
-    transform_for_inference
+    transform_for_inference,
+    evaluate,
     
 )
 from utils.data_prep import xnet_collate_fn, base_collate_fn, encode_sequence_bert, encode_sequence_llm
-from utils.inference import evaluate
 from utils.data_loader import (
     RubricRetrievalLoader,
     group_by_id, 
@@ -85,8 +85,6 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
             convert_field(task_args.input_fields),
             add_instruction=task_args.add_instruction,
         )
-
-        
     else:
         enc_fn = lambda examples: encode_sequence_bert(
             examples,
@@ -120,11 +118,12 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     # Evaluate on test datasets
     test_model = trainer.load_model()
     inference_speed = 0
+    dts_loader.test_ua = dts_loader.test_ua.map(lambda x: enc_fn(x))
+    dts_loader.test_uq = dts_loader.test_uq.map(lambda x: enc_fn(x))
     if task_args.model_class == "xnet":
         dts_loader.test_ua = group_by_id(dts_loader.test_ua)
         dts_loader.test_uq = group_by_id(dts_loader.test_uq)
-    dts_loader.test_ua = dts_loader.test_ua.map(lambda x: enc_fn(x))
-    dts_loader.test_uq = dts_loader.test_uq.map(lambda x: enc_fn(x))
+
 
     if is_main_process():
         for test in ["test_ua", "test_uq"]:
