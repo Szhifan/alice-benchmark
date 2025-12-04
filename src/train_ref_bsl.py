@@ -3,25 +3,26 @@ import time
 import os
 import wandb
 from dataclasses import dataclass, field
-from utils.train_utils import (
+from trainer import (
     AsagTrainer,
     AsagTrainingArguments,
     get_tokenizer
 )
-from utils.utils import (
+from utils import (
     set_seed,
     eval_report,
     save_report,
     evaluate,
 )
 
-from utils.data_prep import base_collate_fn, encode_solution_pair
-from utils.data_loader import (
-    BaseLoader
+from data_utils.data_prep import base_collate_fn, encode_solution_pair
+from data_utils.data_loader import (
+    Alice_loader
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
 import torch.distributed as dist
+USE_MULTI_GPU = True
 dist.init_process_group(backend="nccl")
 def is_main_process():
     """Check if the current process is the main process (rank 0)."""
@@ -42,8 +43,9 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     if not os.path.exists(train_args.save_dir):
         os.makedirs(train_args.save_dir)
 
-    wandb.login()
+    
     if train_args.log_wandb and is_main_process():
+        wandb.login()
         wandb.init(
             config={**vars(train_args), **vars(task_args)},
             dir=train_args.save_dir,
@@ -56,7 +58,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     print(f"Task arguments: {task_args}")
     
     # Load the dataset
-    dts_loader = BaseLoader(train_frac=task_args.train_frac, task_type=task_args.task_name)
+    dts_loader = Alice_loader(train_frac=task_args.train_frac, task_type=task_args.task_name)
     tokenizer = get_tokenizer(task_args.base_model)
 
     dts_loader.train = dts_loader.train.map(lambda x: encode_solution_pair(x, tokenizer))
@@ -64,7 +66,7 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
 
 
     # Initialize trainer with grouped collate function
-    trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
+    trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=USE_MULTI_GPU)
     trainer.set_collate_fn(base_collate_fn)
 
     if not train_args.test_only:

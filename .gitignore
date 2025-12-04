@@ -10,3 +10,5 @@ test.py
 alice_data/
 *png
 get_stats.py
+*.pyc  
+.DS_Store

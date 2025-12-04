@@ -13,6 +13,7 @@ python src/train.py --save-dir "${EXP_ROOT}" \
     --base-model "bert-base-multilingual-cased" \
     --batch-size 4 \
     --train-frac 0.01 \
+    --model-class "grasp" \
     --gradient-accumulation-steps 8 \
     --lr 1e-4 \
     --max-epoch 5 \

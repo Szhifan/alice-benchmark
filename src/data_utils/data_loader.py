@@ -71,7 +71,7 @@ def group_by_id(dataset):
         regrouped_examples.append(grouped_example)
     
     return Dataset.from_list(regrouped_examples)
-class BaseLoader:
+class Alice_loader:
     """
     Load the splits of Alice dataset.
     """
@@ -216,19 +216,11 @@ class BaseLoader:
         self.val = val_dataset
         self.test_ua = Dataset.from_list(test_ua_data)
         self.test_uq = Dataset.from_list(test_uq_data)
-
-
-
-class RubricRetrievalLoader(BaseLoader):
-    def __init__(self, train_frac=1, task_type="lp"):
-        """
-        Alice dataset for snet and xnet pair-wise ranking. 
-        Each entry is expended to include all rubric levels.
-        The labels is 1 if the level matches the rubric level, otherwise 0.
-        """
-        super().__init__(train_frac=train_frac, task_type=task_type)
- 
+     
     def expand_with_rubric(self):
+        """
+        For rubric retrieval tasks, expand each entry to include all rubric levels.
+        """
         def _expand_dataset(dataset):
             expanded_data = []
             for example in dataset:
@@ -245,3 +237,4 @@ class RubricRetrievalLoader(BaseLoader):
         self.val = _expand_dataset(self.val)
         self.test_ua = _expand_dataset(self.test_ua)
         self.test_uq = _expand_dataset(self.test_uq)
+

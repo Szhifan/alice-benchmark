@@ -2,20 +2,18 @@ from transformers import (
     AutoTokenizer, 
     BitsAndBytesConfig, 
     AutoModelForSequenceClassification,
-    AutoModelForCausalLM,
     AutoConfig,
     Trainer,
     TrainingArguments
 )
-from modelling.modelling_xnet import AsagXnet 
+
 import torch
 import os 
 from dataclasses import dataclass, field
-from peft import LoraConfig, get_peft_model, PeftModelForSequenceClassification, PeftModelForCausalLM
+from peft import LoraConfig, get_peft_model, PeftModelForSequenceClassification
 import evaluate
 import numpy as np
 from accelerate import PartialState
-import json
 from functools import partial
 import tempfile
 import shutil
@@ -138,8 +136,12 @@ class ModelLoader:
         return config
     def _model_mapping(self, model_class):
         """Map model class string to actual model class."""
+        from modelling.modelling_pn import PointerRubricGrasp, PointerRubricTolegra
+        from modelling.modelling_xnet import AsagXnet 
         mapping = {
             "xnet": AsagXnet,
+            "grasp": PointerRubricGrasp,
+            "tolegra": PointerRubricTolegra,
             "ref-bsl": AutoModelForSequenceClassification,
             "xnet-contrastive": AutoModelForSequenceClassification,
         }
@@ -150,7 +152,7 @@ class ModelLoader:
         """
         Helping function to initialize the model
         """
-        if self.task_args.model_class in ["snet", "xnet"]:
+        if self.task_args.model_class in ["snet", "xnet", "grasp", "tolegra"]:
             config.pool_type = self.custom_model_args.pool_type if self.custom_model_args else "avg"
             config.base_model_name_or_path = self.task_args.base_model
             model_class = self._model_mapping(self.task_args.model_class)
@@ -288,7 +290,7 @@ class ModelLoader:
         if not self.train_args.use_lora:
             return model
         # For our custom snet and xnet implementations use their internal init_peft if available.
-        if self.task_args.model_class in ["snet", "xnet"]:
+        if self.task_args.model_class in ["snet", "xnet", "grasp", "tolegra"]:
 
             model.init_peft(self.lora_config)
         else:
@@ -296,14 +298,13 @@ class ModelLoader:
         print_trainable_parameters(model, use_4bit=self.train_args.use_bnb)
         return model
     def _load_peft_model(self, model, cp_path: str):
-        # 根据训练配置决定数据类型
         dtype = torch.float16 if self.train_args.bf16 or self.train_args.use_bnb else torch.float32
     
         if self.task_args.model_class in ["ref-bsl", "xnet-contrastive"]:
             model = PeftModelForSequenceClassification.from_pretrained(
                 model,
                 str(cp_path) + '/',
-                torch_dtype=dtype,  # 使用一致的数据类型
+                torch_dtype=dtype, 
                 device_map=self.device_map,
             )
         elif self.task_args.model_class in ["snet", "xnet"]:
@@ -320,11 +321,11 @@ class ModelLoader:
         :return: Loaded model.
         """
         cp_path = str(cp_path)
-        config = AutoConfig.from_pretrained(cp_path + "/")
+        config = AutoConfig.from_pretrained(cp_path)
         bnb_config = self.bnb_config if self.train_args.use_bnb else None
         model = None
 
-        if self.task_args.model_class in ["snet", "xnet"]:
+        if self.task_args.model_class in ["snet", "xnet", "grasp", "tolegra"]:
             model_class = self._model_mapping(self.task_args.model_class)
             model = model_class.from_pretrained(
                 cp_path,

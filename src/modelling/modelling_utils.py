@@ -8,7 +8,7 @@ from transformers import AutoModel
 from torch import Tensor
 import os
 import logging
-from peft import PeftModel, get_peft_model
+from transformers import PreTrainedModel
 
 
 logger = logging.getLogger(__name__)
@@ -285,3 +285,174 @@ def flip_tensor(tensor, flag=True):
         return tensor.flip(dims=(1,))
     else:
         return tensor
+
+
+
+class BaseAsagModel(PreTrainedModel):
+    """
+    Base class for ASAG models with shared functionality:
+    - LoRA support
+    - Quantization support  
+    - Custom save/load logic
+    - Gradient checkpointing
+    """
+    
+    def __init__(self, config, lora_config=None, bnb_config=None):
+        super().__init__(config)
+        self.config = config
+        self.lora_config = lora_config
+        self.bnb_config = bnb_config
+        
+        # Initialize encoder
+        self._init_encoder()
+        
+    def _init_encoder(self):
+        """Initialize the transformer encoder with optional quantization"""
+        if self.bnb_config is not None:
+            self.encoder = AutoModel.from_pretrained(
+                self.config.base_model_name_or_path,
+                quantization_config=self.bnb_config,
+                config=self.config
+            )
+        else:
+            self.encoder = AutoModel.from_pretrained(
+                self.config.base_model_name_or_path,
+                config=self.config
+            )
+
+    def init_peft(self, lora_config=None):
+        """Initialize PEFT model"""
+        from peft import get_peft_model
+        
+        if lora_config:
+            self.lora_config = lora_config
+        
+        if self.lora_config and not hasattr(self.encoder, 'peft_config'):
+            self.encoder = get_peft_model(self.encoder, self.lora_config)
+            logger.info("Successfully initialized PEFT model")
+
+    def _load_peft_adapter(self, ckpt_dir: str):
+        """Load PEFT adapter weights"""
+        from peft import PeftModel
+        self.encoder = PeftModel.from_pretrained(self.encoder, ckpt_dir)
+
+    @classmethod
+    def from_pretrained(cls, model_path, config=None, lora_config=None, bnb_config=None, **kwargs):
+        """
+        Custom model loading logic that supports:
+        1) Pure model (pytorch_model.bin)
+        2) LoRA: adapter_model + non_peft_params.bin
+        """
+        # Create model instance
+        model = cls(config, lora_config=lora_config, bnb_config=bnb_config)
+
+        # Check for adapter files
+        adapter_file_pt = os.path.join(model_path, "adapter_model.bin")
+        adapter_file_st = os.path.join(model_path, "adapter_model.safetensors")
+        has_adapter = os.path.exists(adapter_file_pt) or os.path.exists(adapter_file_st)
+
+        non_peft_file = os.path.join(model_path, "non_peft_params.bin")
+        full_file = os.path.join(model_path, "pytorch_model.bin")
+
+        if lora_config:
+            # LoRA model loading
+            if has_adapter:
+                model._load_peft_adapter(model_path)
+                logger.info(f"[LoRA Load] Successfully loaded LoRA adapter from {model_path}")
+            else:
+                logger.warning(f"[LoRA Load] Adapter model not found in {model_path}")
+            
+            # Load non-PEFT parameters
+            if os.path.exists(non_peft_file):
+                non_peft_state = torch.load(non_peft_file, map_location="cpu")
+                missing, unexpected = model.load_state_dict(non_peft_state, strict=False)
+                if missing:
+                    logger.warning(f"[LoRA Load] Missing non_peft parameters: {missing}")
+                if unexpected:
+                    logger.warning(f"[LoRA Load] Unexpected non_peft parameters: {unexpected}")
+            else:
+                logger.warning(f"[LoRA Load] non_peft_params.bin not found in {model_path}")
+        else:
+            # Non-LoRA: Load the full state dict
+            if os.path.exists(full_file):
+                full_state = torch.load(full_file, map_location="cpu")
+                missing, unexpected = model.load_state_dict(full_state, strict=False)
+                if missing:
+                    logger.warning(f"[Full Load] Missing parameters: {missing}")
+                if unexpected:
+                    logger.warning(f"[Full Load] Unexpected parameters: {unexpected}")
+            else:
+                logger.error(f"[Full Load] {full_file} not found")
+                
+        return model
+
+    def save_pretrained(self, save_path, **kwargs):
+        """
+        Custom save logic that handles both LoRA and full model saving
+        """
+        os.makedirs(save_path, exist_ok=True)
+        
+        # Save config
+        self.config.save_pretrained(save_path)
+
+        if hasattr(self.encoder, 'save_pretrained') and hasattr(self.encoder, 'peft_config'):
+            # This is a PEFT model
+            self.encoder.save_pretrained(save_path)
+            
+            # Save non-PEFT parameters
+            full_state = self.state_dict()
+            to_remove = [k for k in full_state.keys() if k.startswith("encoder.")]
+            for k in to_remove:
+                full_state.pop(k, None)
+            torch.save(full_state, os.path.join(save_path, "non_peft_params.bin"))
+            logger.info(f"Saved LoRA adapter and non-PEFT parameters to {save_path}")
+        else:
+            # Save full model
+            torch.save(self.state_dict(), os.path.join(save_path, "pytorch_model.bin"))
+            logger.info(f"Saved full model to {save_path}")
+
+    def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs=None):
+        """Enable gradient checkpointing"""
+        self.encoder.gradient_checkpointing_enable(gradient_checkpointing_kwargs=gradient_checkpointing_kwargs)
+
+    def gradient_checkpointing_disable(self):
+        """Disable gradient checkpointing"""
+        self.encoder.gradient_checkpointing_disable()
+
+    def listwise_loss(
+        self,
+        logits: torch.Tensor,          # [B, R]
+        rubric_mask: torch.Tensor,     # [B, R] in {0,1}
+        pos_idx: torch.Tensor,         # [B] index of correct rubric
+        tau: float = 1.0
+    ) -> torch.Tensor:
+        """
+        Shared listwise loss for ranking rubrics.
+        """
+        from torch.nn import CrossEntropyLoss
+        
+        # Sanity: at least one valid rubric per example
+        assert (rubric_mask.sum(dim=1) > 0).all(), "Every sample needs at least one valid rubric."
+
+        # Temperature scaling
+        scaled_logits = logits / tau
+
+        # Mask invalid rubrics. Use a large negative (not -inf) to avoid NaNs in mixed precision.
+        masked_logits = scaled_logits.masked_fill(rubric_mask == 0, -1e9)
+
+        # Ensure pos_idx refers to valid rubrics
+        pos_mask = rubric_mask.gather(1, pos_idx.view(-1, 1)).squeeze(1)
+        assert (pos_idx == -1).any() or (pos_mask == 1).all(), "pos_idx must refer to valid rubrics or be -1."
+
+        return CrossEntropyLoss()(masked_logits, pos_idx)
+
+    def get_encoder_outputs(self, input_ids, attention_mask, token_type_ids=None):
+        """Get encoder outputs with optional token type ids"""
+        inputs = {
+            "input_ids": input_ids,
+            "attention_mask": attention_mask
+        }
+        if token_type_ids is not None:
+            inputs["token_type_ids"] = token_type_ids
+            
+        return self.encoder(**inputs)

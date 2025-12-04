@@ -8,7 +8,7 @@ from trainer import (
     AsagTrainingArguments,
     get_tokenizer
 )
-from utils.utils import (
+from utils import (
     set_seed,
     eval_report,
     save_report,
@@ -16,15 +16,16 @@ from utils.utils import (
     evaluate,
     
 )
-from utils.data_prep import xnet_collate_fn, base_collate_fn, encode_sequence_bert, encode_sequence_llm
-from utils.data_loader import (
-    RubricRetrievalLoader,
+from data_utils.data_prep import xnet_collate_fn, base_collate_fn, encode_sequence_bert, encode_sequence_llm, encode_with_spans_bert, encode_with_spans_llm, grasp_collate_fn
+from data_utils.data_loader import (
+    Alice_loader,
     group_by_id, 
 )
 from modelling.modelling_utils import BackwardSupportedArguments
 from transformers import HfArgumentParser
 import torch.distributed as dist
-# dist.init_process_group(backend="nccl")
+USE_MULTI_GPU = True
+dist.init_process_group(backend="nccl")
 def is_main_process():
     """Check if the current process is the main process (rank 0)."""
     return not dist.is_available() or not dist.is_initialized() or dist.get_rank() == 0
@@ -42,7 +43,7 @@ class TaskArguments:
     task_name: str = field(default="lp", metadata={"help": "name of the task"})
     def __post_init__(self):
         """Validation checks after initialization"""
-        assert self.model_class in ['xnet', 'snet',"xnet-contrastive"], f"model_class must be one of ['xnet', 'snet', 'xnet-contrastive'], got {self.model_class}"
+        assert self.model_class in ['xnet', 'snet', 'grasp', 'tolegra', "xnet-contrastive"], f"model_class must be one of ['xnet', 'snet', 'grasp', 'tolegra', 'xnet-contrastive'], got {self.model_class}"
         assert 0 < self.train_frac <= 1.0, "train_frac must be between 0 and 1"
         assert self.input_format in ['structured', 'natural_language'], "input_format must be one of ['structured', 'natural_language']"
         assert self.task_name in ["lp", "ke", "sk"]  
@@ -60,8 +61,9 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     if not os.path.exists(train_args.save_dir):
         os.makedirs(train_args.save_dir)
 
-    wandb.login()
+    
     if train_args.log_wandb and is_main_process():
+        wandb.login()
         wandb.init(
             config={**vars(train_args), **vars(task_args)},
             dir=train_args.save_dir,
@@ -74,11 +76,28 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     print(f"Task arguments: {task_args}")
     
     # Load the dataset
-    dts_loader = RubricRetrievalLoader(train_frac=task_args.train_frac, task_type=task_args.task_name)
-    dts_loader.expand_with_rubric()
+    dts_loader = Alice_loader(train_frac=task_args.train_frac, task_type=task_args.task_name)
+    if task_args.model_class != "grasp":
+        dts_loader.expand_with_rubric()
     tokenizer = get_tokenizer(task_args.base_model)
     is_llm = "llama" in task_args.base_model.lower() or "mistral" in task_args.base_model.lower() or "gpt" in task_args.base_model.lower()
-    if is_llm:
+    
+    if task_args.model_class in ["grasp", "tolegra"]:
+        if is_llm:
+            enc_fn = lambda examples: encode_with_spans_llm(
+                examples,
+                tokenizer,
+                input_fields=convert_field(task_args.input_fields),
+                add_instruction=task_args.add_instruction,
+                format=task_args.input_format
+            )
+        else:
+            enc_fn = lambda examples: encode_with_spans_bert(
+                examples,
+                tokenizer,
+                input_fields=convert_field(task_args.input_fields)
+            )
+    elif is_llm:
         enc_fn = lambda examples: encode_sequence_llm(
             examples,
             tokenizer,
@@ -102,9 +121,15 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
     print(f"Grouped train dataset size: {len(dts_loader.train)}")
     print(f"Grouped val dataset size: {len(dts_loader.val)}")
 
-    # Initialize trainer with grouped collate function
-    collate_fn = base_collate_fn if task_args.model_class == "xnet-contrastive" else xnet_collate_fn
-    trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=True)
+    # Initialize trainer with appropriate collate function
+    if task_args.model_class in ["grasp", "tolegra"]:
+        collate_fn = grasp_collate_fn
+    elif task_args.model_class == "xnet-contrastive":
+        collate_fn = base_collate_fn
+    else:
+        collate_fn = xnet_collate_fn
+        
+    trainer = AsagTrainer(train_args, task_args, dts_loader.train, dts_loader.val, custom_model_args=custom_model_args, multi_gpu=USE_MULTI_GPU)
     trainer.set_collate_fn(collate_fn, fc_kwargs={"pad_id": tokenizer.pad_token_id})
 
     if not train_args.test_only:
@@ -116,6 +141,8 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         print("***** Training finished *****")
     
     # Evaluate on test datasets
+    if not is_main_process():
+        return
     test_model = trainer.load_model()
     inference_speed = 0
     dts_loader.test_ua = dts_loader.test_ua.map(lambda x: enc_fn(x))
@@ -125,46 +152,46 @@ def main(task_args: TaskArguments, train_args: AsagTrainingArguments, custom_mod
         dts_loader.test_uq = group_by_id(dts_loader.test_uq)
 
 
-    if is_main_process():
-        for test in ["test_ua", "test_uq"]:
-            test_ds = getattr(dts_loader, test)
-            print(f"***** Running evaluation on {test} *****")
-            print(f"Num examples = {len(test_ds)}")
-            
-            time_start = time.time()
-            
-            test_predictions, test_loss = evaluate(
-                test_model,
-                test_ds,
-                batch_size=train_args.batch_size,
-                collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
-            )
-            
-            inf_time = time.time() - time_start
-            
-            # Save predictions
-            pred_dir = os.path.join(train_args.save_dir, "predictions")
-            if not os.path.exists(pred_dir):
-                os.makedirs(pred_dir)
-            
-            if task_args.model_class == "xnet-contrastive":
-                test_predictions = transform_for_inference(test_predictions)
-            test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
-            
-            # Calculate and save metrics
-            test_metrics = eval_report(test_predictions)
-            save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
-            
-            inference_speed += inf_time / test_predictions.shape[0]
-            
-            # Log metrics to wandb
-            metrics_wandb = {f"{test}": test_metrics}
-            wandb.log(metrics_wandb)
-            
-            print(f"***** {test} Results *****")
-            for key, value in test_metrics.items():
-                print(f"{key} = {value:.4f}")
-    
+
+    for test in ["test_ua", "test_uq"]:
+        test_ds = getattr(dts_loader, test)
+        print(f"***** Running evaluation on {test} *****")
+        print(f"Num examples = {len(test_ds)}")
+        
+        time_start = time.time()
+        
+        test_predictions, test_loss = evaluate(
+            test_model,
+            test_ds,
+            batch_size=train_args.batch_size,
+            collate_fn=lambda x: trainer.collate_fn(x, pad_id=tokenizer.pad_token_id, return_meta=True)
+        )
+        
+        inf_time = time.time() - time_start
+        
+        # Save predictions
+        pred_dir = os.path.join(train_args.save_dir, "predictions")
+        if not os.path.exists(pred_dir):
+            os.makedirs(pred_dir)
+        
+        if task_args.model_class == "xnet-contrastive":
+            test_predictions = transform_for_inference(test_predictions)
+        test_predictions.to_csv(os.path.join(pred_dir, f"{test}_predictions.csv"), index=False)
+        
+        # Calculate and save metrics
+        test_metrics = eval_report(test_predictions)
+        save_report(test_metrics, os.path.join(pred_dir, f"{test}_metrics.json"))
+        
+        inference_speed += inf_time / test_predictions.shape[0]
+        
+        # Log metrics to wandb
+        metrics_wandb = {f"{test}": test_metrics}
+        wandb.log(metrics_wandb)
+        
+        print(f"***** {test} Results *****")
+        for key, value in test_metrics.items():
+            print(f"{key} = {value:.4f}")
+
     # Log final metrics
     inference_speed /= 2
     wandb.log({"inference_speed_per_sample_sec": inference_speed})

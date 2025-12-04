@@ -97,24 +97,7 @@ def eval_report(pred_df, group_by=None):
             group_metrics = metrics_calc(group_df["labels"].values, group_df["pred_id"].values)
             results[f"{group}_qwk"] = group_metrics["qwk"]
     return results
-def eval_report_gen(pred_df, group_by=None):
-    def extract_ans(pred_df):
-        answers = []
-        for output in pred_df["pred_text"].tolist():
-            output = str(output)
-            match = re.search(r'\d', output)
-            if match:
-                answers.append(match.group())
-            else:
-                answers.append("NA")
 
-        pred_df["pred_id"] = answers 
-    extract_ans(pred_df)
-    pred_df["labels"] = pred_df["level"].astype(str)
-    answer_rate = sum(1 for ans in pred_df["pred_id"] if ans != "NA") / len(pred_df)
-    results = eval_report(pred_df, group_by)
-    results["answer_rate"] = answer_rate
-    return results
 def save_report(metrics, path):
     """
     Save the metrics to a JSON file.

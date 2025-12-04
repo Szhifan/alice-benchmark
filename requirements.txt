@@ -1,6 +1,4 @@
-torch==2.8.0+cu126
-torchvision==0.23.0+cu126
-torchaudio==2.8.0+cu126
+torch
 transformers==4.57.1
 datasets==4.4.1
 nltk==3.9.2
